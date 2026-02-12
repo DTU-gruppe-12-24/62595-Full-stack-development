@@ -28,26 +28,26 @@ public class Recipe {
 	public String name;
 	public String description;
 	public String instructions;
-	public String meal_type;
+	public String mealType;
 
 	public Integer servings;
-	public Integer prep_time_minutes;
+	public Integer prepTimeMinutes;
 
-	public String image_url;
+	public String imageUrl;
 
-	public LocalDate last_made;
+	public LocalDate lastMade;
 
-	public Recipe(UUID id, User owner, Group group, String name, String description, String instructions, String meal_type, Integer servings, Integer prep_time_minutes, String image_url, LocalDate last_made) {
+	public Recipe(UUID id, User owner, Group group, String name, String description, String instructions, String mealType, Integer servings, Integer prepTimeMinutes, String imageUrl, LocalDate lastMade) {
 		this.id = id;
 		this.owner = owner;
 		this.group = group;
 		this.name = name;
 		this.description = description;
 		this.instructions = instructions;
-		this.meal_type = meal_type;
+		this.mealType = mealType;
 		this.servings = servings;
-		this.prep_time_minutes = prep_time_minutes;
-		this.image_url = image_url;
-		this.last_made = last_made;
+		this.prepTimeMinutes = prepTimeMinutes;
+		this.imageUrl = imageUrl;
+		this.lastMade = lastMade;
 	}
 }

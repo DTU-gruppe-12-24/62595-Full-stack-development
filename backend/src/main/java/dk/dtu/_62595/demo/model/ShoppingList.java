@@ -22,13 +22,13 @@ public class ShoppingList {
 	@JoinColumn(name = "ingredient_id")
 	public Ingredient ingredient;
 	public float amount;
-	public boolean is_bought;
+	public boolean isBought;
 
-	public ShoppingList(UUID id, Group group, Ingredient ingredient, float amount, boolean is_bought) {
+	public ShoppingList(UUID id, Group group, Ingredient ingredient, float amount, boolean isBought) {
 		this.id = id;
 		this.group = group;
 		this.ingredient = ingredient;
 		this.amount = amount;
-		this.is_bought = is_bought;
+		this.isBought = isBought;
 	}
 }

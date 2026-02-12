@@ -24,14 +24,14 @@ public class MealPlan {
 	@ManyToOne
 	@JoinColumn(name = "recipe_id", nullable = false)
 	public Recipe recipe;
-	public LocalDate scheduled_date;
-	public String meal_slot;
+	public LocalDate scheduledDate;
+	public String mealSlot;
 
-	public MealPlan(UUID id, Group group, Recipe recipe, LocalDate scheduled_date, String meal_slot) {
+	public MealPlan(UUID id, Group group, Recipe recipe, LocalDate scheduledDate, String mealSlot) {
 		this.id = id;
 		this.group = group;
 		this.recipe = recipe;
-		this.scheduled_date = scheduled_date;
-		this.meal_slot = meal_slot;
+		this.scheduledDate = scheduledDate;
+		this.mealSlot = mealSlot;
 	}
 }

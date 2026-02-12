@@ -16,16 +16,16 @@ public class User {
 
 	public String name;
 	public String email;
-	public String password_hash;
+	public String passwordHash;
 
 	public User(UUID id) {
 		this.id = id;
 	}
 
-	public User(UUID id, String name, String email, String password_hash) {
+	public User(UUID id, String name, String email, String passwordHash) {
 		this.id = id;
 		this.name = name;
 		this.email = email;
-		this.password_hash = password_hash;
+		this.passwordHash = passwordHash;
 	}
 }

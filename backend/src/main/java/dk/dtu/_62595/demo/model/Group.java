@@ -9,7 +9,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "Group")
+@Table(name = "GroupTable") // Group and Groups are reserved keywords in MySQL
 public class Group {
 	@Id @GeneratedValue(strategy = GenerationType.UUID)
 	public final UUID id;

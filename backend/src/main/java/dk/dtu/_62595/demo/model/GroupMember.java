@@ -18,12 +18,12 @@ public class GroupMember {
 	@EmbeddedId
 	public final GroupMemberId id;
 
-	@MapsId("user_id")
+	@MapsId("userId")
 	@ManyToOne
 	@JoinColumn(name = "user_id")
 	public User user;
 
-	@MapsId("group_id")
+	@MapsId("groupId")
 	@ManyToOne
 	@JoinColumn(name = "group_id")
 	public Group group;
@@ -43,14 +43,14 @@ public class GroupMember {
 
 	@Embeddable
 	public static class GroupMemberId implements Serializable {
-		public UUID user_id;
-		public UUID group_id;
+		public UUID userId;
+		public UUID groupId;
 
 		public GroupMemberId() {}
 
-		public GroupMemberId(UUID user_id, UUID group_id) {
-			this.user_id = user_id;
-			this.group_id = group_id;
+		public GroupMemberId(UUID userId, UUID groupId) {
+			this.userId = userId;
+			this.groupId = groupId;
 		}
 
 		@Override
@@ -58,13 +58,13 @@ public class GroupMember {
 			if (this == o) return true;
 			if (o == null || getClass() != o.getClass()) return false;
 			GroupMemberId that = (GroupMemberId) o;
-			return Objects.equals(user_id, that.user_id) &&
-					Objects.equals(group_id, that.group_id);
+			return Objects.equals(userId, that.userId) &&
+					Objects.equals(groupId, that.groupId);
 		}
 
 		@Override
 		public int hashCode() {
-			return Objects.hash(user_id, group_id);
+			return Objects.hash(userId, groupId);
 		}
 	}
 }
