@@ -9,7 +9,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "Users")
+@Table(name = "user_table")
 public class User {
 	@Id @GeneratedValue(strategy = GenerationType.UUID)
 	public final UUID id;
