@@ -12,12 +12,17 @@ import jakarta.persistence.Table;
 @Table(name = "GroupTable") // Group and Groups are reserved keywords in MySQL
 public class Group {
 	@Id @GeneratedValue(strategy = GenerationType.UUID)
-	public final UUID id;
+	private UUID id;
 
-	public String name;
+	private String name;
 
-	public Group(UUID id, String name) {
-		this.id = id;
+    public Group() {}
+
+	public Group(String name) {
 		this.name = name;
 	}
+
+    public UUID getId() {   return id; }
+
+    public String getName() { return name; }
 }

@@ -12,20 +12,19 @@ import jakarta.persistence.Table;
 @Table(name = "user_table")
 public class User {
 	@Id @GeneratedValue(strategy = GenerationType.UUID)
-	public final UUID id;
+	private UUID id;
 
 	public String name;
 	public String email;
 	public String passwordHash;
 
-	public User(UUID id) {
-		this.id = id;
-	}
+	public User() {}
 
-	public User(UUID id, String name, String email, String passwordHash) {
-		this.id = id;
+	public User(String name, String email, String passwordHash) {
 		this.name = name;
 		this.email = email;
 		this.passwordHash = passwordHash;
 	}
+
+    public UUID getId() {   return id; }
 }

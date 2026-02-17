@@ -16,35 +16,36 @@ import java.util.Objects;
 @Table(name = "Group_Members")
 public class GroupMember {
 	@EmbeddedId
-	public final GroupMemberId id;
+	private GroupMemberId id;
 
 	@MapsId("userId")
 	@ManyToOne
 	@JoinColumn(name = "user_id")
-	public User user;
+	private User user;
 
 	@MapsId("groupId")
 	@ManyToOne
 	@JoinColumn(name = "group_id")
-	public Group group;
+	private Group group;
 
-	public String role;
+	private String role;
 
-	public GroupMember(GroupMemberId id) {
-		this.id = id;
-	}
-
+    public GroupMember() {}
 	public GroupMember(User user, Group group, String role) {
-		this.id = new GroupMemberId(user.id, group.id);
+		this.id = new GroupMemberId(user.getId(), group.getId());
 		this.user = user;
 		this.group = group;
 		this.role = role;
 	}
 
+    public GroupMemberId getId() {
+        return id;
+    }
+
 	@Embeddable
 	public static class GroupMemberId implements Serializable {
-		public UUID userId;
-		public UUID groupId;
+		private UUID userId;
+		private UUID groupId;
 
 		public GroupMemberId() {}
 
