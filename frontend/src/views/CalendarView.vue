@@ -14,14 +14,14 @@
 
 </template>
 
-<script setup>
+<script setup lang="ts">
 
 import { ref } from 'vue'
 import AppCalendar from '@/components/AppCalendar.vue'
 
-const selectedDate = ref(null)
+const selectedDate = ref(null as Date | null)
 
-function selectDate(date) {
+function selectDate(date: Date) {
   selectedDate.value = date
 }
 

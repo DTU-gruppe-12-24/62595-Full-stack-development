@@ -1,25 +1,21 @@
 import { createRouter, createWebHistory } from 'vue-router'
 
-import ComponentPreview from '@/views/ComponentPreview.vue'
-import CalendarView from '@/views/CalendarView.vue'
-import ShoppingListView from '@/views/ShoppingListView.vue'
-
 
 const routes = [
 
   {
     path: '/',
-    component: ComponentPreview
+    component: () => import('@/views/ComponentPreview.vue')
   },
 
   {
     path: '/calendar',
-    component: CalendarView
+    component: () => import('@/views/CalendarView.vue')
   },
 
   {
     path: '/shopping',
-    component: ShoppingListView
+    component: () => import('@/views/ShoppingListView.vue')
   }
 
 ]
