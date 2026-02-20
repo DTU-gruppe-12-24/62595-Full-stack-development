@@ -3,31 +3,28 @@ package dk.dtu._62595.demo.model;
 import java.io.Serializable;
 import java.util.UUID;
 
-import jakarta.persistence.Embeddable;
-import jakarta.persistence.EmbeddedId;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.MapsId;
+import jakarta.persistence.*;
+
 import java.util.Objects;
 
 @Entity
-@Table(name = "Group_Members")
+@Table(name = "group_members")
 public class GroupMember {
+
 	@EmbeddedId
 	private GroupMemberId id;
 
 	@MapsId("userId")
 	@ManyToOne
-	@JoinColumn(name = "user_id")
+	@JoinColumn(name = "user_id", columnDefinition = "CHAR(36)")
 	private User user;
 
 	@MapsId("groupId")
 	@ManyToOne
-	@JoinColumn(name = "group_id")
+	@JoinColumn(name = "group_id", columnDefinition = "CHAR(36)")
 	private Group group;
 
+	@Column(nullable = true)
 	private String role;
 
     public GroupMember() {}
@@ -44,7 +41,11 @@ public class GroupMember {
 
 	@Embeddable
 	public static class GroupMemberId implements Serializable {
+
+		@Column(name = "user_id", columnDefinition = "CHAR(36)")
 		private UUID userId;
+
+		@Column(name = "group_id", columnDefinition = "CHAR(36)")
 		private UUID groupId;
 
 		public GroupMemberId() {}

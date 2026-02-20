@@ -1,34 +1,42 @@
 package dk.dtu._62595.demo.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+
 import java.util.UUID;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.JoinColumn;
 
 @Entity
-@Table(name = "Shopping_Lists")
+@Table(name = "shopping_lists")
 public class ShoppingList {
-	@Id @GeneratedValue(strategy = GenerationType.UUID)
-	public final UUID id;
 
-	@ManyToOne
-	@JoinColumn(name = "group_id")
-	public Group group;
-	@ManyToOne
-	@JoinColumn(name = "ingredient_id")
-	public Ingredient ingredient;
-	public float amount;
-	public boolean isBought;
+	@Id
+	@Column(columnDefinition = "CHAR(36)")
+	private UUID id;
 
-	public ShoppingList(UUID id, Group group, Ingredient ingredient, float amount, boolean isBought) {
-		this.id = id;
+	@ManyToOne(optional = false)
+	@JoinColumn(name = "group_id", columnDefinition = "CHAR(36)", nullable = false)
+	private Group group;
+
+	@ManyToOne(optional = false)
+	@JoinColumn(name = "ingredient_id", columnDefinition = "CHAR(36)", nullable = false)
+	private Ingredient ingredient;
+
+	@Column(nullable = false)
+	private float amount;
+
+	@Column(name = "is_bought", nullable = false)
+	private boolean isBought;
+
+	public ShoppingList() {}
+
+	public ShoppingList(Group group, Ingredient ingredient, float amount, boolean isBought) {
+		this.id = UUID.randomUUID();
 		this.group = group;
 		this.ingredient = ingredient;
 		this.amount = amount;
 		this.isBought = isBought;
+	}
+
+	public UUID getID() {
+		return id;
 	}
 }

@@ -3,42 +3,51 @@ package dk.dtu._62595.demo.model;
 import java.time.LocalDate;
 import java.util.UUID;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.JoinColumn;
+import jakarta.persistence.*;
 
 @Entity
-@Table(name = "Recipes")
+@Table(name = "recipes")
 public class Recipe {
-	@Id @GeneratedValue(strategy = GenerationType.UUID)
-	public final UUID id;
+
+	@Id
+	@Column(columnDefinition = "CHAR(36)")
+	private UUID id;
+
+	@ManyToOne(optional = false)
+	@JoinColumn(name = "owner_id", columnDefinition = "CHAR(36)", nullable = false)
+	private User owner;
 
 	@ManyToOne
-	@JoinColumn(name = "owner_id", nullable = false)
-	public User owner;
+	@JoinColumn(name = "group_id", columnDefinition = "CHAR(36)")
+	private Group group;
 
-	@ManyToOne
-	@JoinColumn(name = "group_id")
-	public Group group;
+	@Column(nullable = false)
+	private String name;
 
-	public String name;
-	public String description;
-	public String instructions;
-	public String mealType;
+	@Column(columnDefinition = "TEXT")
+	private String description;
 
-	public Integer servings;
-	public Integer prepTimeMinutes;
+	@Column(columnDefinition = "TEXT")
+	private String instructions;
 
-	public String imageUrl;
+	@Column(name = "meal_type")
+	private String mealType;
 
-	public LocalDate lastMade;
+	private Integer servings;
 
-	public Recipe(UUID id, User owner, Group group, String name, String description, String instructions, String mealType, Integer servings, Integer prepTimeMinutes, String imageUrl, LocalDate lastMade) {
-		this.id = id;
+	@Column(name = "prep_time_minutes")
+	private Integer prepTimeMinutes;
+
+	@Column(name = "image_url")
+	private String imageUrl;
+
+	@Column(name = "last_made")
+	private LocalDate lastMade;
+
+	public Recipe() {}
+
+	public Recipe(User owner, Group group, String name, String description, String instructions, String mealType, Integer servings, Integer prepTimeMinutes, String imageUrl, LocalDate lastMade) {
+		this.id = UUID.randomUUID();
 		this.owner = owner;
 		this.group = group;
 		this.name = name;
@@ -49,5 +58,9 @@ public class Recipe {
 		this.prepTimeMinutes = prepTimeMinutes;
 		this.imageUrl = imageUrl;
 		this.lastMade = lastMade;
+	}
+
+	public UUID getId() {
+		return id;
 	}
 }

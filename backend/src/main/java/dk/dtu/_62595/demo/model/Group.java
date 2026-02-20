@@ -2,23 +2,23 @@ package dk.dtu._62595.demo.model;
 
 import java.util.UUID;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "GroupTable") // Group and Groups are reserved keywords in MySQL
 public class Group {
-	@Id @GeneratedValue(strategy = GenerationType.UUID)
+
+	@Id
+	@Column(columnDefinition = "CHAR(36)")
 	private UUID id;
 
+	@Column(nullable = false)
 	private String name;
 
     public Group() {}
 
 	public Group(String name) {
+		this.id = UUID.randomUUID();
 		this.name = name;
 	}
 

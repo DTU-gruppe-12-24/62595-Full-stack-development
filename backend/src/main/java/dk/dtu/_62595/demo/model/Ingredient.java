@@ -2,26 +2,45 @@ package dk.dtu._62595.demo.model;
 
 import java.util.UUID;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 @Entity
-@Table(name = "Ingredients")
+@Table(name = "ingredients")
 public class Ingredient {
-	@Id @GeneratedValue(strategy = GenerationType.UUID)
-	public final UUID id;
 
-	public String name;
-	public Float calories;
-	public Float price;
+	@Id
+	@Column(columnDefinition = "CHAR(36)")
+	private UUID id;
 
-	public Ingredient(UUID id, String name, Float calories, Float price) {
-		this.id = id;
+	@Column(nullable = false)
+	private String name;
+
+	private Float calories;
+
+	private Float price;
+
+	public Ingredient() {}
+
+	public Ingredient(String name, Float calories, Float price) {
+		this.id = UUID.randomUUID();
 		this.name = name;
 		this.calories = calories;
 		this.price = price;
+	}
+
+	public UUID getId() {
+		return id;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public Float getCalories() {
+		return calories;
+	}
+
+	public Float getPrice() {
+		return price;
 	}
 }
