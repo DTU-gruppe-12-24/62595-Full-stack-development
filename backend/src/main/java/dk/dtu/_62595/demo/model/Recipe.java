@@ -10,7 +10,7 @@ import jakarta.persistence.*;
 public class Recipe {
 
 	@Id
-	@Column(columnDefinition = "CHAR(36)")
+	@GeneratedValue(strategy = GenerationType.UUID)
 	private UUID id;
 
 	@ManyToOne(optional = false)
@@ -62,5 +62,87 @@ public class Recipe {
 
 	public UUID getId() {
 		return id;
+	}
+
+	public void setId(UUID id) {
+		this.id = id;
+	}
+	public User getOwner() {
+		return owner;
+	}
+	public void setOwner(User owner) {
+		this.owner = owner;
+	}
+
+	public Group getGroup() {
+		return group;
+	}
+
+	public void setGroup(Group group) {
+		this.group = group;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	public String getInstructions() {
+		return instructions;
+	}
+
+	public void setInstructions(String instructions) {
+		this.instructions = instructions;
+	}
+
+	public String getMealType() {
+		return mealType;
+	}
+
+	public void setMealType(String mealType) {
+		this.mealType = mealType;
+	}
+
+	public Integer getServings() {
+		return servings;
+	}
+
+	public void setServings(Integer servings) {
+		this.servings = servings;
+	}
+
+	public Integer getPrepTimeMinutes() {
+		return prepTimeMinutes;
+	}
+
+	public void setPrepTimeMinutes(Integer prepTimeMinutes) {
+		this.prepTimeMinutes = prepTimeMinutes;
+	}
+
+	public String getImageUrl() {
+		return imageUrl;
+	}
+
+	public void setImageUrl(String imageUrl) {
+		this.imageUrl = imageUrl;
+	}
+
+	public LocalDate getLastMade() {
+		return lastMade;
+	}
+
+	public void setLastMade(LocalDate lastMade) {
+		this.lastMade = lastMade;
 	}
 }
