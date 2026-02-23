@@ -1,0 +1,28 @@
+package dk.dtu._62595.demo.model;
+
+import java.util.UUID;
+
+import jakarta.persistence.*;
+
+@Entity
+@Table(name = "group_table") // Group and Groups are reserved keywords in MySQL
+public class Group {
+
+	@Id
+	@Column(columnDefinition = "CHAR(36)")
+	private UUID id;
+
+	@Column(nullable = false)
+	private String name;
+
+    public Group() {}
+
+	public Group(String name) {
+		this.id = UUID.randomUUID();
+		this.name = name;
+	}
+
+    public UUID getId() {   return id; }
+
+    public String getName() { return name; }
+}
