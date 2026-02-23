@@ -58,8 +58,18 @@ public class GroupMember {
 			this.groupId = groupId;
 		}
 
+<<<<<<< HEAD
 		public UUID getUserId() { return userId; }
 		public UUID getGroupId() { return groupId; }
+=======
+		public UUID getGroupId() {
+			return groupId;
+		}
+
+		public UUID getUserId() {
+			return groupId;
+		}
+>>>>>>> 8a58eaa (Add group api endpoints to backend)
 
 		@Override
 		public boolean equals(Object o) {
