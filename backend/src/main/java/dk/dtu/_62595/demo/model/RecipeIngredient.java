@@ -45,6 +45,10 @@ public class RecipeIngredient {
 	public RecipeIngredientId getId() {
 		return id;
 	}
+	public Recipe getRecipe() { return recipe; }
+	public Ingredient getIngredient() { return ingredient; }
+	public Float getAmount() { return amount; }
+	public String getUnit() { return unit; }
 
 	@Embeddable
 	public static class RecipeIngredientId implements Serializable {

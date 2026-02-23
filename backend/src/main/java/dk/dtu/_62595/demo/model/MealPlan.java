@@ -39,4 +39,8 @@ public class MealPlan {
 	public UUID getId() {
 		return id;
 	}
+	public Group getGroup() { return group; }
+	public Recipe getRecipe() { return recipe; }
+	public LocalDate getScheduledDate() { return scheduledDate; }
+	public String getMealSlot() { return mealSlot; }
 }

@@ -63,4 +63,15 @@ public class Recipe {
 	public UUID getId() {
 		return id;
 	}
+	public User getOwner() { return owner; }
+	public Group getGroup() { return group; }
+	public String getName() { return name; }
+	public String getDescription() { return description; }
+	public String getInstructions() { return instructions; }
+	public String getMealType() { return mealType; }
+	public Integer getServings() { return servings; }
+	public Integer getPrepTimeMinutes() { return prepTimeMinutes; }
+	public String getImageUrl() { return imageUrl; }
+	public LocalDate getLastMade() { return lastMade; }
+
 }
