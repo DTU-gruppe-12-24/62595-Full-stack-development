@@ -2,7 +2,6 @@ package dk.dtu._62595.demo.services;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -58,6 +57,6 @@ public class GroupService {
 		return groupMemberRepository.findByUser(currentUser)
 				.stream()
 				.map(GroupMember::getGroup)
-				.collect(Collectors.toList());
+				.toList();
 	}
 }

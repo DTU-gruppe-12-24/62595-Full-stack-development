@@ -16,6 +16,11 @@ const routes = [
   {
     path: '/shopping',
     component: () => import('@/views/ShoppingListView.vue')
+  },
+
+  {
+    path: '/groups',
+    component: () => import('@/views/GroupView.vue'),
   }
 
 ]

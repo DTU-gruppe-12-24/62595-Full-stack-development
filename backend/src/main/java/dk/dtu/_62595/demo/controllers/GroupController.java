@@ -9,24 +9,32 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import dk.dtu._62595.demo.model.Group;
 import dk.dtu._62595.demo.model.User;
+import dk.dtu._62595.demo.repositories.UserRepository;
 import dk.dtu._62595.demo.services.GroupService;
 
 @RestController
-@RequestMapping("/api/group")
+@RequestMapping(value = "/api/group", consumes = { "application/xml", "application/json" })
 public class GroupController {
+	@Autowired
+	UserRepository userRepository;
+
 	@Autowired
 	GroupService groupService;
 
+	private User getCurrentUser() {
+		return userRepository.findByEmail("test@test.dk").orElseGet(() -> userRepository.save(new User("Test", "test@test.dk", "")));
+	}
+
 	@PostMapping
-	public Group create(@RequestParam String name, @RequestAttribute("currentUser") User currentUser) {
-		return groupService.createGroup(name, currentUser);
+	public Group create(@RequestBody Group group) {
+		return groupService.createGroup(group.getName(), getCurrentUser());
 	}
 
 	@PutMapping("/{groupId}")
@@ -45,7 +53,7 @@ public class GroupController {
 	}
 
 	@GetMapping("/me")
-	public List<Group> getMyGroups(@RequestAttribute("currentUser") User currentUser) {
-		return groupService.getGroupsForUser(currentUser);
+	public List<Group> getMyGroups() {
+		return groupService.getGroupsForUser(getCurrentUser());
 	}
 }
