@@ -15,9 +15,24 @@
 			</div>
 		</div>
 	</AppCard>
-	<AppButton variant="cancel" @click="() => createGroup('Test name')">
+	<AppButton variant="primary" @click="() => showCreateDialog = true">
 		Create
 	</AppButton>
+	<AppDialog v-model="showCreateDialog" title="Create group">
+		<AppInput
+			v-model="newGroupName"
+			placeholder="Group name..."
+			@keyup.enter="submitCreateGroup"
+		/>
+		<template #footer>
+			<AppButton variant="cancel" @click="() => showCreateDialog = false">
+				Cancel
+			</AppButton>
+			<AppButton variant="secondary" @click="submitCreateGroup">
+				Create
+			</AppButton>
+		</template>
+	</AppDialog>
 </div>
 </template>
 
@@ -29,10 +44,14 @@ import type { Group } from "@/model/Group"
 import AppCard from "@/components/AppCard.vue"
 import AppButton from "@/components/AppButton.vue"
 import AppText from "@/components/AppText.vue"
+import AppDialog from "@/components/AppDialog.vue"
+import AppInput from "@/components/AppInput.vue"
 
 import { apiFetch } from "@/utilities/apiFetch"
 
 const groups = ref([] as Group[])
+const showCreateDialog = ref(false)
+const newGroupName = ref("")
 
 getGroups();
 function getGroups() {
@@ -43,6 +62,12 @@ function getGroups() {
 		});
 }
 
+function submitCreateGroup() {
+	const name = newGroupName.value.trim();
+	if (!name) return;
+	createGroup(name);
+	showCreateDialog.value = false;
+}
 
 function createGroup(name: string) {
 	apiFetch<Group, Partial<Group>>("/api/group", "POST", { name })
