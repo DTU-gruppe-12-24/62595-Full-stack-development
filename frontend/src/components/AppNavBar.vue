@@ -27,6 +27,10 @@ export default defineComponent({
         <RouterLink to="/shopping" class="menu-item">
           Shopping List
         </RouterLink>
+
+        <RouterLink to="/groups" class="menu-item">
+          Groups
+        </RouterLink>
       </div>
 
     </div>
