@@ -64,4 +64,10 @@ public class RecipeController {
 
         return recipeRepository.save(recipe);
     }
+
+    // Det er bare en test for mig (Lukas) :))
+    @GetMapping("/test")
+    public String test() {
+        return "Recipe controller virker!";
+    }
 }
