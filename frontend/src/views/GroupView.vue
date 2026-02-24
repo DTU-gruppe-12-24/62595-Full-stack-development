@@ -6,7 +6,7 @@
 				{{ group.name }}
 			</AppText>
 			<div class="flex flex-row justify-end gap-1 w-fit">
-				<AppButton variant="secondary" @click="">
+				<AppButton variant="secondary" @click="() => openEditDialog(group)">
 					Edit
 				</AppButton>
 				<AppButton variant="cancel" @click="() => deleteGroup(group)">
@@ -33,6 +33,22 @@
 			</AppButton>
 		</template>
 	</AppDialog>
+
+	<AppDialog v-model="showEditDialog" title="Edit group">
+		<AppInput
+			v-model="editGroupName"
+			placeholder="Group name..."
+			@keyup.enter="submitEditGroup"
+		/>
+		<template #footer>
+			<AppButton variant="cancel" @click="closeEditDialog">
+				Cancel
+			</AppButton>
+			<AppButton variant="secondary" @click="submitEditGroup">
+				Save
+			</AppButton>
+		</template>
+	</AppDialog>
 </div>
 </template>
 
@@ -52,6 +68,9 @@ import { apiFetch } from "@/utilities/apiFetch"
 const groups = ref([] as Group[])
 const showCreateDialog = ref(false)
 const newGroupName = ref("")
+const showEditDialog = ref(false)
+const editGroupName = ref("")
+const groupBeingEdited = ref<Group | null>(null)
 
 getGroups();
 function getGroups() {
@@ -67,11 +86,39 @@ function submitCreateGroup() {
 	if (!name) return;
 	createGroup(name);
 	showCreateDialog.value = false;
+	newGroupName.value = "";
+}
+
+function openEditDialog(group: Group) {
+	groupBeingEdited.value = group;
+	editGroupName.value = group.name;
+	showEditDialog.value = true;
+}
+
+function closeEditDialog() {
+	showEditDialog.value = false;
+	groupBeingEdited.value = null;
+	editGroupName.value = "";
+}
+
+function submitEditGroup() {
+	const name = editGroupName.value.trim();
+	if (!name || !groupBeingEdited.value) return;
+	updateGroup(groupBeingEdited.value, name);
+	closeEditDialog();
 }
 
 function createGroup(name: string) {
 	apiFetch<Group, Partial<Group>>("/api/group", "POST", { name })
 		.then((result) => groups.value.push(result))
+		.catch((error) => {
+			console.error(error);
+		});
+}
+
+function updateGroup(group: Group, name: string) {
+	apiFetch<Group, Partial<Group>>("/api/group/" + group.id, "PUT", { name })
+		.then((_) => getGroups())
 		.catch((error) => {
 			console.error(error);
 		});
