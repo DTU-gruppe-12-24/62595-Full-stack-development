@@ -9,7 +9,7 @@
 				<AppButton variant="secondary" @click="() => openEditDialog(group)">
 					Edit
 				</AppButton>
-				<AppButton variant="cancel" @click="() => deleteGroup(group)">
+				<AppButton variant="cancel" @click="() => { showConfirmDeleteDialog = true; groupBeingDeleted = group; }">
 					Delete
 				</AppButton>
 			</div>
@@ -49,6 +49,17 @@
 			</AppButton>
 		</template>
 	</AppDialog>
+
+	<AppDialog v-model="showConfirmDeleteDialog" :title="'Are you sure you want to delete \'' + groupBeingDeleted?.name + '\'?'">
+		<template #footer>
+			<AppButton variant="cancel" @click="() => showConfirmDeleteDialog = false">
+				Cancel
+			</AppButton>
+			<AppButton variant="secondary" @click="() => { deleteGroup(groupBeingDeleted!); showConfirmDeleteDialog = false; }">
+				Yes
+			</AppButton>
+		</template>
+	</AppDialog>
 </div>
 </template>
 
@@ -71,6 +82,10 @@ const newGroupName = ref("")
 const showEditDialog = ref(false)
 const editGroupName = ref("")
 const groupBeingEdited = ref<Group | null>(null)
+
+const groupBeingDeleted = ref<Group | null>(null)
+const showConfirmDeleteDialog = ref(false)
+
 
 getGroups();
 function getGroups() {

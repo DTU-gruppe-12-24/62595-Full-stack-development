@@ -11,10 +11,10 @@ import org.springframework.web.server.ResponseStatusException;
 import dk.dtu._62595.demo.model.Group;
 import dk.dtu._62595.demo.model.GroupMember;
 import dk.dtu._62595.demo.model.User;
-
 import dk.dtu._62595.demo.repositories.GroupMemberRepository;
 import dk.dtu._62595.demo.repositories.GroupRepository;
 import dk.dtu._62595.demo.repositories.UserRepository;
+import jakarta.transaction.Transactional;
 
 @Service
 public class GroupService {
@@ -25,6 +25,7 @@ public class GroupService {
 	@Autowired
 	GroupMemberRepository groupMemberRepository;
 
+	@Transactional
 	public Group createGroup(String name, User currentUser) {
 		Group group = new Group(name);
 		Group saved = groupRepository.save(group);
@@ -33,6 +34,7 @@ public class GroupService {
 		return saved;
 	}
 
+	@Transactional
 	public Group updateGroup(UUID groupId, String name) {
 		Group group = groupRepository.findById(groupId)
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Group not found"));
@@ -40,19 +42,20 @@ public class GroupService {
 		return groupRepository.save(group);
 	}
 
+	@Transactional
 	public void deleteGroup(UUID groupId) {
 		Group group = groupRepository.findById(groupId)
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Group not found"));
-		groupMemberRepository.findByGroup(group)
-				.forEach(groupMemberRepository::delete);
-		groupRepository.deleteById(groupId);
+		groupRepository.deleteById(group.getId());
 	}
 
+	@Transactional
 	public Group getGroupById(UUID groupId) {
 		return groupRepository.findById(groupId)
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Group not found"));
 	}
 
+	@Transactional
 	public List<Group> getGroupsForUser(User currentUser) {
 		return groupMemberRepository.findByUser(currentUser)
 				.stream()
