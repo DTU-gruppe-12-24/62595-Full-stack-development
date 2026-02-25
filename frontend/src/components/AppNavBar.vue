@@ -1,9 +1,28 @@
 <script lang="ts">
-import {defineComponent} from 'vue'
-
+import { defineComponent, ref, watch } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
+import { isAuthenticated, logout } from '@/services/authService'
 
 export default defineComponent({
-  name: "AppNavBar"
+  name: "AppNavBar",
+  setup() {
+    const router = useRouter()
+    const route = useRoute()
+
+    // Re-check auth state whenever the route changes
+    const loggedIn = ref(isAuthenticated())
+    watch(() => route.path, () => {
+      loggedIn.value = isAuthenticated()
+    })
+
+    async function handleLogout() {
+      await logout()
+      loggedIn.value = false
+      router.push('/sign-in')
+    }
+
+    return { loggedIn, handleLogout }
+  }
 })
 </script>
 
@@ -20,19 +39,31 @@ export default defineComponent({
 
       <!-- Menu links -->
       <div class="menu">
-        <RouterLink to="/calendar" class="menu-item">
-          Calendar
-        </RouterLink>
+        <!-- Show these links only if the user is logged in -->
+        <template v-if="loggedIn">
+          <RouterLink to="/calendar" class="menu-item">
+            Calendar
+          </RouterLink>
 
-        <RouterLink to="/shopping" class="menu-item">
-          Shopping List
-        </RouterLink>
+          <RouterLink to="/shopping" class="menu-item">
+            Shopping List
+          </RouterLink>
+
+          <a class="menu-item" @click.prevent="handleLogout" href="#">
+            Log out
+          </a>
+        </template>
+        <!-- Show these links only if the user is not logged in -->
+        <template v-else>
+          <RouterLink to="/sign-in" class="menu-item">
+            Sign in
+          </RouterLink>
+        </template>
       </div>
 
     </div>
   </nav>
 </template>
-
 <style scoped>
 
 .navbar {
