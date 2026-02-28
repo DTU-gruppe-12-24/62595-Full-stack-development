@@ -34,13 +34,17 @@ const router = createRouter({
       component: () => import('@/views/CalendarView.vue')
     },
 
-    {
-      path: '/shopping',
+  {
+    path: '/shopping',
       name: 'shopping',
-      component: () => import('@/views/ShoppingListView.vue')
-    }
-  ],
-})
+    component: () => import('@/views/ShoppingListView.vue')
+  },
+
+  {
+    path: '/groups',
+      name: 'groups',
+    component: () => import('@/views/GroupView.vue'),
+  }
 
 // Nav guard
 router.beforeEach((to) => {

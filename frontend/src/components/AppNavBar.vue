@@ -49,6 +49,10 @@ export default defineComponent({
             Shopping List
           </RouterLink>
 
+          <RouterLink to="/groups" class="menu-item">
+            Groups
+          </RouterLink>
+
           <a class="menu-item" @click.prevent="handleLogout" href="#">
             Log out
           </a>
