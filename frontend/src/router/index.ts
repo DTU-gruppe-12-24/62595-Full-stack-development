@@ -13,13 +13,13 @@ const router = createRouter({
       path: '/sign-in',
       name: 'sign-in',
       component: SignInView,
-      meta: { public: true },
+      meta: {public: true},
     },
     {
       path: '/sign-up',
       name: 'sign-up',
       component: SignUpView,
-      meta: { public: true },
+      meta: {public: true},
     },
 
     {
@@ -34,18 +34,19 @@ const router = createRouter({
       component: () => import('@/views/CalendarView.vue')
     },
 
-  {
-    path: '/shopping',
+    {
+      path: '/shopping',
       name: 'shopping',
-    component: () => import('@/views/ShoppingListView.vue')
-  },
+      component: () => import('@/views/ShoppingListView.vue')
+    },
 
-  {
-    path: '/groups',
+    {
+      path: '/groups',
       name: 'groups',
-    component: () => import('@/views/GroupView.vue'),
-  }
-
+      component: () => import('@/views/GroupView.vue'),
+    }
+  ],
+})
 // Nav guard
 router.beforeEach((to) => {
   const authenticated = isAuthenticated()
