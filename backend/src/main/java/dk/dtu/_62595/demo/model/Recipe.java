@@ -10,7 +10,7 @@ import jakarta.persistence.*;
 public class Recipe {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.UUID)
+	@Column(columnDefinition = "CHAR(36)")
 	private UUID id;
 
 	@ManyToOne(optional = false)
@@ -145,4 +145,6 @@ public class Recipe {
 	public void setLastMade(LocalDate lastMade) {
 		this.lastMade = lastMade;
 	}
+
+
 }
