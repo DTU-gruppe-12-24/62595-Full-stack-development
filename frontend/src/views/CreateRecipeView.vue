@@ -4,19 +4,20 @@ import { useRouter } from "vue-router"
 
 const router = useRouter()
 
-const name = ref("")
-const description = ref("")
-const instructions = ref("")
-const mealType = ref("")
-const servings = ref<number | null>(null)
-const prepTimeMinutes = ref<number | null>(null)
+const ownerId = "PUT-UUID-HERE"
 
-// Midlertidigt hardcoded UUID
-const ownerId = "PUT-UUID-HER"
+const recipe = ref({
+  name: "",
+  description: "",
+  instructions: "",
+  mealType: "",
+  servings: null as number | null,
+  prepTimeMinutes: null as number | null
+})
 
 async function createRecipe() {
   try {
-    await fetch("http://localhost:8080/api/recipes", {
+    const response = await fetch("http://localhost:8080/api/recipes", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -24,35 +25,60 @@ async function createRecipe() {
       body: JSON.stringify({
         owner: { id: ownerId },
         group: null,
-        name: name.value,
-        description: description.value,
-        instructions: instructions.value,
-        mealType: mealType.value,
-        servings: servings.value,
-        prepTimeMinutes: prepTimeMinutes.value,
+        name: recipe.value.name,
+        description: recipe.value.description,
+        instructions: recipe.value.instructions,
+        mealType: recipe.value.mealType,
+        servings: recipe.value.servings,
+        prepTimeMinutes: recipe.value.prepTimeMinutes,
         imageUrl: null,
         lastMade: null
       })
     })
 
+    if (!response.ok) {
+      throw new Error("Couldn't create recipe")
+    }
+
     router.push("/")
-  } catch (err) {
-    console.error("Fejl ved oprettelse:", err)
+  } catch (error) {
+    console.error("Error:", error)
   }
 }
 </script>
 
 <template>
   <div>
-    <h1>Opret opskrift</h1>
+    <h1>Create recipe</h1>
 
-    <input v-model="name" placeholder="Navn" />
-    <textarea v-model="description" placeholder="Beskrivelse"></textarea>
-    <textarea v-model="instructions" placeholder="Instruktioner"></textarea>
-    <input v-model="mealType" placeholder="Meal type" />
-    <input type="number" v-model="servings" placeholder="Portioner" />
-    <input type="number" v-model="prepTimeMinutes" placeholder="Tilberedningstid (min)" />
+    <input v-model="recipe.name" placeholder="Name" />
 
-    <button @click="createRecipe">Opret</button>
+    <textarea
+        v-model="recipe.description"
+        placeholder="Description"
+    ></textarea>
+
+    <textarea
+        v-model="recipe.instructions"
+        placeholder="Instructions"
+    ></textarea>
+
+    <input v-model="recipe.mealType" placeholder="Meal type" />
+
+    <input
+        type="number"
+        v-model="recipe.servings"
+        placeholder="Portions"
+    />
+
+    <input
+        type="number"
+        v-model="recipe.prepTimeMinutes"
+        placeholder="Preperation time (min)"
+    />
+
+    <button @click="createRecipe">
+      Create
+    </button>
   </div>
 </template>
