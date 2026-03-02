@@ -1,0 +1,79 @@
+const BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8080'
+
+export interface AuthResponse {
+    token: string
+    userId: string
+    name: string
+    email: string
+}
+
+// Token helpers
+
+export function getToken(): string | null {
+    return localStorage.getItem('auth_token')
+}
+
+export function setToken(token: string): void {
+    localStorage.setItem('auth_token', token)
+}
+
+export function clearToken(): void {
+    localStorage.removeItem('auth_token')
+    localStorage.removeItem('auth_user')
+}
+
+export function getStoredUser(): Omit<AuthResponse, 'token'> | null {
+    const raw = localStorage.getItem('auth_user')
+    return raw ? JSON.parse(raw) : null
+}
+
+function storeAuth(res: AuthResponse): void {
+    setToken(res.token)
+    const { token: _, ...user } = res
+    localStorage.setItem('auth_user', JSON.stringify(user))
+}
+
+// API calls
+
+async function post<T>(path: string, body: object): Promise<T> {
+    const response = await fetch(`${BASE_URL}${path}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+    })
+
+    const data = await response.json()
+
+    if (!response.ok) {
+        throw new Error(data.error ?? 'An unexpected error occurred.')
+    }
+
+    return data as T
+}
+
+export async function register(name: string, email: string, password: string): Promise<AuthResponse> {
+    const res = await post<AuthResponse>('/api/auth/register', { name, email, password })
+    storeAuth(res)
+    return res
+}
+
+export async function login(email: string, password: string): Promise<AuthResponse> {
+    const res = await post<AuthResponse>('/api/auth/login', { email, password })
+    storeAuth(res)
+    return res
+}
+
+export async function logout(): Promise<void> {
+    const token = getToken()
+    if (token) {
+        await fetch(`${BASE_URL}/api/auth/logout`, {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${token}` },
+        }).catch(() => {})
+    }
+    clearToken()
+}
+
+export function isAuthenticated(): boolean {
+    return !!getToken()
+}
