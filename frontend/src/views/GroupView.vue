@@ -1,15 +1,20 @@
 <template>
 <div class="flex flex-col gap-2 justify-center items-center w-full">
-	<AppCard hover v-for="group in groups" :flex="true" class="max-w-1/2">
+	<AppCard
+		v-for="group in groups"
+		flex hover
+		class="max-w-1/2 hover:cursor-pointer"
+		@click="() => openEditDialog(group.group, group.role != 'MEMBER')"
+	>
 		<div class="flex flex-row justify-between items-center w-full">
 			<AppText variant="subtitle" tag="h3" class="max-w-fit">
-				{{ group.name }}
+				{{ group.group.name }}
 			</AppText>
-			<div class="flex flex-row justify-end gap-1 w-fit">
-				<AppButton variant="secondary" @click="() => openEditDialog(group)">
+			<div v-if="group.role != 'MEMBER'" class="flex flex-row justify-end gap-1 w-fit">
+				<AppButton variant="secondary" @click="() => openEditDialog(group.group, true)">
 					Edit
 				</AppButton>
-				<AppButton variant="cancel" @click="() => { showConfirmDeleteDialog = true; groupBeingDeleted = group; }">
+				<AppButton variant="cancel" @click="() => { showConfirmDeleteDialog = true; groupBeingDeleted = group.group; }">
 					Delete
 				</AppButton>
 			</div>
@@ -34,37 +39,38 @@
 		</template>
 	</AppDialog>
 
-	<AppDialog v-model="showEditDialog" title="Edit group">
+	<AppDialog v-model="showEditDialog" :title="allowEdit ? 'Edit group' : groupBeingShown?.name">
 		<div class="flex flex-row justify-between w-full">
 			<AppInput
 				v-model="editGroupName"
 				placeholder="Group name..."
 				@keyup.enter="submitEditGroup"
 				class="w-full pr-4"
+				v-if="allowEdit"
 			/>
-			<AppButton variant="secondary" @click="submitEditGroup">
+			<AppButton variant="secondary" @click="submitEditGroup" v-if="allowEdit">
 				Save
 			</AppButton>
 		</div>
 
-		<AppSection v-if="groupMembers[groupBeingEdited!.id]">
-			<AppCard v-for="member in groupMembers[groupBeingEdited!.id]" flex >
+		<AppSection v-if="groupMembers[groupBeingShown!.id]">
+			<AppCard v-for="member in groupMembers[groupBeingShown!.id]" flex >
 				<div class="flex flex-row justify-between items-center mx-4 w-full">
 					<AppText>{{ member.user.name }} ({{ member.user.email }})</AppText>
 					<div class="flex flex-row justify-end gap-1 w-fit">
 						<AppDropdown
 							:values="['ADMIN', 'MEMBER']"
 							v-model="member.role"
-							:disabled="member.role == 'OWNER'"
+							:disabled="member.role == 'OWNER' || !allowEdit"
 							v-on:change="() => updateMemberRole(member)"
 						/>
-						<AppButton variant="ghost" @click="() => removeMember(member)">
+						<AppButton variant="ghost" @click="() => removeMember(member)" v-if="allowEdit">
 							<font-awesome-icon icon="fa-solid fa-right-from-bracket" />
 						</AppButton>
 					</div>
 				</div>
 			</AppCard>
-			<AppCard flex >
+			<AppCard flex v-if="allowEdit">
 				<div class="flex flex-row justify-between items-center mx-4 w-full">
 					<AppInput
 						v-model="inviteEmail"
@@ -110,12 +116,13 @@ import type { GroupMember } from '@/model/GroupMember'
 import AppSection from '@/components/AppSection.vue'
 import type { User } from '@/model/User'
 
-const groups = ref([] as Group[])
+const groups = ref([] as {group: Group, role: GroupMember["role"]}[])
 const showCreateDialog = ref(false)
 const newGroupName = ref("")
 const showEditDialog = ref(false)
+const allowEdit = ref(false)
 const editGroupName = ref("")
-const groupBeingEdited = ref<Group | null>(null)
+const groupBeingShown = ref<Group | null>(null)
 
 const groupMembers = ref<Record<Group["id"], GroupMember[]>>({})
 const inviteEmail = ref("")
@@ -126,7 +133,7 @@ const showConfirmDeleteDialog = ref(false)
 
 getGroups();
 function getGroups() {
-	apiFetch<Group[]>("/api/group/me", "GET")
+	apiFetch<{group: Group, role: GroupMember["role"]}[]>("/api/group/me", "GET")
 		.then((result) => groups.value = result)
 		.catch((error) => {
 			console.error(error);
@@ -141,24 +148,25 @@ function submitCreateGroup() {
 	newGroupName.value = "";
 }
 
-function openEditDialog(group: Group) {
-    groupBeingEdited.value = group;
+function openEditDialog(group: Group, edit: boolean) {
+    groupBeingShown.value = group;
     apiFetch<GroupMember[]>(`/api/group/${group.id}/members`)
         .then((members) => groupMembers.value[group.id] = members)
         .catch((error) => { console.error(error) });
 	editGroupName.value = group.name;
 	showEditDialog.value = true;
+	allowEdit.value = edit
 }
 
 function submitEditGroup() {
 	const name = editGroupName.value.trim();
-	if (!name || !groupBeingEdited.value) return;
-	updateGroup(groupBeingEdited.value, name);
+	if (!name || !groupBeingShown.value) return;
+	updateGroup(groupBeingShown.value, name);
 }
 
 function createGroup(name: string) {
 	apiFetch<Group, Partial<Group>>("/api/group", "POST", { name })
-		.then((result) => groups.value.push(result))
+		.then((result) => groups.value.push({group: result, role: "OWNER"}))
 		.catch((error) => { console.error(error) });
 }
 
@@ -175,7 +183,7 @@ function deleteGroup(group: Group) {
 }
 
 function inviteMember() {
-    const group = groupBeingEdited.value!;
+    const group = groupBeingShown.value!;
     apiFetch<boolean>(`/api/group/${group.id}/invite/${inviteEmail.value}`, "POST")
 		.then((response) => {
 		    if (response) apiFetch<GroupMember[]>(`/api/group/${group.id}/members`)
@@ -199,7 +207,7 @@ function updateMemberRole(member: GroupMember) {
 
 function removeMember(member: GroupMember) {
     apiFetch(`/api/group/${member.group.id}/members/${member.user.id}`, "DELETE")
-		.then((_) => openEditDialog(member.group))
+		.then((_) => openEditDialog(member.group, allowEdit.value))
 		.catch((error) => { console.error(error); });
 }
 

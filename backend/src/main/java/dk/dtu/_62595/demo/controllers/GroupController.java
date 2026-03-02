@@ -19,6 +19,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import dk.dtu._62595.demo.dto.MyGroupResponse;
+import dk.dtu._62595.demo.dto.MyGroupsResponse;
 import dk.dtu._62595.demo.model.Group;
 import dk.dtu._62595.demo.model.GroupMember;
 import dk.dtu._62595.demo.model.User;
@@ -86,8 +88,12 @@ public class GroupController {
 	}
 
 	@GetMapping("/me")
-	public List<Group> getMyGroups() {
-		return groupService.getGroupsForUser(getCurrentUser());
+	public List<MyGroupResponse> getMyGroups() {
+		User user = getCurrentUser();
+		return groupService.getGroupsForUser(user)
+			.stream()
+			.map(group -> new MyGroupResponse(group, groupService.getRole(group, user)))
+			.toList();
 	}
 
 	@GetMapping("/{groupId}/members")
