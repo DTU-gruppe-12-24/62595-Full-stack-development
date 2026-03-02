@@ -5,7 +5,7 @@ import java.util.UUID;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "GroupTable") // Group and Groups are reserved keywords in MySQL
+@Table(name = "group_table") // Group and Groups are reserved keywords in MySQL
 public class Group {
 
 	@Id
@@ -25,4 +25,6 @@ public class Group {
     public UUID getId() {   return id; }
 
     public String getName() { return name; }
+
+    public void setName(String name) { this.name = name; }
 }

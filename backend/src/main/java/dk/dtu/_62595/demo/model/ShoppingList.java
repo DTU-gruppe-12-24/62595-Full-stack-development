@@ -36,7 +36,11 @@ public class ShoppingList {
 		this.isBought = isBought;
 	}
 
-	public UUID getID() {
+	public UUID getId() {
 		return id;
 	}
+	public Group getGroup() { return group; }
+	public Ingredient getIngredient() { return ingredient; }
+	public float getAmount() { return amount; }
+	public boolean isBought() {return isBought; }
 }

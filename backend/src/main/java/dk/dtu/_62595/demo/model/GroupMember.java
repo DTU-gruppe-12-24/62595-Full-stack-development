@@ -38,6 +38,9 @@ public class GroupMember {
     public GroupMemberId getId() {
         return id;
     }
+	public User getUser() { return user; }
+	public Group getGroup() { return group; }
+	public String getRole() { return role; }
 
 	@Embeddable
 	public static class GroupMemberId implements Serializable {
@@ -54,6 +57,9 @@ public class GroupMember {
 			this.userId = userId;
 			this.groupId = groupId;
 		}
+
+		public UUID getUserId() { return userId; }
+		public UUID getGroupId() { return groupId; }
 
 		@Override
 		public boolean equals(Object o) {
