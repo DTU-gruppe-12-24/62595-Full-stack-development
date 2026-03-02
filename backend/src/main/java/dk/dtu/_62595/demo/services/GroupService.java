@@ -1,6 +1,8 @@
 package dk.dtu._62595.demo.services;
 
 import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +31,7 @@ public class GroupService {
 	public Group createGroup(String name, User currentUser) {
 		Group group = new Group(name);
 		Group saved = groupRepository.save(group);
-		GroupMember member = new GroupMember(currentUser, saved, "owner");
+		GroupMember member = new GroupMember(currentUser, saved, GroupMember.Role.OWNER);
 		groupMemberRepository.save(member);
 		return saved;
 	}
@@ -61,5 +63,45 @@ public class GroupService {
 				.stream()
 				.map(GroupMember::getGroup)
 				.toList();
+	}
+
+	@Transactional
+	public GroupMember.Role getRole(Group group, User user) {
+		return groupMemberRepository.findById(new GroupMember.GroupMemberId(user.getId(), group.getId())).orElseThrow().getRole();
+	}
+
+	@Transactional
+	public boolean canUserEditGroup(Group group, User user) {
+		try {
+			return this.getRole(group, user) != GroupMember.Role.MEMBER;
+		} catch (NoSuchElementException exception) {
+			return false;
+		}
+	}
+
+	@Transactional
+	public boolean canUserViewGroup(Group group, User user) {
+		Optional<GroupMember> member = groupMemberRepository.findById(new GroupMember.GroupMemberId(user.getId(), group.getId()));
+		return member.isPresent();
+	}
+
+	@Transactional
+	public List<GroupMember> getGroupMembers(Group group) {
+		return groupMemberRepository.findByGroup(group);
+	}
+
+	@Transactional
+	public void addGroupMember(Group group, User member, GroupMember.Role role) {
+		groupMemberRepository.save(new GroupMember(member, group, role));
+	}
+
+	@Transactional
+	public void editGroupMember(GroupMember groupMember) {
+		groupMemberRepository.save(groupMember);
+	}
+
+	@Transactional
+	public void removeGroupMember(Group group, User member) {
+		groupMemberRepository.delete(groupMemberRepository.findById(new GroupMember.GroupMemberId(member.getId(), group.getId())).orElseThrow());
 	}
 }
