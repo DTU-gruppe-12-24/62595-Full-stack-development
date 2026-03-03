@@ -82,6 +82,12 @@ public class RecipeController {
         return ResponseEntity.ok(recipeRepository.save(existingRecipe));
     }
 
+    @GetMapping("/{id}")
+    public Recipe getRecipe(@PathVariable UUID id) {
+        return recipeRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Opskrift ikke fundet"));
+    }
+
     // Det er bare en test for mig (Lukas) :))
     @GetMapping("/test")
     public String test() {

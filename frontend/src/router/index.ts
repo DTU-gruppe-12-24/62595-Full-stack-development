@@ -21,6 +21,16 @@ const routes = [
   {
     path: '/groups',
     component: () => import('@/views/GroupView.vue'),
+  },
+
+  {
+    path: "/recipes/create",
+    component: () => import("../views/CreateRecipeView.vue")
+  },
+
+  {
+    path: "/recipes/:id/edit",
+    component: () => import("../views/EditRecipeView.vue")
   }
 
 ]
