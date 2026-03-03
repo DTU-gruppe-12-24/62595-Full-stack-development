@@ -26,4 +26,6 @@ public interface RecipeRepository extends Repository<Recipe, UUID> {
     List<Recipe> findByGroupAndNameContainingIgnoreCase(Group group, String fragment);
     List<Recipe> findByOwnerAndMealType(User owner, String mealType);
     List<Recipe> findByGroupAndMealType(Group group, String mealType);
+
+    UUID id(UUID id);
 }

@@ -50,6 +50,20 @@ const router = createRouter({
 // Nav guard
 router.beforeEach((to) => {
   const authenticated = isAuthenticated()
+  {
+    path: '/groups',
+    component: () => import('@/views/GroupView.vue'),
+  },
+
+  {
+    path: "/recipes/create",
+    component: () => import("../views/CreateRecipeView.vue")
+  },
+
+  {
+    path: "/recipes/:id/edit",
+    component: () => import("../views/EditRecipeView.vue")
+  }
 
   // Redirect unauthenticated users to sign-in
   if (!to.meta.public && !authenticated) {
