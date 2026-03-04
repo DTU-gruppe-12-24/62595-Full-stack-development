@@ -3,7 +3,7 @@ package dk.dtu._62595.demo.controllers;
 import dk.dtu._62595.demo.dto.AuthResponse;
 import dk.dtu._62595.demo.dto.LoginRequest;
 import dk.dtu._62595.demo.dto.RegisterRequest;
-import dk.dtu._62595.demo.service.UserService;
+import dk.dtu._62595.demo.services.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
