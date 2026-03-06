@@ -24,6 +24,7 @@ test.describe('Groups', () => {
 
 
   test('can create a group', async ({ page }) => {
+    console.log(await page.evaluate(() => localStorage));
     const name = `MyFavGroup-${Date.now()}`;
 
     await createGroup(page, name);

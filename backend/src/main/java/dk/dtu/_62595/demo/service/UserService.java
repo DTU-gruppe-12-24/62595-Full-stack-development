@@ -10,6 +10,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import org.springframework.stereotype.Service;
 
+import java.util.UUID;
+
 @Service
 public class UserService {
 
@@ -48,5 +50,14 @@ public class UserService {
 
         String token = jwtUtil.generateToken(user.getEmail());
         return new AuthResponse(token, user.getId(), user.getName(), user.getEmail());
+    }
+
+    public void deleteUserById(String id) {
+        UUID uuid = UUID.fromString(id);
+
+        if (!userRepository.existsById(uuid)) {
+            throw new IllegalArgumentException("User not found: " + id);
+        }
+        userRepository.deleteById(uuid);
     }
 }
