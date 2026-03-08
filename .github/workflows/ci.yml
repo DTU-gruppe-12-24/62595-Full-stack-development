@@ -40,7 +40,7 @@ jobs:
 
       - name: Start backend (test profile)
         working-directory: backend
-        run: mvn spring-boot:run -Dspring.profiles.active=test -Dspring.devtools.restart.enabled=false &
+        run: mvn spring-boot:run -Dspring-boot.run.jvmArguments="-Dspring.profiles.active=test -Dspring.devtools.restart.enabled=false" &
 
       - name: Start frontend
         working-directory: frontend
