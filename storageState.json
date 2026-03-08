@@ -1,0 +1,26 @@
+{
+  "cookies": [],
+  "origins": [
+    {
+      "origin": "http://localhost:5173",
+      "localStorage": [
+        {
+          "name": "auth_token",
+          "value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJwbGF5d3JpZ2h0QHRlc3QuZGsiLCJpYXQiOjE3NzI5ODIzNTcsImV4cCI6MTc3MzA2ODc1N30.P6oJnw7Q_p8NB2_aI61RRh2lAT6IXtsc6R9wyX-_7fg"
+        },
+        {
+          "name": "__vue-devtools-frame-state__",
+          "value": "{\"width\":80,\"height\":60,\"top\":0,\"left\":50,\"open\":false,\"route\":\"/\",\"position\":\"bottom\",\"isFirstVisit\":true,\"closeOnOutsideClick\":false,\"minimizePanelInactive\":5000,\"preferShowFloatingPanel\":true,\"reduceMotion\":false}"
+        },
+        {
+          "name": "__vue-devtools-theme__",
+          "value": "auto"
+        },
+        {
+          "name": "auth_user",
+          "value": "{\"userId\":\"4ae4b9d3-22fc-43f5-9506-e52ad8508e5a\",\"name\":\"Playwright Test User\",\"email\":\"playwright@test.dk\"}"
+        }
+      ]
+    }
+  ]
+}

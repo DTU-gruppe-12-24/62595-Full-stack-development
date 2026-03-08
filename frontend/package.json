@@ -10,8 +10,8 @@
     "build-only": "vite build",
     "type-check": "vue-tsc --build",
     "backend:test": "cd ../backend && mvn spring-boot:run -Dspring-boot.run.profiles=test",
-    "test:e2e": "playwright test",
-    "dev:all": "run-p backend:test dev"
+    "test:all": "playwright test",
+    "dev:test": "run-p backend:test dev"
 
   },
   "dependencies": {
