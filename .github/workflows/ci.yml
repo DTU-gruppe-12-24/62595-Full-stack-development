@@ -39,8 +39,8 @@ jobs:
         run: npx playwright install --with-deps
 
       - name: Start backend (test profile)
-        working-directory: frontend
-        run: npm run backend:test &
+        working-directory: backend
+        run: mvn spring-boot:run -Dspring-boot.run.profiles=test &
 
       - name: Start frontend
         working-directory: frontend
