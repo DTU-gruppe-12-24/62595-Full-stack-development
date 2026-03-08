@@ -7,7 +7,7 @@ const TEST_USER = {
 };
 
 async function globalSetup(config: FullConfig) {
-  const baseURL = config.use?.baseURL || 'http://localhost:5173';
+  const baseURL = (config as any).use?.baseURL || 'http://localhost:5173';
   console.log("Using baseURL:", baseURL);
 
   // Register test user
@@ -32,7 +32,7 @@ async function globalSetup(config: FullConfig) {
 
   await page.waitForURL(`${baseURL}/`);
 
-  await page.context().storageState({ path: 'storageState.json' });
+  await page.context().storageState({ path: './storageState.json' });
 
   await browser.close();
 }

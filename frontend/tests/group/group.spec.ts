@@ -1,4 +1,5 @@
-import { test, expect, Page } from '@playwright/test';
+import { test } from '../setup';
+import { expect, Page } from '@playwright/test';
 
 test.describe('Groups', () => {
 
@@ -24,11 +25,9 @@ test.describe('Groups', () => {
 
 
   test('can create a group', async ({ page }) => {
-    console.log(await page.evaluate(() => localStorage));
     const name = `MyFavGroup-${Date.now()}`;
 
     await createGroup(page, name);
-    await deleteGroup(page, name);
   });
 
 
@@ -44,7 +43,6 @@ test.describe('Groups', () => {
     await page.getByRole('button', { name: 'Save' }).click();
     await expect(page.getByText(updatedName)).toBeVisible();
 
-    await deleteGroup(page, updatedName);
   });
 
 

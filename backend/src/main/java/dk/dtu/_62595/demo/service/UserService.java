@@ -52,12 +52,8 @@ public class UserService {
         return new AuthResponse(token, user.getId(), user.getName(), user.getEmail());
     }
 
-    public void deleteUserById(String id) {
-        UUID uuid = UUID.fromString(id);
+    public void deleteUserByEmail(String email) {
+    userRepository.findByEmail(email).ifPresent(userRepository::delete);
+}
 
-        if (!userRepository.existsById(uuid)) {
-            throw new IllegalArgumentException("User not found: " + id);
-        }
-        userRepository.deleteById(uuid);
-    }
 }

@@ -16,9 +16,9 @@ public class TestUserController {
         this.userService = userService;
     }
 
-    @DeleteMapping("/user/{id}")
-    public ResponseEntity<Void> deleteTestUser(@PathVariable String id) {
-        userService.deleteUserById(id);
+    @DeleteMapping("/user/email/{email}")
+    public ResponseEntity<Void> deleteTestUser(@PathVariable String email) {
+        userService.deleteUserByEmail(email);
         return ResponseEntity.noContent().build();
     }
 }
