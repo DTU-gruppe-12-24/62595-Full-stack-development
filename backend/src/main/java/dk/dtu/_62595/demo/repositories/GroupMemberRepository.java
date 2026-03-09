@@ -3,6 +3,7 @@ package dk.dtu._62595.demo.repositories;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.Repository;
 
 import dk.dtu._62595.demo.model.Group;
@@ -10,7 +11,7 @@ import dk.dtu._62595.demo.model.GroupMember;
 import dk.dtu._62595.demo.model.GroupMember.GroupMemberId;
 import dk.dtu._62595.demo.model.User;
 
-public interface GroupMemberRepository extends Repository<GroupMember, GroupMemberId> {
+public interface GroupMemberRepository extends JpaRepository<GroupMember, GroupMemberId> {
     // Persistence operations
     GroupMember save(GroupMember entity);
     void delete(GroupMember entity);

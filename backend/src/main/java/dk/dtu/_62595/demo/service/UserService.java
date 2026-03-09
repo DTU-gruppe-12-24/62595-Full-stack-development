@@ -49,4 +49,8 @@ public class UserService {
         String token = jwtUtil.generateToken(user.getEmail());
         return new AuthResponse(token, user.getId(), user.getName(), user.getEmail());
     }
+
+    public void deleteUserByEmail(String email) {
+    userRepository.findByEmail(email).ifPresent(userRepository::delete);
+    }
 }
