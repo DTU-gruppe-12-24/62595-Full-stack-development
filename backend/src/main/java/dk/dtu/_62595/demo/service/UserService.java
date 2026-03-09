@@ -10,8 +10,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import org.springframework.stereotype.Service;
 
-import java.util.UUID;
-
 @Service
 public class UserService {
 
@@ -54,6 +52,5 @@ public class UserService {
 
     public void deleteUserByEmail(String email) {
     userRepository.findByEmail(email).ifPresent(userRepository::delete);
-}
-
+    }
 }
