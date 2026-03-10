@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -86,6 +87,11 @@ public class RecipeController {
     public Recipe getRecipe(@PathVariable UUID id) {
         return recipeRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Opskrift ikke fundet"));
+    }
+
+    @GetMapping
+    public List<Recipe> getAllRecipes() {
+        return recipeRepository.findAll();
     }
 
     // Det er bare en test for mig (Lukas) :))

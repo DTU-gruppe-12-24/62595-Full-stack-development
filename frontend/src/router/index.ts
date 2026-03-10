@@ -63,6 +63,12 @@ router.beforeEach((to) => {
   {
     path: "/recipes/:id/edit",
     component: () => import("../views/EditRecipeView.vue")
+  },
+
+  {
+    path: "/recipes",
+    name: "recipes",
+    component: () => import("../views/EditRecipesView.vue")
   }
 
   // Redirect unauthenticated users to sign-in
