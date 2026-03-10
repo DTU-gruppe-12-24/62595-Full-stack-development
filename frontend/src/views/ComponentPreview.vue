@@ -5,7 +5,6 @@ import AppCard from "../components/AppCard.vue"
 import AppButton from "../components/AppButton.vue"
 import AppInput from "../components/AppInput.vue"
 import AppDialog from "@/components/AppDialog.vue"
-import { getToken } from "@/services/authService"
 
 const showDialog = ref<boolean>(false)
 
@@ -14,10 +13,6 @@ function handleSave() {
   showDialog.value = false
 }
 
-fetch("/api/test", {
-  method: "GET",
-  headers: { Authorization: `Bearer ${getToken()}` },
-}).then(async (response) => console.log(response.status, await response.text()))
 </script>
 
 <template>

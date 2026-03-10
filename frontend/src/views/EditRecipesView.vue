@@ -1,4 +1,11 @@
 <script setup lang="ts">
+import AppButton from "@/components/AppButton.vue"
+import AppInput from "@/components/AppInput.vue"
+import AppText from "@/components/AppText.vue"
+
+import type { Recipe } from "@/model/Recipe"
+import { apiFetch } from "@/utilities/apiFetch"
+
 import { ref, onMounted } from "vue"
 import { useRoute, useRouter } from "vue-router"
 
@@ -7,58 +14,44 @@ const router = useRouter()
 
 const recipeId = route.params.id as string
 
-const recipe = ref({
+const recipe = ref<Partial<Recipe>>({
   name: "",
   description: "",
   instructions: "",
   mealType: "",
-  servings: null as number | null,
-  prepTimeMinutes: null as number | null,
-  imageUrl: null as string | null,
-  lastMade: null as string | null
+  servings: undefined,
+  prepTimeMinutes: undefined,
+  imageUrl: undefined,
+  lastMade: undefined
 })
 
 onMounted(async () => {
-  const response = await fetch(`http://localhost:8080/api/recipes/${recipeId}`)
-  const data = await response.json()
-  recipe.value = data
+    apiFetch<typeof recipe.value>(`/api/recipes/${recipeId}`)
+        .then((result) => recipe.value = result)
+        .catch(() => console.error("Kunne ikke finde opskrift"))
 })
 
 async function updateRecipe() {
-  const response = await fetch(
-      `http://localhost:8080/api/recipes/${recipeId}`,
-      {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(recipe.value)
-      }
-  )
-
-  if (!response.ok) {
-    console.error("Kunne ikke opdatere opskrift")
-    return
-  }
-
-  router.push("/")
+    await apiFetch(`/api/recipes/${recipeId}`, "PUT", recipe.value)
+        .then(() => router.push("/"))
+        .catch(() => console.error("Kunne ikke opdatere opskrift"));
 }
 </script>
 
 <template>
   <div class="page">
-    <h1>Rediger opskrift</h1>
+    <AppText variant="title" tag="h1">Rediger opskrift</AppText>
 
-    <input v-model="recipe.name" placeholder="Navn" />
-    <textarea v-model="recipe.description" placeholder="Beskrivelse"></textarea>
-    <textarea v-model="recipe.instructions" placeholder="Instruktioner"></textarea>
-    <input v-model="recipe.mealType" placeholder="Meal type" />
-    <input type="number" v-model="recipe.servings" placeholder="Portioner" />
-    <input type="number" v-model="recipe.prepTimeMinutes" placeholder="Tilberedningstid (min)" />
+    <AppInput v-model="recipe.name" placeholder="Navn" />
+    <AppInput type="textarea" v-model="recipe.description" placeholder="Beskrivelse" />
+    <AppInput type="textarea" v-model="recipe.instructions" placeholder="Instruktioner" />
+    <AppInput v-model="recipe.mealType" placeholder="Meal type" />
+    <AppInput type="number" v-model="recipe.servings" placeholder="Portioner" />
+    <AppInput type="number" v-model="recipe.prepTimeMinutes" placeholder="Tilberedningstid (min)" />
 
-    <button @click="updateRecipe">
+    <AppButton @click="updateRecipe">
       Gem ændringer
-    </button>
+    </AppButton>
   </div>
 </template>
 
@@ -67,16 +60,5 @@ async function updateRecipe() {
   max-width: 600px;
   margin: 0 auto;
   padding: 20px;
-}
-input,
-textarea {
-  display: block;
-  width: 100%;
-  margin-bottom: 12px;
-  padding: 8px;
-}
-button {
-  padding: 10px 16px;
-  cursor: pointer;
 }
 </style>

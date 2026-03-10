@@ -1,4 +1,8 @@
 <script setup lang="ts">
+import AppButton from "@/components/AppButton.vue"
+import AppInput from "@/components/AppInput.vue"
+import AppText from "@/components/AppText.vue"
+import { apiFetch } from "@/utilities/apiFetch"
 import { ref } from "vue"
 import { useRouter } from "vue-router"
 
@@ -16,14 +20,7 @@ const recipe = ref({
 })
 
 async function createRecipe() {
-  try {
-    const response = await fetch("http://localhost:8080/api/recipes", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        owner: { id: ownerId },
+    await apiFetch("/api/recipes", "POST", {
         group: null,
         name: recipe.value.name,
         description: recipe.value.description,
@@ -33,32 +30,24 @@ async function createRecipe() {
         prepTimeMinutes: recipe.value.prepTimeMinutes,
         imageUrl: null,
         lastMade: null
-      })
     })
-
-    if (!response.ok) {
-      throw new Error("Kunne ikke oprette opskrift")
-    }
-
-    router.push("/")
-  } catch (error) {
-    console.error(error)
-  }
+        .then(() => router.push("/"))
+        .catch(() => console.error("Kunne ikke oprette opskrift"))
 }
 </script>
 
 <template>
   <div class="page">
-    <h1>Opret opskrift</h1>
+    <AppText variant="title" tag="h1">Opret opskrift</AppText>
 
-    <input v-model="recipe.name" placeholder="Navn" />
-    <textarea v-model="recipe.description" placeholder="Beskrivelse"></textarea>
-    <textarea v-model="recipe.instructions" placeholder="Instruktioner"></textarea>
-    <input v-model="recipe.mealType" placeholder="Meal type" />
-    <input type="number" v-model="recipe.servings" placeholder="Portioner" />
-    <input type="number" v-model="recipe.prepTimeMinutes" placeholder="Tilberedningstid (min)" />
+    <AppInput v-model="recipe.name" placeholder="Navn" />
+    <AppInput type="textarea" v-model="recipe.description" placeholder="Beskrivelse" />
+    <AppInput type="textarea" v-model="recipe.instructions" placeholder="Instruktioner" />
+    <AppInput v-model="recipe.mealType" placeholder="Meal type" />
+    <AppInput type="number" min="0" v-model="recipe.servings" placeholder="Portioner" />
+    <AppInput type="number" min="0" v-model="recipe.prepTimeMinutes" placeholder="Tilberedningstid (min)" />
 
-    <button @click="createRecipe">Opret</button>
+    <AppButton variant="primary" @click="createRecipe">Opret</AppButton>
   </div>
 </template>
 
@@ -67,16 +56,5 @@ async function createRecipe() {
   max-width: 600px;
   margin: 0 auto;
   padding: 20px;
-}
-input,
-textarea {
-  display: block;
-  width: 100%;
-  margin-bottom: 12px;
-  padding: 8px;
-}
-button {
-  padding: 10px 16px;
-  cursor: pointer;
 }
 </style>
