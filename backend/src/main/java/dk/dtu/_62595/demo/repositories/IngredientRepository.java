@@ -20,4 +20,19 @@ public interface IngredientRepository extends Repository<Ingredient, UUID> {
 
     // Derived queries
     Optional<Ingredient> findByName(String name);
+    @org.springframework.data.jpa.repository.Query(
+        """
+        SELECT i FROM Ingredient i
+        WHERE LOWER(i.name) LIKE LOWER(CONCAT('%', :query, '%'))
+        ORDER BY
+            CASE
+                WHEN LOWER(i.name) = LOWER(:query)                    THEN 0
+                WHEN LOWER(i.name) LIKE LOWER(CONCAT(:query, '%'))    THEN 1
+                ELSE                                                       2
+            END,
+            i.name
+        LIMIT 20
+        """
+    )
+    List<Ingredient> searchByRelevance(String query);
 }

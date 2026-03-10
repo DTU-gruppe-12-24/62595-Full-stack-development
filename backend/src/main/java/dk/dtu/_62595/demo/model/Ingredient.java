@@ -16,7 +16,15 @@ public class Ingredient {
 	private String name;
 
 	private Float calories;
+	private Float protein;
+	private Float carbohydrates;
+	private Float fat;
 
+	@Column(name = "saturated_fat")
+	private Float saturatedFat;
+
+	private Float sugars;
+	private Float salt;
 	private Float price;
 
 	public Ingredient() {}
@@ -28,19 +36,14 @@ public class Ingredient {
 		this.price = price;
 	}
 
-	public UUID getId() {
-		return id;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public Float getCalories() {
-		return calories;
-	}
-
-	public Float getPrice() {
-		return price;
-	}
+	public UUID getId() { return id; }
+	public String getName() { return name; }
+	public Float getCalories() { return calories; }
+	public Float getProtein() { return protein; }
+	public Float getCarbohydrates() { return carbohydrates; }
+	public Float getFat() { return fat; }
+	public Float getSaturatedFat() { return saturatedFat; }
+	public Float getSugars() { return sugars; }
+	public Float getSalt() { return salt; }
+	public Float getPrice() { return price; }
 }
