@@ -1,4 +1,4 @@
-import { getToken } from '@/services/authService'
+import { getToken, clearToken } from '@/services/authService'
 
 export async function apiFetch<ResultType, BodyType = undefined>(url: string, method: "GET" | "POST" | "PUT" | "DELETE" = "GET", body?: BodyType) : Promise<ResultType> {
 	const token = getToken()
@@ -16,6 +16,11 @@ export async function apiFetch<ResultType, BodyType = undefined>(url: string, me
 		}
 	)
 		.then(async (response) => {
+			if (response.status === 401) {
+				clearToken()
+				window.location.href = '/sign-in'
+				throw new Error('Session expired. Please sign in again.')
+			}
 			if (response.status < 200 || response.status > 299) throw new Error(await response.text());
 			const contentType = response.headers.get("content-type");
 			if (contentType == "application/json") return response.json();

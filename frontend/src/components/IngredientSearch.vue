@@ -14,7 +14,7 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  (e: 'update:modelValue', value: IngredientResult | null): void
+  'update:modelValue': [value: IngredientResult | null]
 }>()
 
 const query = ref(props.modelValue?.ingredientName ?? '')
@@ -65,15 +65,19 @@ function onBlur() {
 
 <template>
   <div class="ingredient-search">
-    <label v-if="label" class="label">{{ label }}</label>
+    <label v-if="label" class="label" for="ingredient-search-input">{{ label }}</label>
 
     <div class="input-wrap">
       <input
+        id="ingredient-search-input"
         class="input"
         type="text"
         :placeholder="placeholder ?? 'Search ingredients…'"
         :value="query"
         autocomplete="off"
+        aria-autocomplete="list"
+        :aria-expanded="showSuggestions && suggestions.length > 0"
+        aria-controls="ingredient-suggestions"
         @input="query = ($event.target as HTMLInputElement).value; onInput()"
         @blur="onBlur"
         @focus="showSuggestions = true"
@@ -81,26 +85,25 @@ function onBlur() {
 
       <ul
         v-if="showSuggestions && suggestions.length > 0"
+        id="ingredient-suggestions"
         class="suggestions"
-        role="listbox"
       >
         <li
           v-for="s in suggestions"
           :key="s.ingredientId"
           class="suggestion-item"
-          role="option"
           @mousedown.prevent="select(s)"
         >
           {{ s.ingredientName }}
         </li>
       </ul>
 
-      <div
+      <p
         v-if="showSuggestions && query.trim() && suggestions.length === 0"
         class="no-results"
       >
-        No match — "{{ query }}" will be created as a new ingredient
-      </div>
+        "{{ query }}" is not a recognised ingredient
+      </p>
     </div>
   </div>
 </template>
@@ -178,6 +181,7 @@ function onBlur() {
   padding: 9px 14px;
   font-size: 13px;
   color: #888;
+  margin: 0;
   z-index: 200;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
 }
