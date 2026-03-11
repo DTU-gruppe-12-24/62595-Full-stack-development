@@ -54,11 +54,11 @@ public class UserService {
         return new AuthResponse(token, user.getId(), user.getName(), user.getEmail());
     }
 
-    public Optional<User> findUser(String email) {
+    public Optional<User> find(String email) {
     	return userRepository.findByEmail(email);
     }
 
-    public Optional<User> findUser(UUID id) {
+    public Optional<User> find(UUID id) {
     	return userRepository.findById(id);
     }
 }

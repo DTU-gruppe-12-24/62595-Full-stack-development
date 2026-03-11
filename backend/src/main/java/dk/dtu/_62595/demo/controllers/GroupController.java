@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import dk.dtu._62595.demo.dto.MyGroupResponse;
 import dk.dtu._62595.demo.dto.MyGroupsResponse;
@@ -27,40 +28,18 @@ import dk.dtu._62595.demo.model.User;
 import dk.dtu._62595.demo.services.GroupService;
 import dk.dtu._62595.demo.services.UserService;
 
-import org.springframework.web.server.ResponseStatusException;
-
 @RestController
 @RequestMapping(value = "/api/group", consumes = { "application/xml", "application/json" })
 public class GroupController {
 	@Autowired
-	UserService userService;
+	AuthController authController;
 
 	@Autowired
 	GroupService groupService;
 
-	private User getCurrentUser() {
-		var authentication = SecurityContextHolder.getContext().getAuthentication();
-
-		if (authentication == null || authentication.getPrincipal() == null) {
-			throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "No active session found");
-		}
-
-		Object principal = authentication.getPrincipal();
-		String email;
-
-		if (principal instanceof UserDetails userDetails) {
-			email = userDetails.getUsername();
-		} else {
-			email = principal.toString();
-		}
-
-		return userService.findUser(email)
-				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User record not found in database"));
-	}
-
 	@PostMapping
 	public Group create(@RequestBody Group group) {
-		return groupService.createGroup(group.getName(), getCurrentUser());
+		return groupService.createGroup(group.getName(), authController.getLoggedInUser());
 	}
 
 	@PutMapping("/{groupId}")
@@ -89,8 +68,7 @@ public class GroupController {
 
 	@GetMapping("/me")
 	public List<MyGroupResponse> getMyGroups() {
-		User user = getCurrentUser();
-		return groupService.getGroupsForUser(user)
+		return groupService.getGroupsForUser(authController.getLoggedInUser())
 			.stream()
 			.map(group -> new MyGroupResponse(group, groupService.getRole(group, user)))
 			.toList();

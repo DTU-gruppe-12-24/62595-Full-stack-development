@@ -1,14 +1,16 @@
 <script setup lang="ts">
 
 defineProps<{
-  modelValue?: string
+  modelValue?: unknown
   placeholder?: string
   label?: string
   type?: string
+  min?: string
+  max?: string
 }>()
 
 const emit = defineEmits<{
-  (e: "update:modelValue", value: string): void
+  (e: "update:modelValue", value: unknown): void
 }>()
 
 function onInput(event: Event) {
@@ -28,6 +30,8 @@ function onInput(event: Event) {
         :type="type || 'text'"
         :placeholder="placeholder"
         :value="modelValue"
+        :min="min"
+        :max="max"
         @input="onInput"
     />
   </div>
