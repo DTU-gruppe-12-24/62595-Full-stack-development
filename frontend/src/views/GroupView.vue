@@ -64,7 +64,7 @@
 							:disabled="member.role == 'OWNER' || !allowEdit"
 							v-on:change="() => updateMemberRole(member)"
 						/>
-						<AppButton variant="ghost" @click="() => removeMember(member)" v-if="allowEdit">
+						<AppButton variant="ghost" @click="() => removeMember(member)" v-if="allowEdit && member.role != 'OWNER'">
 							<font-awesome-icon icon="fa-solid fa-right-from-bracket" />
 						</AppButton>
 					</div>
@@ -186,7 +186,7 @@ function inviteMember() {
     const group = groupBeingShown.value!;
     apiFetch<boolean>(`/api/group/${group.id}/invite/${inviteEmail.value}`, "POST")
 		.then((response) => {
-		    if (response) apiFetch<GroupMember[]>(`/api/group/${group.id}/members`)
+			if (response) apiFetch<GroupMember[]>(`/api/group/${group.id}/members`)
                             .then((members) => {
                                 groupMembers.value[group.id] = members
                                 inviteEmail.value = ""
@@ -200,7 +200,7 @@ function inviteMember() {
 function updateMemberRole(member: GroupMember) {
     apiFetch<GroupMember[], [{user: User, role: GroupMember["role"]}]>(`/api/group/${member.group.id}/members`, "POST", [member])
 		.then((response) => {
-		    groupMembers.value[member.group.id] = response
+			groupMembers.value[member.group.id] = response
 		})
 		.catch((error) => { console.error(error); });
 }

@@ -7,8 +7,6 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authorization.AuthorizationDeniedException;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -21,7 +19,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import dk.dtu._62595.demo.dto.MyGroupResponse;
-import dk.dtu._62595.demo.dto.MyGroupsResponse;
 import dk.dtu._62595.demo.model.Group;
 import dk.dtu._62595.demo.model.GroupMember;
 import dk.dtu._62595.demo.model.User;
@@ -33,9 +30,10 @@ import dk.dtu._62595.demo.services.UserService;
 public class GroupController {
 	@Autowired
 	AuthController authController;
-
 	@Autowired
 	GroupService groupService;
+	@Autowired
+	UserService userService;
 
 	@PostMapping
 	public Group create(@RequestBody Group group) {
@@ -45,7 +43,7 @@ public class GroupController {
 	@PutMapping("/{groupId}")
 	public Group update(@PathVariable UUID groupId, @RequestBody Group group) {
 		Group currentGroup = groupService.getGroupById(groupId);
-		User currentUser = getCurrentUser();
+		User currentUser = authController.getLoggedInUser();
 		if (!groupService.canUserEditGroup(currentGroup, currentUser)) throw new AuthorizationDeniedException("You do not have permission to edit this group!");
 		return groupService.updateGroup(groupId, group.getName());
 	}
@@ -53,7 +51,7 @@ public class GroupController {
 	@DeleteMapping("/{groupId}")
 	public void delete(@PathVariable UUID groupId) {
 		Group currentGroup = groupService.getGroupById(groupId);
-		User currentUser = getCurrentUser();
+		User currentUser = authController.getLoggedInUser();
 		if (!groupService.canUserEditGroup(currentGroup, currentUser)) throw new AuthorizationDeniedException("You do not have permission to delete this group!");
 		groupService.deleteGroup(groupId);
 	}
@@ -61,14 +59,15 @@ public class GroupController {
 	@GetMapping("/{groupId}")
 	public Group getById(@PathVariable UUID groupId) {
 		Group group = groupService.getGroupById(groupId);
-		User currentUser = getCurrentUser();
+		User currentUser = authController.getLoggedInUser();
 		if (!groupService.canUserViewGroup(group, currentUser)) throw new AuthorizationDeniedException("You do not have permission to view this group!");
 		return group;
 	}
 
 	@GetMapping("/me")
 	public List<MyGroupResponse> getMyGroups() {
-		return groupService.getGroupsForUser(authController.getLoggedInUser())
+		User user = authController.getLoggedInUser();
+		return groupService.getGroupsForUser(user)
 			.stream()
 			.map(group -> new MyGroupResponse(group, groupService.getRole(group, user)))
 			.toList();
@@ -77,7 +76,7 @@ public class GroupController {
 	@GetMapping("/{groupId}/members")
 	public List<GroupMember> getMembersById(@PathVariable UUID groupId) {
 		Group group = groupService.getGroupById(groupId);
-		User currentUser = getCurrentUser();
+		User currentUser = authController.getLoggedInUser();
 		if (!groupService.canUserViewGroup(group, currentUser)) throw new AuthorizationDeniedException("You do not have permission to view this group!");
 		return groupService.getGroupMembers(group);
 	}
@@ -85,7 +84,7 @@ public class GroupController {
 	@PostMapping("/{groupId}/members")
 	public List<GroupMember> updateMembersById(@PathVariable UUID groupId, @RequestBody List<GroupMember> members) {
 		Group group = groupService.getGroupById(groupId);
-		User currentUser = getCurrentUser();
+		User currentUser = authController.getLoggedInUser();
 		if (!groupService.canUserEditGroup(group, currentUser)) throw new AuthorizationDeniedException("You do not have permission to edit this group!");
 
 		members.forEach(member -> {
@@ -104,11 +103,11 @@ public class GroupController {
 
 	@PostMapping("/{groupId}/invite/{email}")
 	public boolean inviteMember(@PathVariable UUID groupId, @PathVariable String email, @RequestParam(required = false) GroupMember.Role role) {
-		User currentUser = getCurrentUser();
+		User currentUser = authController.getLoggedInUser();
 		Group group = groupService.getGroupById(groupId);
 		if (!groupService.canUserEditGroup(group, currentUser)) throw new AuthorizationDeniedException("You do not have permission to edit this group!");
 
-		User invitedUser = userService.findUser(email).orElse(null);
+		User invitedUser = userService.find(email).orElse(null);
 		if (invitedUser == null) return false; // User with the given email does not exist
 
 		if (groupService.canUserViewGroup(group, invitedUser)) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User is already a member of the group.");
@@ -119,9 +118,9 @@ public class GroupController {
 
 	@DeleteMapping("/{groupId}/members/{userId}")
 	public void removeMember(@PathVariable UUID groupId, @PathVariable UUID userId) {
-		User currentUser = getCurrentUser();
+		User currentUser = authController.getLoggedInUser();
 		Group group = groupService.getGroupById(groupId);
-		User userToRemove = userService.findUser(userId).orElseThrow();
+		User userToRemove = userService.find(userId).orElseThrow();
 
 		GroupMember.Role ownRole = groupService.getRole(group, currentUser);
 		GroupMember.Role removeRole = groupService.getRole(group, userToRemove);
