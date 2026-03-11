@@ -3,8 +3,6 @@ package dk.dtu._62595.demo.model;
 import java.io.Serializable;
 import java.util.UUID;
 
-import org.hibernate.annotations.Type;
-
 import jakarta.persistence.*;
 
 import java.util.Objects;
@@ -22,7 +20,7 @@ public class GroupMember {
 	private User user;
 
 	@MapsId("groupId")
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "group_id", columnDefinition = "CHAR(36)")
 	private Group group;
 

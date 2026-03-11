@@ -14,7 +14,7 @@
 				<AppButton variant="secondary" @click="() => openEditDialog(group.group, true)">
 					Edit
 				</AppButton>
-				<AppButton variant="cancel" @click="() => { showConfirmDeleteDialog = true; groupBeingDeleted = group.group; }">
+				<AppButton variant="cancel" @click="() => { showConfirmDeleteDialog = true; groupBeingDeleted = group.group; }" v-on:click.stop>
 					Delete
 				</AppButton>
 			</div>

@@ -79,7 +79,6 @@ public class GroupService {
 		}
 	}
 
-	@Transactional
 	public boolean canUserViewGroup(Group group, User user) {
 		Optional<GroupMember> member = groupMemberRepository.findById(new GroupMember.GroupMemberId(user.getId(), group.getId()));
 		return member.isPresent();
