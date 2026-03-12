@@ -37,7 +37,7 @@ async function createRecipe() {
     })
 
     if (!response.ok) {
-      throw new Error("Kunne ikke oprette opskrift")
+      throw new Error("Could not create recipe")
     }
 
     router.push("/")
@@ -49,16 +49,16 @@ async function createRecipe() {
 
 <template>
   <div class="page">
-    <h1>Opret opskrift</h1>
+    <h1>Create recipe</h1>
 
-    <input v-model="recipe.name" placeholder="Navn" />
-    <textarea v-model="recipe.description" placeholder="Beskrivelse"></textarea>
-    <textarea v-model="recipe.instructions" placeholder="Instruktioner"></textarea>
+    <input v-model="recipe.name" placeholder="Name" />
+    <textarea v-model="recipe.description" placeholder="Description"></textarea>
+    <textarea v-model="recipe.instructions" placeholder="Instructions"></textarea>
     <input v-model="recipe.mealType" placeholder="Meal type" />
-    <input type="number" v-model="recipe.servings" placeholder="Portioner" />
-    <input type="number" v-model="recipe.prepTimeMinutes" placeholder="Tilberedningstid (min)" />
+    <input type="number" v-model="recipe.servings" placeholder="Portions" />
+    <input type="number" v-model="recipe.prepTimeMinutes" placeholder="Cooking time (min)" />
 
-    <button @click="createRecipe">Opret</button>
+    <button @click="createRecipe">Create</button>
   </div>
 </template>
 

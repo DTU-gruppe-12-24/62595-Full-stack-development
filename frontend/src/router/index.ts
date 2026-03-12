@@ -52,22 +52,22 @@ const router = createRouter({
     },
 
     {
+      path: "/recipes",
+      name: "recipes",
+      component: () => import("../views/RecipesView.vue")  // the list page
+    },
+
+    {
       path: "/recipes/create",
-      name: 'recipes',
+      name: "recipeCreate",
       component: () => import("../views/CreateRecipeView.vue")
     },
 
     {
       path: "/recipes/:id/edit",
-      name: 'recipeEdit',
+      name: "recipeEdit",
       component: () => import("../views/EditRecipesView.vue")
     },
-
-    {
-      path: "/recipes",
-      name: "recipes",
-      component: () => import("../views/EditRecipesView.vue")
-    }
   ],
 })
 // Nav guard
