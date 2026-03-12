@@ -1,43 +1,36 @@
-<script setup lang="ts">
-import { ref, onMounted } from "vue"
-
-const recipes = ref<any[]>([])
-
-onMounted(async () => {
-  const response = await fetch("http://localhost:8080/api/recipes")
-  const data = await response.json()
-  recipes.value = data
-})
-</script>
-
 <template>
   <div class="page">
-    <h1>Opskrifter</h1>
+    <h1>Recipes</h1>
 
-    <div v-if="recipes.length === 0">
-      Ingen opskrifter endnu.
-    </div>
+    <button @click="openDialog">
+      Show recipes
+    </button>
 
-    <div v-for="recipe in recipes" :key="recipe.id" class="card">
-      <h2>{{ recipe.name }}</h2>
-      <p>{{ recipe.description }}</p>
+    <div v-if="showDialog" class="modal-overlay">
+      <div class="modal">
 
-      <router-link :to="`/recipes/${recipe.id}/edit`">
-        Rediger
-      </router-link>
+        <button class="close" @click="closeDialog">
+          Close
+        </button>
+
+        <h2>Recipes</h2>
+
+        <div v-if="recipes.length === 0">
+          No recipes yet
+        </div>
+
+        <div class="recipe-list">
+          <div v-for="recipe in recipes" :key="recipe.id" class="card">
+            <h2>{{ recipe.name }}</h2>
+            <p>{{ recipe.description }}</p>
+
+            <router-link :to="`/recipes/${recipe.id}/edit`">
+              Edit
+            </router-link>
+          </div>
+        </div>
+
+      </div>
     </div>
   </div>
 </template>
-
-<style scoped>
-.page {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 20px;
-}
-.card {
-  border: 1px solid #ddd;
-  padding: 16px;
-  margin-bottom: 16px;
-}
-</style>
