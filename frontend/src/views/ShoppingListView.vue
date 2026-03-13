@@ -138,6 +138,61 @@ async function submitAddItem() {
 
 const showAddRecipeDialog = ref(false)
 const showGenerateDialog = ref(false)
+
+// Add custom ingredient dialog
+const showCustomIngredientDialog = ref(false)
+const customIngredientError = ref('')
+const customIngredientSuccess = ref('')
+const customIngredient = ref({
+  name: '',
+  calories: '' as number | '',
+  protein: '' as number | '',
+  carbohydrates: '' as number | '',
+  fat: '' as number | '',
+  saturatedFat: '' as number | '',
+  sugars: '' as number | '',
+  salt: '' as number | '',
+  price: '' as number | '',
+})
+
+function openCustomIngredientDialog() {
+  customIngredient.value = {
+    name: '', calories: '', protein: '', carbohydrates: '',
+    fat: '', saturatedFat: '', sugars: '', salt: '', price: ''
+  }
+  customIngredientError.value = ''
+  customIngredientSuccess.value = ''
+  showCustomIngredientDialog.value = true
+}
+
+function toOptionalFloat(val: number | ''): number | null {
+  return val === '' ? null : Number(val)
+}
+
+async function submitCustomIngredient() {
+  customIngredientError.value = ''
+  customIngredientSuccess.value = ''
+  const name = customIngredient.value.name.trim()
+  if (!name) { customIngredientError.value = 'Please enter an ingredient name.'; return }
+
+  try {
+    await apiFetch('/api/ingredients', 'POST', {
+      name,
+      calories:      toOptionalFloat(customIngredient.value.calories),
+      protein:       toOptionalFloat(customIngredient.value.protein),
+      carbohydrates: toOptionalFloat(customIngredient.value.carbohydrates),
+      fat:           toOptionalFloat(customIngredient.value.fat),
+      saturatedFat:  toOptionalFloat(customIngredient.value.saturatedFat),
+      sugars:        toOptionalFloat(customIngredient.value.sugars),
+      salt:          toOptionalFloat(customIngredient.value.salt),
+      price:         toOptionalFloat(customIngredient.value.price),
+    })
+    customIngredientSuccess.value = `"${name}" has been added to the database.`
+    customIngredient.value.name = ''
+  } catch (e) {
+    customIngredientError.value = e instanceof Error ? e.message : 'Failed to add ingredient.'
+  }
+}
 </script>
 
 <template>
@@ -224,7 +279,53 @@ const showGenerateDialog = ref(false)
       </template>
     </AppDialog>
 
+    <!-- Add custom ingredient button, shown outside the group guard -->
+    <AppSection>
+      <template #title>Database</template>
+      <AppCard>
+        <p style="font-size:14px;color:#888;margin:0 0 12px;">
+          Can't find an ingredient in the search? Add it to the database here.
+        </p>
+        <AppButton variant="secondary" @click="openCustomIngredientDialog">
+          Add custom ingredient
+        </AppButton>
+      </AppCard>
+    </AppSection>
+
   </AppContainer>
+
+  <!-- Add custom ingredient dialog -->
+  <AppDialog v-model="showCustomIngredientDialog" title="Add custom ingredient" width="560px">
+    <div class="dialog-form">
+      <AppInput v-model="customIngredient.name" label="Name" placeholder="e.g. Dragon fruit" />
+
+      <p class="section-label">Nutritional values per 100g (optional)</p>
+
+      <div class="amount-row">
+        <AppInput v-model="customIngredient.calories"      label="Calories (kcal)" type="number" placeholder="e.g. 52" />
+        <AppInput v-model="customIngredient.protein"       label="Protein (g)"     type="number" placeholder="e.g. 0.3" />
+      </div>
+      <div class="amount-row">
+        <AppInput v-model="customIngredient.carbohydrates" label="Carbs (g)"       type="number" placeholder="e.g. 14" />
+        <AppInput v-model="customIngredient.sugars"        label="Sugars (g)"      type="number" placeholder="e.g. 10" />
+      </div>
+      <div class="amount-row">
+        <AppInput v-model="customIngredient.fat"           label="Fat (g)"         type="number" placeholder="e.g. 0.2" />
+        <AppInput v-model="customIngredient.saturatedFat"  label="Saturated fat (g)" type="number" placeholder="e.g. 0.1" />
+      </div>
+      <div class="amount-row">
+        <AppInput v-model="customIngredient.salt"          label="Salt (g)"        type="number" placeholder="e.g. 0.01" />
+        <AppInput v-model="customIngredient.price"         label="Price (DKK)"     type="number" placeholder="e.g. 12.50" />
+      </div>
+
+      <p v-if="customIngredientError" class="error-text">{{ customIngredientError }}</p>
+      <p v-if="customIngredientSuccess" class="success-text">{{ customIngredientSuccess }}</p>
+    </div>
+    <template #footer>
+      <AppButton variant="cancel" @click="showCustomIngredientDialog = false">Close</AppButton>
+      <AppButton variant="primary" @click="submitCustomIngredient">Add</AppButton>
+    </template>
+  </AppDialog>
 </template>
 
 <style scoped>
@@ -267,4 +368,6 @@ const showGenerateDialog = ref(false)
 .amount-row > * { flex: 1; }
 
 .error-text { color: #c0392b; font-size: 0.875rem; margin: 0; }
+.success-text { color: #27ae60; font-size: 0.875rem; margin: 0; }
+.section-label { font-size: 13px; font-weight: 500; color: var(--color-secondary); margin: 4px 0 0; }
 </style>
