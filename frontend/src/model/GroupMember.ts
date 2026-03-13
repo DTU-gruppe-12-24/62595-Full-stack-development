@@ -8,5 +8,5 @@ export type GroupMember = {
 	};
 	user: User;
 	group: Group;
-	role?: string;
+	role: "OWNER" | "ADMIN" | "MEMBER";
 };

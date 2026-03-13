@@ -3,8 +3,8 @@ package dk.dtu._62595.demo.controllers;
 import dk.dtu._62595.demo.dto.AuthResponse;
 import dk.dtu._62595.demo.dto.LoginRequest;
 import dk.dtu._62595.demo.dto.RegisterRequest;
-import dk.dtu._62595.demo.model.User;
 import dk.dtu._62595.demo.services.UserService;
+import dk.dtu._62595.demo.model.User;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
