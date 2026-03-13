@@ -1,6 +1,6 @@
 import { getToken, clearToken } from '@/services/authService'
 
-export async function apiFetch<ResultType, BodyType = undefined>(url: string, method: "GET" | "POST" | "PUT" | "DELETE" = "GET", body?: BodyType) : Promise<ResultType> {
+export async function apiFetch<ResultType, BodyType = undefined>(url: string, method: "GET" | "POST" | "PUT" | "DELETE" | "PATCH" = "GET", body?: BodyType) : Promise<ResultType> {
 	const token = getToken()
 
 	return fetch(
