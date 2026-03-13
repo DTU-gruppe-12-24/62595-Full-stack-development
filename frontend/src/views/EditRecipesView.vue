@@ -1,4 +1,11 @@
 <script setup lang="ts">
+import AppButton from "@/components/AppButton.vue"
+import AppInput from "@/components/AppInput.vue"
+import AppText from "@/components/AppText.vue"
+
+import type { Recipe } from "@/model/Recipe"
+import { apiFetch } from "@/utilities/apiFetch"
+
 import { ref, onMounted } from "vue"
 import { useRoute, useRouter } from "vue-router"
 
@@ -17,14 +24,15 @@ const isSaving = ref(false)
 const errorMessage = ref("")
 
 const recipe = ref({
+const recipe = ref<Partial<Recipe>>({
   name: "",
   description: "",
   instructions: "",
   mealType: "",
-  servings: null as number | null,
-  prepTimeMinutes: null as number | null,
-  imageUrl: null as string | null,
-  lastMade: null as string | null
+  servings: undefined,
+  prepTimeMinutes: undefined,
+  imageUrl: undefined,
+  lastMade: undefined
 })
 
 onMounted(async () => {
@@ -73,6 +81,15 @@ async function updateRecipe() {
   } finally {
     isSaving.value = false
   }
+    apiFetch<typeof recipe.value>(`/api/recipes/${recipeId}`)
+        .then((result) => recipe.value = result)
+        .catch(() => console.error("Kunne ikke finde opskrift"))
+})
+
+async function updateRecipe() {
+    await apiFetch(`/api/recipes/${recipeId}`, "PUT", recipe.value)
+        .then(() => router.push("/"))
+        .catch(() => console.error("Kunne ikke opdatere opskrift"));
 }
 </script>
 
@@ -138,6 +155,18 @@ async function updateRecipe() {
         </AppButton>
       </template>
     </AppCard>
+    <AppText variant="title" tag="h1">Rediger opskrift</AppText>
+
+    <AppInput v-model="recipe.name" placeholder="Navn" />
+    <AppInput type="textarea" v-model="recipe.description" placeholder="Beskrivelse" />
+    <AppInput type="textarea" v-model="recipe.instructions" placeholder="Instruktioner" />
+    <AppInput v-model="recipe.mealType" placeholder="Meal type" />
+    <AppInput type="number" v-model="recipe.servings" placeholder="Portioner" />
+    <AppInput type="number" v-model="recipe.prepTimeMinutes" placeholder="Tilberedningstid (min)" />
+
+    <AppButton @click="updateRecipe">
+      Gem ændringer
+    </AppButton>
   </div>
 </template>
 

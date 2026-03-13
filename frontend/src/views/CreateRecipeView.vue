@@ -1,4 +1,8 @@
 <script setup lang="ts">
+import AppButton from "@/components/AppButton.vue"
+import AppInput from "@/components/AppInput.vue"
+import AppText from "@/components/AppText.vue"
+import { apiFetch } from "@/utilities/apiFetch"
 import { ref } from "vue"
 import { useRouter } from "vue-router"
 
@@ -54,6 +58,19 @@ async function createRecipe() {
   } finally {
     isLoading.value = false
   }
+    await apiFetch("/api/recipes", "POST", {
+        group: null,
+        name: recipe.value.name,
+        description: recipe.value.description,
+        instructions: recipe.value.instructions,
+        mealType: recipe.value.mealType,
+        servings: recipe.value.servings,
+        prepTimeMinutes: recipe.value.prepTimeMinutes,
+        imageUrl: null,
+        lastMade: null
+    })
+        .then(() => router.push("/"))
+        .catch(() => console.error("Kunne ikke oprette opskrift"))
 }
 </script>
 
@@ -121,6 +138,16 @@ async function createRecipe() {
 
     </AppCard>
 
+    <AppText variant="title" tag="h1">Opret opskrift</AppText>
+
+    <AppInput v-model="recipe.name" placeholder="Navn" />
+    <AppInput type="textarea" v-model="recipe.description" placeholder="Beskrivelse" />
+    <AppInput type="textarea" v-model="recipe.instructions" placeholder="Instruktioner" />
+    <AppInput v-model="recipe.mealType" placeholder="Meal type" />
+    <AppInput type="number" min="0" v-model="recipe.servings" placeholder="Portioner" />
+    <AppInput type="number" min="0" v-model="recipe.prepTimeMinutes" placeholder="Tilberedningstid (min)" />
+
+    <AppButton variant="primary" @click="createRecipe">Opret</AppButton>
   </div>
 </template>
 

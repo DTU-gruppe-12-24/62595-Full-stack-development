@@ -1,3 +1,5 @@
+import { apiFetch } from "@/utilities/apiFetch"
+
 const BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8080'
 
 export interface AuthResponse {
@@ -35,30 +37,14 @@ function storeAuth(res: AuthResponse): void {
 
 // API calls
 
-async function post<T>(path: string, body: object): Promise<T> {
-    const response = await fetch(`${BASE_URL}${path}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-    })
-
-    const data = await response.json()
-
-    if (!response.ok) {
-        throw new Error(data.error ?? 'An unexpected error occurred.')
-    }
-
-    return data as T
-}
-
 export async function register(name: string, email: string, password: string): Promise<AuthResponse> {
-    const res = await post<AuthResponse>('/api/auth/register', { name, email, password })
+    const res = await apiFetch<AuthResponse, { name: string, email: string, password: string }>('/api/auth/register', "POST", { name, email, password })
     storeAuth(res)
     return res
 }
 
 export async function login(email: string, password: string): Promise<AuthResponse> {
-    const res = await post<AuthResponse>('/api/auth/login', { email, password })
+    const res = await apiFetch<AuthResponse, { email: string, password: string }>('/api/auth/login', "POST", { email, password })
     storeAuth(res)
     return res
 }
@@ -66,10 +52,7 @@ export async function login(email: string, password: string): Promise<AuthRespon
 export async function logout(): Promise<void> {
     const token = getToken()
     if (token) {
-        await fetch(`${BASE_URL}/api/auth/logout`, {
-            method: 'POST',
-            headers: { Authorization: `Bearer ${token}` },
-        }).catch(() => {})
+        await apiFetch(`${BASE_URL}/api/auth/logout`, 'POST').catch(() => {})
     }
     clearToken()
 }

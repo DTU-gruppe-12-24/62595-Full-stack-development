@@ -9,6 +9,11 @@ import dk.dtu._62595.demo.repositories.RecipeRepository;
 import dk.dtu._62595.demo.repositories.UserRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
+import dk.dtu._62595.demo.model.Group;
+import dk.dtu._62595.demo.repositories.RecipeRepository;
+import dk.dtu._62595.demo.services.GroupService;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -20,7 +25,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/recipes")
+@RequestMapping(value = "/api/recipes", consumes = { "application/xml", "application/json" })
 public class RecipeController {
 
     private final RecipeRepository recipeRepository;
@@ -59,6 +64,23 @@ public class RecipeController {
             group = groupRepository.findById(request.getGroupId())
                     .orElseThrow(() ->
                             new ResponseStatusException(HttpStatus.NOT_FOUND, "Group not found"));
+	@Autowired
+    private RecipeRepository recipeRepository;
+    @Autowired
+    private GroupService groupService;
+    @Autowired
+	AuthController authController;
+
+    @PostMapping
+    @Transactional
+    public Recipe createRecipe(@RequestBody Recipe recipeRequest) {
+
+        User owner = authController.getLoggedInUser();
+
+        Group group = null;
+
+        if (recipeRequest.getGroup() != null) {
+            group = groupService.getGroupById(recipeRequest.getGroup().getId());
         }
 
         Recipe recipe = new Recipe(

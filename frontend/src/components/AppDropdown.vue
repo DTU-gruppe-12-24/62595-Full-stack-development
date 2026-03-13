@@ -1,16 +1,15 @@
 <script setup lang="ts">
 
-defineProps<{
-  modelValue?: unknown
+const props = defineProps<{
+  modelValue?: string
+  values: string[]
   placeholder?: string
   label?: string
-  type?: string
-  min?: string
-  max?: string
+  disabled?: boolean
 }>()
 
 const emit = defineEmits<{
-  (e: "update:modelValue", value: unknown): void
+  (e: "update:modelValue", value: string): void
 }>()
 
 function onInput(event: Event) {
@@ -25,15 +24,16 @@ function onInput(event: Event) {
       {{ label }}
     </label>
 
-    <input
-        class="input"
-        :type="type || 'text'"
-        :placeholder="placeholder"
-        :value="modelValue"
-        :min="min"
-        :max="max"
-        @input="onInput"
-    />
+    <select
+    	class="input"
+	    :placeholder="placeholder"
+	    :value="modelValue"
+	    @input="onInput"
+		:disabled="disabled"
+    >
+    	<option v-if="modelValue && !values.includes(modelValue)" :value="modelValue">{{modelValue}}</option>
+    	<option v-for="value in values" :value="value">{{value}}</option>
+    </select>
   </div>
 </template>
 
@@ -62,5 +62,11 @@ function onInput(event: Event) {
 .input:focus {
   border-color: var(--color-primary);
   box-shadow: 0 0 0 3px rgba(243, 114, 44, 0.2);
+}
+
+.input:disabled {
+	border-color: var(--color-text-light);
+	background-color: var(--color-gray-300);
+	cursor: not-allowed;
 }
 </style>
