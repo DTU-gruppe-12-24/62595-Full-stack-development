@@ -2,9 +2,16 @@
 import { ref } from "vue"
 import { useRouter } from "vue-router"
 
+import AppCard from "@/components/AppCard.vue"
+import AppButton from "@/components/AppButton.vue"
+import AppInput from "@/components/AppInput.vue"
+
+import { apiFetch } from "@/utilities/apiFetch.ts";
+
 const router = useRouter()
 
-const ownerId = "PUT-UUID-HERE"
+const isLoading = ref(false)
+const errorMessage = ref("")
 
 const recipe = ref({
   name: "",
@@ -16,67 +23,118 @@ const recipe = ref({
 })
 
 async function createRecipe() {
+  errorMessage.value = ""
+
+  if (!recipe.value.name.trim()) {
+    errorMessage.value = "Name is required"
+    return
+  }
+
+  isLoading.value = true
+
   try {
-    const response = await fetch("http://localhost:8080/api/recipes", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        owner: { id: ownerId },
-        group: null,
-        name: recipe.value.name,
-        description: recipe.value.description,
-        instructions: recipe.value.instructions,
-        mealType: recipe.value.mealType,
-        servings: recipe.value.servings,
-        prepTimeMinutes: recipe.value.prepTimeMinutes,
-        imageUrl: null,
-        lastMade: null
-      })
+    await apiFetch("/api/recipes", "POST", {
+      name: recipe.value.name,
+      description: recipe.value.description,
+      instructions: recipe.value.instructions,
+      mealType: recipe.value.mealType,
+      servings: recipe.value.servings,
+      prepTimeMinutes: recipe.value.prepTimeMinutes,
+      imageUrl: null,
+      lastMade: null,
+      groupId: null
     })
 
-    if (!response.ok) {
-      throw new Error("Could not create recipe")
-    }
+    router.push("/recipes")
 
-    router.push("/")
-  } catch (error) {
+  } catch (error: any) {
+    errorMessage.value = error.message || "Something went wrong"
     console.error(error)
+
+  } finally {
+    isLoading.value = false
   }
 }
 </script>
 
 <template>
   <div class="page">
-    <h1>Create recipe</h1>
 
-    <input v-model="recipe.name" placeholder="Name" />
-    <textarea v-model="recipe.description" placeholder="Description"></textarea>
-    <textarea v-model="recipe.instructions" placeholder="Instructions"></textarea>
-    <input v-model="recipe.mealType" placeholder="Meal type" />
-    <input type="number" v-model="recipe.servings" placeholder="Portions" />
-    <input type="number" v-model="recipe.prepTimeMinutes" placeholder="Cooking time (min)" />
+    <h1>Create Recipe</h1>
 
-    <button @click="createRecipe">Create</button>
+    <AppCard>
+
+      <p v-if="errorMessage" class="error">
+        {{ errorMessage }}
+      </p>
+
+      <AppInput
+          v-model="recipe.name"
+          placeholder="Recipe name"
+      />
+
+      <AppInput
+          v-model="recipe.description"
+          placeholder="Description"
+      />
+
+      <AppInput
+          v-model="recipe.instructions"
+          placeholder="Instructions"
+      />
+
+      <AppInput
+          v-model="recipe.mealType"
+          placeholder="Meal type"
+      />
+
+      <AppInput
+          v-model="recipe.servings"
+          type="number"
+          placeholder="Servings"
+      />
+
+      <AppInput
+          v-model="recipe.prepTimeMinutes"
+          type="number"
+          placeholder="Prep time (minutes)"
+      />
+
+      <template #footer>
+
+        <AppButton
+            variant="secondary"
+            @click="router.push('/recipes')"
+        >
+          Cancel
+        </AppButton>
+
+        <AppButton
+            variant="primary"
+            :disabled="isLoading"
+            @click="createRecipe"
+        >
+          {{ isLoading ? "Creating..." : "Create Recipe" }}
+        </AppButton>
+
+      </template>
+
+    </AppCard>
+
   </div>
 </template>
 
 <style scoped>
+
 .page {
-  max-width: 600px;
-  margin: 0 auto;
-  padding: 20px;
+  max-width: 700px;
+  margin: 60px auto;
+  padding: 0 24px;
 }
-input,
-textarea {
-  display: block;
-  width: 100%;
-  margin-bottom: 12px;
-  padding: 8px;
+
+.error {
+  color: red;
+  margin-bottom: 16px;
 }
-button {
-  padding: 10px 16px;
-  cursor: pointer;
-}
+
 </style>

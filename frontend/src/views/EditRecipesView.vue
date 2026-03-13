@@ -2,10 +2,19 @@
 import { ref, onMounted } from "vue"
 import { useRoute, useRouter } from "vue-router"
 
+import AppCard from "@/components/AppCard.vue"
+import AppButton from "@/components/AppButton.vue"
+import AppInput from "@/components/AppInput.vue"
+import { apiFetch } from "@/utilities/apiFetch"
+
 const route = useRoute()
 const router = useRouter()
 
 const recipeId = route.params.id as string
+
+const isLoading = ref(false)
+const isSaving = ref(false)
+const errorMessage = ref("")
 
 const recipe = ref({
   name: "",
@@ -19,64 +28,112 @@ const recipe = ref({
 })
 
 onMounted(async () => {
-  const response = await fetch(`http://localhost:8080/api/recipes/${recipeId}`)
-  const data = await response.json()
-  recipe.value = data
+  try {
+    const data = await apiFetch(
+        `/api/recipes/${recipeId}`,
+        "GET"
+    )
+    recipe.value = data
+  } catch (error) {
+    console.error("Could not load recipe", error)
+  }
 })
 
 async function updateRecipe() {
-  const response = await fetch(
-      `http://localhost:8080/api/recipes/${recipeId}`,
-      {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(recipe.value)
-      }
-  )
+  errorMessage.value = ""
+  isSaving.value = true
 
-  if (!response.ok) {
-    console.error("Kunne ikke opdatere opskrift")
-    return
+  try {
+    await apiFetch(
+        `/api/recipes/${recipeId}`,
+        "PUT",
+        recipe.value
+    )
+
+    router.push("/recipes")
+  } catch (error: any) {
+    errorMessage.value = error.message || "Could not update recipe"
+    console.error(error)
+  } finally {
+    isSaving.value = false
   }
-
-  router.push("/")
 }
 </script>
 
 <template>
   <div class="page">
-    <h1>Edit recipe</h1>
+    <h1>Edit Recipe</h1>
 
-    <input v-model="recipe.name" placeholder="Name" />
-    <textarea v-model="recipe.description" placeholder="Description"></textarea>
-    <textarea v-model="recipe.instructions" placeholder="Instructions"></textarea>
-    <input v-model="recipe.mealType" placeholder="Meal type" />
-    <input type="number" v-model="recipe.servings" placeholder="Portions" />
-    <input type="number" v-model="recipe.prepTimeMinutes" placeholder="Cooking time (min)" />
+    <AppCard>
+      <p v-if="errorMessage" class="error">
+        {{ errorMessage }}
+      </p>
 
-    <button @click="updateRecipe">
-      Save changes
-    </button>
+      <p v-if="isLoading">Loading recipe...</p>
+
+      <template v-else>
+        <AppInput
+            v-model="recipe.name"
+            placeholder="Recipe name"
+        />
+
+        <AppInput
+            v-model="recipe.description"
+            placeholder="Description"
+        />
+
+        <AppInput
+            v-model="recipe.instructions"
+            placeholder="Instructions"
+        />
+
+        <AppInput
+            v-model="recipe.mealType"
+            placeholder="Meal type"
+        />
+
+        <AppInput
+            v-model="recipe.servings"
+            type="number"
+            placeholder="Servings"
+        />
+
+        <AppInput
+            v-model="recipe.prepTimeMinutes"
+            type="number"
+            placeholder="Prep time (minutes)"
+        />
+      </template>
+
+      <template #footer>
+        <AppButton
+            variant="secondary"
+            @click="router.push('/recipes')"
+        >
+          Cancel
+        </AppButton>
+
+        <AppButton
+            variant="primary"
+            :disabled="isLoading || isSaving"
+            @click="updateRecipe"
+        >
+          {{ isSaving ? "Saving..." : "Save changes" }}
+        </AppButton>
+      </template>
+    </AppCard>
   </div>
 </template>
 
 <style scoped>
 .page {
-  max-width: 600px;
-  margin: 0 auto;
-  padding: 20px;
+  max-width: 700px;
+  margin: 60px auto;
+  padding: 0 24px;
 }
-input,
-textarea {
-  display: block;
-  width: 100%;
-  margin-bottom: 12px;
-  padding: 8px;
-}
-button {
-  padding: 10px 16px;
-  cursor: pointer;
+
+.error {
+  color: red;
+  margin-bottom: 16px;
 }
 </style>
