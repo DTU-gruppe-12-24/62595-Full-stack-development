@@ -1,112 +1,339 @@
 <script setup lang="ts">
-import { ref, computed } from "vue"
+import { ref, computed, watch } from 'vue'
 
-import AppContainer from "@/components/AppContainer.vue"
-import AppSection from "@/components/AppSection.vue"
-import AppCard from "@/components/AppCard.vue"
-import AppInput from "@/components/AppInput.vue"
-import AppButton from "@/components/AppButton.vue"
-import AppCheckbox from "@/components/AppCheckbox.vue"
-import AppText from "@/components/AppText.vue"
+import AppContainer from '@/components/AppContainer.vue'
+import AppSection from '@/components/AppSection.vue'
+import AppCard from '@/components/AppCard.vue'
+import AppInput from '@/components/AppInput.vue'
+import AppButton from '@/components/AppButton.vue'
+import AppCheckbox from '@/components/AppCheckbox.vue'
+import AppText from '@/components/AppText.vue'
+import AppDialog from '@/components/AppDialog.vue'
+import GroupSelector from '@/components/GroupSelector.vue'
+import IngredientSearch from '@/components/IngredientSearch.vue'
+import type { Group } from '@/components/GroupSelector.vue'
+import type { IngredientResult } from '@/components/IngredientSearch.vue'
+
+import { apiFetch } from '@/utilities/apiFetch'
 
 interface ShoppingItem {
-  id: number
-  name: string
-  checked: boolean
+  id: string
+  ingredientId: string
+  ingredientName: string
+  amount: number
+  unit: string | null
+  isBought: boolean
 }
 
+// Active group
+const activeGroup = ref<Group | null>(null)
+
+watch(activeGroup, () => loadItems())
+
+// Items
 const items = ref<ShoppingItem[]>([])
-const newItem = ref("")
+const loading = ref(false)
 
-function addItem() {
-  if (!newItem.value.trim()) return
-
-  items.value.push({
-    id: Date.now(),
-    name: newItem.value,
-    checked: false
-  })
-
-  newItem.value = ""
+async function loadItems() {
+  if (!activeGroup.value) { items.value = []; return }
+  loading.value = true
+  try {
+    items.value = await apiFetch<ShoppingItem[]>(`/api/shopping-list/${activeGroup.value.id}`)
+  } catch (e) {
+    console.error(e)
+  } finally {
+    loading.value = false
+  }
 }
 
-function removeItem(id: number) {
-  items.value = items.value.filter(i => i.id !== id)
+const remainingCount = computed(() => items.value.filter(i => !i.isBought).length)
+
+function formatItem(item: ShoppingItem): string {
+  const amt = item.amount % 1 === 0 ? item.amount.toFixed(0) : String(item.amount)
+  return item.unit ? `${item.ingredientName}, ${amt} ${item.unit}` : `${item.ingredientName}, ${amt}`
 }
 
-const remainingCount = computed(
-    () => items.value.filter(i => !i.checked).length
-)
+// Toggle / delete / remove bought / clear
+async function toggleBought(item: ShoppingItem) {
+  try {
+    const updated = await apiFetch<ShoppingItem>(`/api/shopping-list/item/${item.id}/toggle`, 'PATCH')
+    const index = items.value.findIndex(i => i.id === item.id)
+    if (index !== -1) items.value[index] = updated
+  } catch (e) { console.error(e) }
+}
+
+async function deleteItem(id: string) {
+  try {
+    await apiFetch(`/api/shopping-list/item/${id}`, 'DELETE')
+    items.value = items.value.filter(i => i.id !== id)
+  } catch (e) { console.error(e) }
+}
+
+async function removeBought() {
+  if (!activeGroup.value) return
+  try {
+    await apiFetch(`/api/shopping-list/${activeGroup.value.id}/bought`, 'DELETE')
+    items.value = items.value.filter(i => !i.isBought)
+  } catch (e) { console.error(e) }
+}
+
+async function clearList() {
+  if (!activeGroup.value) return
+  try {
+    await apiFetch(`/api/shopping-list/${activeGroup.value.id}/clear`, 'DELETE')
+    items.value = []
+  } catch (e) { console.error(e) }
+}
+
+// Export
+function exportList() {
+  const lines = ['## Shopping list', '']
+  for (const item of items.value) {
+    lines.push(`- ${item.isBought ? '[x]' : '[ ]'} ${formatItem(item)}`)
+  }
+  const blob = new Blob([lines.join('\n')], { type: 'text/plain' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = 'shopping-list.txt'
+  a.click()
+  URL.revokeObjectURL(url)
+}
+
+// Add item dialog
+const showAddDialog = ref(false)
+const selectedIngredient = ref<IngredientResult | null>(null)
+const newAmount = ref<number | ''>('')
+const newUnit = ref('')
+const addError = ref('')
+
+function openAddDialog() {
+  selectedIngredient.value = null
+  newAmount.value = ''
+  newUnit.value = ''
+  addError.value = ''
+  showAddDialog.value = true
+}
+
+async function submitAddItem() {
+  addError.value = ''
+  if (!selectedIngredient.value) { addError.value = 'Please select or type an ingredient.'; return }
+  if (!newAmount.value || Number(newAmount.value) <= 0) { addError.value = 'Please enter a valid amount.'; return }
+  if (!activeGroup.value) return
+
+  try {
+    const item = await apiFetch<ShoppingItem, { ingredientName: string; amount: number; unit: string }>(
+      `/api/shopping-list/${activeGroup.value.id}`,
+      'POST',
+      { ingredientName: selectedIngredient.value.ingredientName, amount: Number(newAmount.value), unit: newUnit.value.trim() }
+    )
+    const existing = items.value.findIndex(i => i.id === item.id)
+    if (existing !== -1) items.value[existing] = item
+    else items.value.push(item)
+    showAddDialog.value = false
+  } catch (e) {
+    addError.value = e instanceof Error ? e.message : 'Failed to add item.'
+  }
+}
+
+const showAddRecipeDialog = ref(false)
+const showGenerateDialog = ref(false)
+
+// Add custom ingredient dialog
+const showCustomIngredientDialog = ref(false)
+const customIngredientError = ref('')
+const customIngredientSuccess = ref('')
+const customIngredient = ref({
+  name: '',
+  calories: '' as number | '',
+  protein: '' as number | '',
+  carbohydrates: '' as number | '',
+  fat: '' as number | '',
+  saturatedFat: '' as number | '',
+  sugars: '' as number | '',
+  salt: '' as number | '',
+  price: '' as number | '',
+})
+
+function openCustomIngredientDialog() {
+  customIngredient.value = {
+    name: '', calories: '', protein: '', carbohydrates: '',
+    fat: '', saturatedFat: '', sugars: '', salt: '', price: ''
+  }
+  customIngredientError.value = ''
+  customIngredientSuccess.value = ''
+  showCustomIngredientDialog.value = true
+}
+
+function toOptionalFloat(val: number | ''): number | null {
+  return val === '' ? null : Number(val)
+}
+
+async function submitCustomIngredient() {
+  customIngredientError.value = ''
+  customIngredientSuccess.value = ''
+  const name = customIngredient.value.name.trim()
+  if (!name) { customIngredientError.value = 'Please enter an ingredient name.'; return }
+
+  try {
+    await apiFetch('/api/ingredients', 'POST', {
+      name,
+      calories:      toOptionalFloat(customIngredient.value.calories),
+      protein:       toOptionalFloat(customIngredient.value.protein),
+      carbohydrates: toOptionalFloat(customIngredient.value.carbohydrates),
+      fat:           toOptionalFloat(customIngredient.value.fat),
+      saturatedFat:  toOptionalFloat(customIngredient.value.saturatedFat),
+      sugars:        toOptionalFloat(customIngredient.value.sugars),
+      salt:          toOptionalFloat(customIngredient.value.salt),
+      price:         toOptionalFloat(customIngredient.value.price),
+    })
+    customIngredientSuccess.value = `"${name}" has been added to the database.`
+    customIngredient.value.name = ''
+  } catch (e) {
+    customIngredientError.value = e instanceof Error ? e.message : 'Failed to add ingredient.'
+  }
+}
 </script>
 
 <template>
   <AppContainer>
-    <AppText variant="title" class="page-title">
-      Shopping List
-    </AppText>
+    <AppText variant="title" class="page-title">Shopping List</AppText>
 
+    <!-- Group selector -->
     <AppSection>
-      <template #title>Add Ingredient</template>
+      <template #title>Group</template>
+      <AppCard>
+        <GroupSelector v-model="activeGroup" />
+      </AppCard>
+    </AppSection>
 
-      <AppCard flex class="add-card">
-        <AppInput
-            v-model="newItem"
-            placeholder="Milk, Tomatoes, Pasta..."
-            class="grow"
-            @keyup.enter="addItem"
+    <!-- Everything below is hidden until a group is selected -->
+    <template v-if="activeGroup">
+
+      <!-- Actions -->
+      <AppSection>
+        <div class="actions">
+          <AppButton variant="primary" @click="openAddDialog">Add item</AppButton>
+          <AppButton variant="secondary" @click="showAddRecipeDialog = true">Add recipe</AppButton>
+          <AppButton variant="secondary" @click="showGenerateDialog = true">Generate shopping list</AppButton>
+          <AppButton variant="secondary" @click="exportList">Export list</AppButton>
+          <AppButton variant="cancel" @click="removeBought">Remove bought</AppButton>
+          <AppButton variant="cancel" @click="clearList">Clear list</AppButton>
+        </div>
+      </AppSection>
+
+      <!-- List -->
+      <AppSection>
+        <template #title>Items ({{ remainingCount }} left)</template>
+        <AppCard class="list-card">
+          <div v-if="loading" class="empty">Loading…</div>
+          <div v-else-if="items.length === 0" class="empty">No items yet — add some above.</div>
+
+          <div v-for="item in items" :key="item.id" class="list-item">
+            <AppCheckbox
+              :model-value="item.isBought"
+              :label="formatItem(item)"
+              :class="{ 'item-checked': item.isBought }"
+              @update:model-value="toggleBought(item)"
+            />
+            <button class="delete-btn" @click="deleteItem(item.id)">✕</button>
+          </div>
+        </AppCard>
+      </AppSection>
+
+    </template>
+
+    <!-- Add item dialog -->
+    <AppDialog v-model="showAddDialog" title="Add ingredient">
+      <div class="dialog-form">
+        <IngredientSearch
+          v-model="selectedIngredient"
+          label="Ingredient"
+          placeholder="Search e.g. mayonnaise, milk, sugar…"
         />
+        <div class="amount-row">
+          <AppInput v-model="newAmount" label="Amount" type="number" placeholder="e.g. 500" />
+          <AppInput v-model="newUnit" label="Unit (optional)" placeholder="e.g. grams, loafs" />
+        </div>
+        <p v-if="addError" class="error-text">{{ addError }}</p>
+      </div>
+      <template #footer>
+        <AppButton variant="cancel" @click="showAddDialog = false">Cancel</AppButton>
+        <AppButton variant="primary" @click="submitAddItem">Add</AppButton>
+      </template>
+    </AppDialog>
 
-        <AppButton variant="primary" @click="addItem">
-          Add
+    <!-- Add recipe — not implemented -->
+    <AppDialog v-model="showAddRecipeDialog" title="Add recipe">
+      <p>Not implemented yet.</p>
+      <template #footer>
+        <AppButton variant="secondary" @click="showAddRecipeDialog = false">Close</AppButton>
+      </template>
+    </AppDialog>
+
+    <!-- Generate — not implemented -->
+    <AppDialog v-model="showGenerateDialog" title="Generate shopping list">
+      <p>Not implemented yet.</p>
+      <template #footer>
+        <AppButton variant="secondary" @click="showGenerateDialog = false">Close</AppButton>
+      </template>
+    </AppDialog>
+
+    <!-- Add custom ingredient button, shown outside the group guard -->
+    <AppSection>
+      <template #title>Database</template>
+      <AppCard>
+        <p style="font-size:14px;color:#888;margin:0 0 12px;">
+          Can't find an ingredient in the search? Add it to the database here.
+        </p>
+        <AppButton variant="secondary" @click="openCustomIngredientDialog">
+          Add custom ingredient
         </AppButton>
       </AppCard>
     </AppSection>
 
-    <AppSection>
-      <template #title>
-        Items ({{ remainingCount }} left)
-      </template>
-
-      <AppCard class="list-card">
-        <div v-if="items.length === 0" class="empty">
-          No items added yet
-        </div>
-
-        <div
-            v-for="item in items"
-            :key="item.id"
-            class="list-item"
-        >
-          <AppCheckbox
-              v-model="item.checked"
-              :label="item.name"
-              :class="{ 'item-checked': item.checked }"
-          />
-
-          <button
-              class="delete-btn"
-              @click="removeItem(item.id)"
-          >
-            ✕
-          </button>
-        </div>
-      </AppCard>
-    </AppSection>
   </AppContainer>
+
+  <!-- Add custom ingredient dialog -->
+  <AppDialog v-model="showCustomIngredientDialog" title="Add custom ingredient" width="560px">
+    <div class="dialog-form">
+      <AppInput v-model="customIngredient.name" label="Name" placeholder="e.g. Dragon fruit" />
+
+      <p class="section-label">Nutritional values per 100g (optional)</p>
+
+      <div class="amount-row">
+        <AppInput v-model="customIngredient.calories"      label="Calories (kcal)" type="number" placeholder="e.g. 52" />
+        <AppInput v-model="customIngredient.protein"       label="Protein (g)"     type="number" placeholder="e.g. 0.3" />
+      </div>
+      <div class="amount-row">
+        <AppInput v-model="customIngredient.carbohydrates" label="Carbs (g)"       type="number" placeholder="e.g. 14" />
+        <AppInput v-model="customIngredient.sugars"        label="Sugars (g)"      type="number" placeholder="e.g. 10" />
+      </div>
+      <div class="amount-row">
+        <AppInput v-model="customIngredient.fat"           label="Fat (g)"         type="number" placeholder="e.g. 0.2" />
+        <AppInput v-model="customIngredient.saturatedFat"  label="Saturated fat (g)" type="number" placeholder="e.g. 0.1" />
+      </div>
+      <div class="amount-row">
+        <AppInput v-model="customIngredient.salt"          label="Salt (g)"        type="number" placeholder="e.g. 0.01" />
+        <AppInput v-model="customIngredient.price"         label="Price (DKK)"     type="number" placeholder="e.g. 12.50" />
+      </div>
+
+      <p v-if="customIngredientError" class="error-text">{{ customIngredientError }}</p>
+      <p v-if="customIngredientSuccess" class="success-text">{{ customIngredientSuccess }}</p>
+    </div>
+    <template #footer>
+      <AppButton variant="cancel" @click="showCustomIngredientDialog = false">Close</AppButton>
+      <AppButton variant="primary" @click="submitCustomIngredient">Add</AppButton>
+    </template>
+  </AppDialog>
 </template>
 
 <style scoped>
-.page-title {
-  margin-bottom: 24px;
-}
+.page-title { margin-bottom: 24px; }
 
-.grow {
-  flex: 1;
-}
+.actions { display: flex; flex-wrap: wrap; gap: 10px; }
 
-.list-card {
-  margin-top: 10px;
-}
+.list-card { margin-top: 10px; }
 
 .list-item {
   display: flex;
@@ -116,11 +343,9 @@ const remainingCount = computed(
   border-bottom: 1px solid #f9c74f20;
 }
 
-.list-item:last-child {
-  border-bottom: none;
-}
+.list-item:last-child { border-bottom: none; }
 
-
+.item-checked :deep(label) { text-decoration: line-through; opacity: 0.5; }
 
 .delete-btn {
   background: none;
@@ -133,14 +358,16 @@ const remainingCount = computed(
   transition: background 0.2s;
 }
 
-.delete-btn:hover {
-  background: #fff5f0;
-}
+.delete-btn:hover { background: #fff5f0; }
 
-.empty {
-  color: #888;
-  text-align: center;
-  padding: 30px;
-  font-style: italic;
-}
+.empty { color: #888; text-align: center; padding: 30px; font-style: italic; }
+
+.dialog-form { display: flex; flex-direction: column; gap: 16px; min-height: 280px; }
+
+.amount-row { display: flex; gap: 12px; }
+.amount-row > * { flex: 1; }
+
+.error-text { color: #c0392b; font-size: 0.875rem; margin: 0; }
+.success-text { color: #27ae60; font-size: 0.875rem; margin: 0; }
+.section-label { font-size: 13px; font-weight: 500; color: var(--color-secondary); margin: 4px 0 0; }
 </style>
