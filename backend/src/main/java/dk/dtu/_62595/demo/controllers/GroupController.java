@@ -52,7 +52,7 @@ public class GroupController {
 	public void delete(@PathVariable UUID groupId) {
 		Group currentGroup = groupService.getGroupById(groupId);
 		User currentUser = authController.getLoggedInUser();
-		if (!groupService.canUserEditGroup(currentGroup, currentUser)) throw new AuthorizationDeniedException("You do not have permission to delete this group!");
+		if (groupService.getRole(currentGroup, currentUser) != GroupMember.Role.OWNER) throw new AuthorizationDeniedException("You do not have permission to delete this group!");
 		groupService.deleteGroup(groupId);
 	}
 

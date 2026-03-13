@@ -1,5 +1,5 @@
 <template>
-<div class="flex flex-col gap-8 justify-center items-center w-full">
+<div class="flex flex-col gap-4 justify-center items-center w-full">
 	<AppCard
 		v-for="group in groups"
 		flex hover
@@ -12,10 +12,10 @@
 			</AppText>
 			<div v-if="group.role != 'MEMBER'" class="flex flex-row justify-end gap-1 w-fit">
 				<AppButton variant="secondary" @click="() => openEditDialog(group.group, true)">
-					Edit
+					<font-awesome-icon icon="fa-solid fa-pen-to-square" />
 				</AppButton>
-				<AppButton variant="cancel" @click="() => { showConfirmDeleteDialog = true; groupBeingDeleted = group.group; }" v-on:click.stop>
-					Delete
+				<AppButton variant="cancel" v-if="group.role == 'OWNER'" @click="() => { showConfirmDeleteDialog = true; groupBeingDeleted = group.group; }" v-on:click.stop>
+					<font-awesome-icon icon="fa-solid fa-trash" class="text-rose-700" />
 				</AppButton>
 			</div>
 			<div v-else class="flex flex-row justify-end gap-1 w-fit">
@@ -58,7 +58,7 @@
 			</AppButton>
 		</div>
 
-		<AppSection v-if="groupMembers[groupBeingShown!.id]">
+		<AppSection v-if="groupMembers[groupBeingShown!.id]" class="flex flex-col h-fit gap-4">
 			<AppCard v-for="member in groupMembers[groupBeingShown!.id]" flex >
 				<div class="flex flex-row justify-between items-center mx-4 w-full">
 					<AppText>{{ member.user.name }} ({{ member.user.email }})</AppText>
@@ -121,7 +121,7 @@ import type { GroupMember } from '@/model/GroupMember'
 import AppSection from '@/components/AppSection.vue'
 import type { User } from '@/model/User'
 
-const myUser = getMyUser();
+const myUser = getMyUser()!;
 
 const groups = ref([] as {group: Group, role: GroupMember["role"]}[])
 const showCreateDialog = ref(false)
@@ -204,7 +204,7 @@ function inviteMember() {
 		.catch((error) => { console.error(error); });
 }
 
-function updateMemberRole(member: GroupMember) {
+function updateMemberRole(member: Omit<GroupMember, "id">) {
     apiFetch<GroupMember[], [{user: User, role: GroupMember["role"]}]>(`/api/group/${member.group.id}/members`, "POST", [member])
 		.then((response) => {
 			groupMembers.value[member.group.id] = response
@@ -215,7 +215,7 @@ function updateMemberRole(member: GroupMember) {
         });
 }
 
-function removeMember(member: GroupMember) {
+function removeMember(member: Omit<GroupMember, "id">) {
     apiFetch(`/api/group/${member.group.id}/members/${member.user.id}`, "DELETE")
         .then((_) => {
             getGroups();
