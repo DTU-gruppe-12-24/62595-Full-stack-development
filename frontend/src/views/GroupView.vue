@@ -18,6 +18,11 @@
 					Delete
 				</AppButton>
 			</div>
+			<div v-else class="flex flex-row justify-end gap-1 w-fit">
+				<AppButton variant="ghost" @click="() => removeMember({group: group.group, user: myUser, role: 'MEMBER'})" v-on:click.stop>
+					<font-awesome-icon icon="fa-solid fa-right-from-bracket" />
+				</AppButton>
+			</div>
 		</div>
 	</AppCard>
 	<AppButton variant="primary" @click="() => showCreateDialog = true">
