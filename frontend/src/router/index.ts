@@ -54,16 +54,7 @@ const router = createRouter({
     {
       path: "/recipes",
       name: "recipes",
-      component: () => import("../views/RecipesView.vue")  // the list page
-    },
-
-    {
-      path: "/recipes/create",
-      name: "recipeCreate",
-
-    {
-      path: "/recipes/create",
-      component: () => import("../views/CreateRecipeView.vue")
+      component: () => import("../views/RecipesView.vue")
     },
 
     {
@@ -71,9 +62,7 @@ const router = createRouter({
       name: "recipeEdit",
       component: () => import("../views/EditRecipesView.vue")
     },
-      component: () => import("../views/EditRecipesView.vue")
-    }
-  ],
+  ]
 })
 // Nav guard
 router.beforeEach((to) => {

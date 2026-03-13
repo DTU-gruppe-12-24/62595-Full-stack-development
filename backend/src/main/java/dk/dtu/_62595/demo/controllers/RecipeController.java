@@ -1,22 +1,14 @@
 package dk.dtu._62595.demo.controllers;
 
 import dk.dtu._62595.demo.dto.CreateRecipeRequest;
+import dk.dtu._62595.demo.dto.UpdateRecipeRequest;
 import dk.dtu._62595.demo.model.Group;
 import dk.dtu._62595.demo.model.Recipe;
 import dk.dtu._62595.demo.model.User;
 import dk.dtu._62595.demo.repositories.GroupRepository;
 import dk.dtu._62595.demo.repositories.RecipeRepository;
-import dk.dtu._62595.demo.repositories.UserRepository;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
-import dk.dtu._62595.demo.model.Group;
-import dk.dtu._62595.demo.repositories.RecipeRepository;
-import dk.dtu._62595.demo.services.GroupService;
-
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -25,144 +17,98 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping(value = "/api/recipes", consumes = { "application/xml", "application/json" })
+@RequestMapping("/api/recipes")
 public class RecipeController {
 
     private final RecipeRepository recipeRepository;
-    private final UserRepository userRepository;
     private final GroupRepository groupRepository;
+    private final AuthController authController;
 
-    public RecipeController(
-            RecipeRepository recipeRepository,
-            UserRepository userRepository,
-            GroupRepository groupRepository
-    ) {
+    public RecipeController(RecipeRepository recipeRepository,
+                            GroupRepository groupRepository,
+                            AuthController authController) {
         this.recipeRepository = recipeRepository;
-        this.userRepository = userRepository;
         this.groupRepository = groupRepository;
+        this.authController = authController;
     }
 
     @PostMapping
     @Transactional
-    public Recipe createRecipe(
-            @AuthenticationPrincipal Jwt jwt,
-            @RequestBody CreateRecipeRequest request
-    ) {
-        if (jwt == null) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not authenticated");
-        }
-
-        UUID userId = UUID.fromString(jwt.getSubject());
-
-        User owner = userRepository.findById(userId)
-                .orElseThrow(() ->
-                        new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
-
-        Group group = null;
-
-        if (request.getGroupId() != null) {
-            group = groupRepository.findById(request.getGroupId())
-                    .orElseThrow(() ->
-                            new ResponseStatusException(HttpStatus.NOT_FOUND, "Group not found"));
-	@Autowired
-    private RecipeRepository recipeRepository;
-    @Autowired
-    private GroupService groupService;
-    @Autowired
-	AuthController authController;
-
-    @PostMapping
-    @Transactional
-    public Recipe createRecipe(@RequestBody Recipe recipeRequest) {
-
+    public ResponseEntity<Recipe> createRecipe(@RequestBody CreateRecipeRequest request) {
         User owner = authController.getLoggedInUser();
 
         Group group = null;
-
-        if (recipeRequest.getGroup() != null) {
-            group = groupService.getGroupById(recipeRequest.getGroup().getId());
+        if (request.groupId() != null) {
+            group = groupRepository.findById(request.groupId())
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Group not found"));
         }
 
         Recipe recipe = new Recipe(
                 owner,
                 group,
-                request.getName(),
-                request.getDescription(),
-                request.getInstructions(),
-                request.getMealType(),
-                request.getServings(),
-                request.getPrepTimeMinutes(),
-                request.getImageUrl(),
-                request.getLastMade()
+                request.name(),
+                request.description(),
+                request.instructions(),
+                request.mealType(),
+                request.servings(),
+                request.prepTimeMinutes(),
+                request.imageUrl(),
+                request.lastMade()
         );
 
-        return recipeRepository.save(recipe);
+        return ResponseEntity.status(HttpStatus.CREATED).body(recipeRepository.save(recipe));
     }
 
     @PutMapping("/{id}")
     @Transactional
-    public ResponseEntity<Recipe> updateRecipe(
-            @PathVariable UUID id,
-            @AuthenticationPrincipal Jwt jwt,
-            @RequestBody Recipe recipeRequest
-    ) {
-        if (jwt == null) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not authenticated");
+    public ResponseEntity<Recipe> updateRecipe(@PathVariable UUID id,
+                                               @RequestBody UpdateRecipeRequest request) {
+        User currentUser = authController.getLoggedInUser();
+
+        Recipe recipe = recipeRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Recipe not found"));
+
+        if (!recipe.getOwner().getId().equals(currentUser.getId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You do not own this recipe");
         }
 
-        UUID userId = UUID.fromString(jwt.getSubject());
+        recipe.setName(request.name());
+        recipe.setDescription(request.description());
+        recipe.setInstructions(request.instructions());
+        recipe.setMealType(request.mealType());
+        recipe.setServings(request.servings());
+        recipe.setPrepTimeMinutes(request.prepTimeMinutes());
+        recipe.setImageUrl(request.imageUrl());
+        recipe.setLastMade(request.lastMade());
 
-        Recipe existingRecipe = recipeRepository.findById(id)
-                .orElseThrow(() ->
-                        new ResponseStatusException(HttpStatus.NOT_FOUND, "Recipe not found"));
-
-        existingRecipe.setName(recipeRequest.getName());
-        existingRecipe.setDescription(recipeRequest.getDescription());
-        existingRecipe.setInstructions(recipeRequest.getInstructions());
-        existingRecipe.setMealType(recipeRequest.getMealType());
-        existingRecipe.setServings(recipeRequest.getServings());
-        existingRecipe.setPrepTimeMinutes(recipeRequest.getPrepTimeMinutes());
-        existingRecipe.setImageUrl(recipeRequest.getImageUrl());
-        existingRecipe.setLastMade(recipeRequest.getLastMade());
-
-        return ResponseEntity.ok(recipeRepository.save(existingRecipe));
+        return ResponseEntity.ok(recipeRepository.save(recipe));
     }
 
     @DeleteMapping("/{id}")
     @Transactional
-    public ResponseEntity<Void> deleteRecipe(
-            @PathVariable UUID id,
-            @AuthenticationPrincipal Jwt jwt
-    ) {
-
-        if (jwt == null) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
-        }
-
-        UUID userId = UUID.fromString(jwt.getSubject());
+    public ResponseEntity<Void> deleteRecipe(@PathVariable UUID id) {
+        User currentUser = authController.getLoggedInUser();
 
         Recipe recipe = recipeRepository.findById(id)
-                .orElseThrow(() ->
-                        new ResponseStatusException(HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Recipe not found"));
 
-        if (!recipe.getOwner().getId().equals(userId)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+        if (!recipe.getOwner().getId().equals(currentUser.getId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You do not own this recipe");
         }
 
         recipeRepository.delete(recipe);
-
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/{id}")
-    public Recipe getRecipe(@PathVariable UUID id) {
-        return recipeRepository.findById(id)
-                .orElseThrow(() ->
-                        new ResponseStatusException(HttpStatus.NOT_FOUND, "Recipe not found"));
+    public ResponseEntity<Recipe> getRecipe(@PathVariable UUID id) {
+        Recipe recipe = recipeRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Recipe not found"));
+        return ResponseEntity.ok(recipe);
     }
 
     @GetMapping
-    public List<Recipe> getAllRecipes() {
-        return recipeRepository.findAll();
+    public ResponseEntity<List<Recipe>> getAllRecipes() {
+        return ResponseEntity.ok(recipeRepository.findAll());
     }
 }

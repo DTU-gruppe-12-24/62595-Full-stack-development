@@ -1,10 +1,8 @@
 package dk.dtu._62595.demo.dto;
 
 import java.time.LocalDate;
-import java.util.UUID;
 
-public record CreateRecipeRequest(
-        UUID groupId,
+public record UpdateRecipeRequest(
         String name,
         String description,
         String instructions,
