@@ -7,17 +7,16 @@ import AppInput from "@/components/AppInput.vue"
 import AppDialog from "@/components/AppDialog.vue"
 import { apiFetch } from "@/utilities/apiFetch"
 
-interface Recipe {
-  id: string
-  name: string
-  description: string
-  instructions: string
-  mealType: string
-  servings: number | null
-  prepTimeMinutes: number | null
-  imageUrl: string | null
-  lastMade: string | null
-}
+const recipe = ref<Recipe>({
+  name: "",
+  description: "",
+  instructions: "",
+  mealType: "",
+  servings: null,
+  prepTimeMinutes: null,
+  imageUrl: null,
+  lastMade: null
+})
 
 const recipes = ref<Recipe[]>([])
 const selectedRecipe = ref<Recipe | null>(null)

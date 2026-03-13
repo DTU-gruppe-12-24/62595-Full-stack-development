@@ -28,14 +28,30 @@ const recipe = ref({
 })
 
 onMounted(async () => {
+  isLoading.value = true
+  errorMessage.value = ""
+
   try {
-    const data = await apiFetch(
+    const data = await apiFetch<any>(
         `/api/recipes/${recipeId}`,
         "GET"
     )
-    recipe.value = data
-  } catch (error) {
-    console.error("Could not load recipe", error)
+
+    recipe.value = {
+      name: data.name ?? "",
+      description: data.description ?? "",
+      instructions: data.instructions ?? "",
+      mealType: data.mealType ?? "",
+      servings: data.servings ?? null,
+      prepTimeMinutes: data.prepTimeMinutes ?? null,
+      imageUrl: data.imageUrl ?? null,
+      lastMade: data.lastMade ?? null
+    }
+  } catch (error: any) {
+    errorMessage.value = error.message || "Could not load recipe"
+    console.error(error)
+  } finally {
+    isLoading.value = false
   }
 })
 
