@@ -1,5 +1,6 @@
 package dk.dtu._62595.demo.model;
 
+import java.util.List;
 import java.util.UUID;
 
 import jakarta.persistence.*;
@@ -14,6 +15,9 @@ public class Group {
 
 	@Column(nullable = false)
 	private String name;
+
+	@OneToMany(mappedBy = "group", orphanRemoval = true)
+	private List<GroupMember> members;
 
     public Group() {}
 
