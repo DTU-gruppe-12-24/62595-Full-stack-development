@@ -1,4 +1,5 @@
-import { getToken } from '@/services/authService'
+import type { User } from '@/model/User';
+import { getToken, getStoredUser } from '@/services/authService'
 
 export async function apiFetch<ResultType, BodyType = undefined>(url: string, method: "GET" | "POST" | "PUT" | "DELETE" = "GET", body?: BodyType) : Promise<ResultType> {
 	const token = getToken()
@@ -27,4 +28,15 @@ export async function apiFetch<ResultType, BodyType = undefined>(url: string, me
 		.catch((error) => {
 			throw error;
 		});
+}
+
+export function getMyUser() {
+    const storedUser = getStoredUser();
+    if (!storedUser) return null;
+    return {
+        id: storedUser.userId,
+        name: storedUser.name,
+        email: storedUser.email,
+        passwordHash: ""
+    } as User;
 }

@@ -85,13 +85,21 @@ public class GroupController {
 	public List<GroupMember> updateMembersById(@PathVariable UUID groupId, @RequestBody List<GroupMember> members) {
 		Group group = groupService.getGroupById(groupId);
 		User currentUser = authController.getLoggedInUser();
-		if (!groupService.canUserEditGroup(group, currentUser)) throw new AuthorizationDeniedException("You do not have permission to edit this group!");
+		GroupMember.Role myRole;
+		try {
+			myRole = groupService.getRole(group, currentUser);
+			if (myRole == GroupMember.Role.MEMBER) throw new AuthorizationDeniedException("");
+		} catch (Exception exception) {
+			throw new AuthorizationDeniedException("You do not have permission to edit this group!");
+		}
 
 		members.forEach(member -> {
 			if (member.getUser() == null || member.getRole() == null)
 				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Each member must have a user and a role");
 			try {
-				groupService.getRole(group, member.getUser());
+				GroupMember.Role role = groupService.getRole(group, member.getUser());
+				if (role == GroupMember.Role.OWNER) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Can't change the group owner's role");
+				if (role == GroupMember.Role.ADMIN && myRole != GroupMember.Role.OWNER) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Only the owner can edit group admins");
 			} catch (NoSuchElementException exception) {
 				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Each member must already be in group");
 			}

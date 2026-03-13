@@ -1,5 +1,5 @@
 <template>
-<div class="flex flex-col gap-2 justify-center items-center w-full">
+<div class="flex flex-col gap-8 justify-center items-center w-full">
 	<AppCard
 		v-for="group in groups"
 		flex hover
@@ -111,10 +111,12 @@ import AppDialog from "@/components/AppDialog.vue"
 import AppInput from "@/components/AppInput.vue"
 import AppDropdown from "@/components/AppDropdown.vue"
 
-import { apiFetch } from "@/utilities/apiFetch"
+import { apiFetch, getMyUser } from "@/utilities/apiFetch"
 import type { GroupMember } from '@/model/GroupMember'
 import AppSection from '@/components/AppSection.vue'
 import type { User } from '@/model/User'
+
+const myUser = getMyUser();
 
 const groups = ref([] as {group: Group, role: GroupMember["role"]}[])
 const showCreateDialog = ref(false)
@@ -202,12 +204,19 @@ function updateMemberRole(member: GroupMember) {
 		.then((response) => {
 			groupMembers.value[member.group.id] = response
 		})
-		.catch((error) => { console.error(error); });
+        .catch((error) => {
+            console.error(error);
+            openEditDialog(member.group, true);
+        });
 }
 
 function removeMember(member: GroupMember) {
     apiFetch(`/api/group/${member.group.id}/members/${member.user.id}`, "DELETE")
-		.then((_) => openEditDialog(member.group, allowEdit.value))
+        .then((_) => {
+            getGroups();
+            if (member.user.id != myUser.id) openEditDialog(member.group, allowEdit.value);
+            else showEditDialog.value = false;
+        })
 		.catch((error) => { console.error(error); });
 }
 
