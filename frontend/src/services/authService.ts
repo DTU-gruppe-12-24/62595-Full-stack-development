@@ -58,5 +58,26 @@ export async function logout(): Promise<void> {
 }
 
 export function isAuthenticated(): boolean {
-    return !!getToken()
+    // Get token
+    const token = getToken()
+
+    // If there is no token, the user is not authenticated
+    if (!token) return false
+
+    // Check if the token is expired. If it is, clear it and return false. If it's not, return true.
+    try {
+        const parts = token.split('.')
+        if (parts.length !== 3) { clearToken(); return false }
+        const rawPayload = parts[1] as string // Typescript got upset when I tried to inline this into the JSON.parse call
+        const payload = JSON.parse(atob(rawPayload))
+        const expiresAt = payload.exp * 1000 // Convert from ms to s
+        if (Date.now() >= expiresAt) {
+            clearToken()
+            return false
+        }
+        return true
+    } catch {
+        clearToken()
+        return false
+    }
 }

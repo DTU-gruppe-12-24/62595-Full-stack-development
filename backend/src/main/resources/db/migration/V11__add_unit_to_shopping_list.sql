@@ -1,0 +1,1 @@
+ALTER TABLE shopping_lists ADD COLUMN unit VARCHAR(64) NULL;
