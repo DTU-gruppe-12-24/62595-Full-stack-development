@@ -211,18 +211,4 @@ function updateIngredientLine(index: number, updated: IngredientLine) {
 
 .remove-btn:hover { background: #fff5f0; }
 
-.ingredient-amount :deep(.input-wrapper),
-.ingredient-unit :deep(.input-wrapper),
-.ingredient-name :deep(.ingredient-search) {
-  width: 100%;
-  min-width: 0;
-}
-
-.ingredient-amount :deep(.input),
-.ingredient-unit :deep(.input),
-.ingredient-name :deep(.input) {
-  width: 100%;
-  box-sizing: border-box;
-  min-width: 0;
-}
 </style>
