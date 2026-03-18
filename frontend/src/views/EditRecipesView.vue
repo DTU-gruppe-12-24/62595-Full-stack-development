@@ -2,81 +2,102 @@
 import { ref, onMounted } from "vue"
 import { useRoute, useRouter } from "vue-router"
 
+import RecipeForm from "@/components/RecipeForm.vue"
+import type { RecipeFormData, IngredientLine } from "@/components/RecipeForm.vue"
+import { apiFetch } from "@/utilities/apiFetch"
+import type { Recipe } from "@/model/Recipe"
+
 const route = useRoute()
 const router = useRouter()
 
 const recipeId = route.params.id as string
 
-const recipe = ref({
+const isLoading = ref(false)
+const isSaving = ref(false)
+const errorMessage = ref("")
+
+const recipe = ref<RecipeFormData>({
   name: "",
   description: "",
   instructions: "",
   mealType: "",
-  servings: null as number | null,
-  prepTimeMinutes: null as number | null,
-  imageUrl: null as string | null,
-  lastMade: null as string | null
+  servings: null,
+  prepTimeMinutes: null
 })
+
+const ingredients = ref<IngredientLine[]>([])
 
 onMounted(async () => {
-  const response = await fetch(`http://localhost:8080/api/recipes/${recipeId}`)
-  const data = await response.json()
-  recipe.value = data
+  isLoading.value = true
+  try {
+    const data = await apiFetch<Recipe>(`/api/recipes/${recipeId}`, "GET")
+    recipe.value = {
+      name: data.name ?? "",
+      description: data.description ?? "",
+      instructions: data.instructions ?? "",
+      mealType: data.mealType ?? "",
+      servings: data.servings ?? null,
+      prepTimeMinutes: data.prepTimeMinutes ?? null
+    }
+    ingredients.value = (data.ingredients ?? []).map(ing => ({
+      selected: { ingredientId: ing.ingredientId, ingredientName: ing.ingredientName },
+      amount: ing.amount ?? "",
+      unit: ing.unit ?? ""
+    }))
+    if (ingredients.value.length === 0) {
+      ingredients.value.push({ selected: null, amount: "", unit: "" })
+    }
+  } catch (error: any) {
+    errorMessage.value = error.message || "Could not load recipe"
+  } finally {
+    isLoading.value = false
+  }
 })
 
-async function updateRecipe() {
-  const response = await fetch(
-      `http://localhost:8080/api/recipes/${recipeId}`,
-      {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(recipe.value)
-      }
-  )
-
-  if (!response.ok) {
-    console.error("Kunne ikke opdatere opskrift")
-    return
+async function submit() {
+  errorMessage.value = ""
+  isSaving.value = true
+  try {
+    await apiFetch(`/api/recipes/${recipeId}`, "PUT", {
+      ...recipe.value,
+      ingredients: ingredients.value
+        .filter(l => l.selected)
+        .map(l => ({
+          ingredientName: l.selected!.ingredientName,
+          amount: l.amount === "" ? null : Number(l.amount),
+          unit: l.unit.trim() || null
+        }))
+    })
+    router.push("/recipes")
+  } catch (error: any) {
+    errorMessage.value = error.message || "Could not update recipe"
+  } finally {
+    isSaving.value = false
   }
-
-  router.push("/")
 }
 </script>
 
 <template>
   <div class="page">
-    <h1>Rediger opskrift</h1>
-
-    <input v-model="recipe.name" placeholder="Navn" />
-    <textarea v-model="recipe.description" placeholder="Beskrivelse"></textarea>
-    <textarea v-model="recipe.instructions" placeholder="Instruktioner"></textarea>
-    <input v-model="recipe.mealType" placeholder="Meal type" />
-    <input type="number" v-model="recipe.servings" placeholder="Portioner" />
-    <input type="number" v-model="recipe.prepTimeMinutes" placeholder="Tilberedningstid (min)" />
-
-    <button @click="updateRecipe">
-      Gem ændringer
-    </button>
+    <h1>Edit Recipe</h1>
+    <p v-if="isLoading">Loading recipe...</p>
+    <RecipeForm
+      v-else
+      v-model="recipe"
+      v-model:ingredients="ingredients"
+      :is-saving="isSaving"
+      :error-message="errorMessage"
+      submit-label="Save changes"
+      @submit="submit"
+      @cancel="router.push('/recipes')"
+    />
   </div>
 </template>
 
 <style scoped>
 .page {
-  max-width: 600px;
-  margin: 0 auto;
-  padding: 20px;
-}
-input,
-textarea {
-  display: block;
-  width: 100%;
-  margin-bottom: 12px;
-  padding: 8px;
-}
-button {
-  padding: 10px 16px;
-  cursor: pointer;
+  max-width: 700px;
+  margin: 60px auto;
+  padding: 0 24px;
 }
 </style>

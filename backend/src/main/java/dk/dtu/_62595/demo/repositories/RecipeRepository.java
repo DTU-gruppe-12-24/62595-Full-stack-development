@@ -29,4 +29,6 @@ public interface RecipeRepository extends JpaRepository<Recipe, UUID> {
     List<Recipe> findByGroupAndMealType(Group group, String mealType);
 
     UUID id(UUID id);
+
+    void delete(Recipe recipe);
 }

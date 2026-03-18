@@ -2,81 +2,77 @@
 import { ref } from "vue"
 import { useRouter } from "vue-router"
 
+import RecipeForm from "@/components/RecipeForm.vue"
+import type { RecipeFormData, IngredientLine } from "@/components/RecipeForm.vue"
+import { apiFetch } from "@/utilities/apiFetch"
+
 const router = useRouter()
 
-const ownerId = "PUT-UUID-HERE"
+const isSaving = ref(false)
+const errorMessage = ref("")
 
-const recipe = ref({
+const recipe = ref<RecipeFormData>({
   name: "",
   description: "",
   instructions: "",
   mealType: "",
-  servings: null as number | null,
-  prepTimeMinutes: null as number | null
+  servings: null,
+  prepTimeMinutes: null
 })
 
-async function createRecipe() {
+const ingredients = ref<IngredientLine[]>([{ selected: null, amount: "", unit: "" }])
+
+async function submit() {
+  errorMessage.value = ""
+
+  if (!recipe.value.name.trim()) {
+    errorMessage.value = "Name is required"
+    return
+  }
+
+  isSaving.value = true
   try {
-    const response = await fetch("http://localhost:8080/api/recipes", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        owner: { id: ownerId },
-        group: null,
-        name: recipe.value.name,
-        description: recipe.value.description,
-        instructions: recipe.value.instructions,
-        mealType: recipe.value.mealType,
-        servings: recipe.value.servings,
-        prepTimeMinutes: recipe.value.prepTimeMinutes,
-        imageUrl: null,
-        lastMade: null
-      })
+    await apiFetch("/api/recipes", "POST", {
+      ...recipe.value,
+      imageUrl: null,
+      lastMade: null,
+      groupId: null,
+      ingredients: ingredients.value
+        .filter(l => l.selected)
+        .map(l => ({
+          ingredientName: l.selected!.ingredientName,
+          amount: l.amount === "" ? null : Number(l.amount),
+          unit: l.unit.trim() || null
+        }))
     })
-
-    if (!response.ok) {
-      throw new Error("Kunne ikke oprette opskrift")
-    }
-
-    router.push("/")
-  } catch (error) {
-    console.error(error)
+    router.push("/recipes")
+  } catch (error: any) {
+    errorMessage.value = error.message || "Could not create recipe"
+  } finally {
+    isSaving.value = false
   }
 }
 </script>
 
 <template>
   <div class="page">
-    <h1>Opret opskrift</h1>
-
-    <input v-model="recipe.name" placeholder="Navn" />
-    <textarea v-model="recipe.description" placeholder="Beskrivelse"></textarea>
-    <textarea v-model="recipe.instructions" placeholder="Instruktioner"></textarea>
-    <input v-model="recipe.mealType" placeholder="Meal type" />
-    <input type="number" v-model="recipe.servings" placeholder="Portioner" />
-    <input type="number" v-model="recipe.prepTimeMinutes" placeholder="Tilberedningstid (min)" />
-
-    <button @click="createRecipe">Opret</button>
+    <h1>Create Recipe</h1>
+    <RecipeForm
+      v-model="recipe"
+      v-model:ingredients="ingredients"
+      :is-saving="isSaving"
+      :error-message="errorMessage"
+      submit-label="Create Recipe"
+      @submit="submit"
+      @cancel="router.push('/recipes')"
+    />
   </div>
 </template>
 
 <style scoped>
 .page {
-  max-width: 600px;
-  margin: 0 auto;
-  padding: 20px;
-}
-input,
-textarea {
-  display: block;
-  width: 100%;
-  margin-bottom: 12px;
-  padding: 8px;
-}
-button {
-  padding: 10px 16px;
-  cursor: pointer;
+  max-width: 700px;
+  margin: 60px auto;
+  padding: 0 24px;
 }
 </style>

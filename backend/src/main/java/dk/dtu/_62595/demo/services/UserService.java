@@ -50,6 +50,14 @@ public class UserService {
         return new AuthResponse(token, user.getId(), user.getName(), user.getEmail());
     }
 
+    public Optional<User> find(String email) {
+    	return userRepository.findByEmail(email);
+    }
+
+    public Optional<User> find(UUID id) {
+    	return userRepository.findById(id);
+    }
+
     public void deleteUserByEmail(String email) {
     userRepository.findByEmail(email).ifPresent(userRepository::delete);
     }

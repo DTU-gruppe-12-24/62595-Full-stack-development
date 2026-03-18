@@ -23,4 +23,5 @@ public interface GroupMemberRepository extends JpaRepository<GroupMember, GroupM
     // Derived queries
     List<GroupMember> findByGroup(Group group);
     List<GroupMember> findByUser(User user);
+    Optional<GroupMember> findByGroupAndUser(Group group, User user);
 }

@@ -20,15 +20,15 @@ public class GroupMember {
 	private User user;
 
 	@MapsId("groupId")
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "group_id", columnDefinition = "CHAR(36)")
 	private Group group;
 
-	@Column(nullable = true)
-	private String role;
+	@Enumerated(EnumType.STRING)
+	private Role role;
 
     public GroupMember() {}
-	public GroupMember(User user, Group group, String role) {
+	public GroupMember(User user, Group group, Role role) {
 		this.id = new GroupMemberId(user.getId(), group.getId());
 		this.user = user;
 		this.group = group;
@@ -40,7 +40,7 @@ public class GroupMember {
     }
 	public User getUser() { return user; }
 	public Group getGroup() { return group; }
-	public String getRole() { return role; }
+	public Role getRole() { return role; }
 
 	@Embeddable
 	public static class GroupMemberId implements Serializable {
@@ -74,5 +74,11 @@ public class GroupMember {
 		public int hashCode() {
 			return Objects.hash(userId, groupId);
 		}
+	}
+
+	public enum Role {
+		OWNER,
+		ADMIN,
+		MEMBER
 	}
 }

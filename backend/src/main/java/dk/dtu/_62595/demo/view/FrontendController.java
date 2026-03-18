@@ -18,7 +18,7 @@ public class FrontendController {
 	}
 
 	// Any unknown route (different vue pages) will be handled by Vue router
-	@GetMapping("/{route:^(?!api\\/$).+$}")
+	@GetMapping("/**/{path:[^\\.]*}")
 	public @ResponseBody byte[] getAny() throws IOException {
 		InputStream stream = getClass().getResourceAsStream("/static/index.html");
 		return IOUtils.toByteArray(stream);
