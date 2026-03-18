@@ -11,10 +11,19 @@
 				{{ group.group.name }}
 			</AppText>
 			<div v-if="group.role != 'MEMBER'" class="flex flex-row justify-end gap-1 w-fit">
-				<AppButton variant="secondary" @click="() => openEditDialog(group.group, true)">
+				<AppButton 
+					variant="secondary"
+					aria-label="Edit"
+					@click="() => openEditDialog(group.group, true)"
+					>
 					<font-awesome-icon icon="fa-solid fa-pen-to-square" />
 				</AppButton>
-				<AppButton variant="cancel" v-if="group.role == 'OWNER'" @click="() => { showConfirmDeleteDialog = true; groupBeingDeleted = group.group; }" v-on:click.stop>
+				<AppButton
+				 	variant="cancel"
+					aria-label="Delete"
+					v-if="group.role == 'OWNER'"
+					@click="() => { showConfirmDeleteDialog = true; groupBeingDeleted = group.group; }"
+					v-on:click.stop>
 					<font-awesome-icon icon="fa-solid fa-trash" class="text-rose-700" />
 				</AppButton>
 			</div>
