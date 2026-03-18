@@ -1,6 +1,7 @@
 package dk.dtu._62595.demo.dto;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
 public record CreateRecipeRequest(
@@ -12,5 +13,6 @@ public record CreateRecipeRequest(
         Integer servings,
         Integer prepTimeMinutes,
         String imageUrl,
-        LocalDate lastMade
+        LocalDate lastMade,
+        List<RecipeIngredientRequest> ingredients
 ) {}

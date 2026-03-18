@@ -62,6 +62,12 @@ const router = createRouter({
       name: "recipeEdit",
       component: () => import("../views/EditRecipesView.vue")
     },
+    {
+      path: "/recipes/create",
+      name: "recipeCreate",
+      component: () => import("../views/CreateRecipeView.vue")
+    },
+
   ]
 })
 // Nav guard
