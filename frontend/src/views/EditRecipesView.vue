@@ -1,64 +1,103 @@
 <script setup lang="ts">
-import AppButton from "@/components/AppButton.vue"
-import AppInput from "@/components/AppInput.vue"
-import AppText from "@/components/AppText.vue"
-
-import type { Recipe } from "@/model/Recipe"
-import { apiFetch } from "@/utilities/apiFetch"
-
 import { ref, onMounted } from "vue"
 import { useRoute, useRouter } from "vue-router"
+
+import RecipeForm from "@/components/RecipeForm.vue"
+import type { RecipeFormData, IngredientLine } from "@/components/RecipeForm.vue"
+import { apiFetch } from "@/utilities/apiFetch"
+import type { Recipe } from "@/model/Recipe"
 
 const route = useRoute()
 const router = useRouter()
 
 const recipeId = route.params.id as string
 
-const recipe = ref<Partial<Recipe>>({
+const isLoading = ref(false)
+const isSaving = ref(false)
+const errorMessage = ref("")
+
+const recipe = ref<RecipeFormData>({
   name: "",
   description: "",
   instructions: "",
   mealType: "",
-  servings: undefined,
-  prepTimeMinutes: undefined,
-  imageUrl: undefined,
-  lastMade: undefined
+  servings: null,
+  prepTimeMinutes: null
 })
+
+const ingredients = ref<IngredientLine[]>([])
 
 onMounted(async () => {
-    apiFetch<typeof recipe.value>(`/api/recipes/${recipeId}`)
-        .then((result) => recipe.value = result)
-        .catch(() => console.error("Kunne ikke finde opskrift"))
+  isLoading.value = true
+  try {
+    const data = await apiFetch<Recipe>(`/api/recipes/${recipeId}`, "GET")
+    recipe.value = {
+      name: data.name ?? "",
+      description: data.description ?? "",
+      instructions: data.instructions ?? "",
+      mealType: data.mealType ?? "",
+      servings: data.servings ?? null,
+      prepTimeMinutes: data.prepTimeMinutes ?? null
+    }
+    ingredients.value = (data.ingredients ?? []).map(ing => ({
+      selected: { ingredientId: ing.ingredientId, ingredientName: ing.ingredientName },
+      amount: ing.amount ?? "",
+      unit: ing.unit ?? ""
+    }))
+    if (ingredients.value.length === 0) {
+      ingredients.value.push({ selected: null, amount: "", unit: "" })
+    }
+  } catch (error: any) {
+    errorMessage.value = error.message || "Could not load recipe"
+  } finally {
+    isLoading.value = false
+  }
 })
 
-async function updateRecipe() {
-    await apiFetch(`/api/recipes/${recipeId}`, "PUT", recipe.value)
-        .then(() => router.push("/"))
-        .catch(() => console.error("Kunne ikke opdatere opskrift"));
+async function submit() {
+  errorMessage.value = ""
+  isSaving.value = true
+  try {
+    await apiFetch(`/api/recipes/${recipeId}`, "PUT", {
+      ...recipe.value,
+      ingredients: ingredients.value
+        .filter(l => l.selected)
+        .map(l => ({
+          ingredientName: l.selected!.ingredientName,
+          amount: l.amount === "" ? null : Number(l.amount),
+          unit: l.unit.trim() || null
+        }))
+    })
+    router.push("/recipes")
+  } catch (error: any) {
+    errorMessage.value = error.message || "Could not update recipe"
+  } finally {
+    isSaving.value = false
+  }
 }
 </script>
 
 <template>
   <div class="page">
-    <AppText variant="title" tag="h1">Rediger opskrift</AppText>
-
-    <AppInput v-model="recipe.name" placeholder="Navn" />
-    <AppInput type="textarea" v-model="recipe.description" placeholder="Beskrivelse" />
-    <AppInput type="textarea" v-model="recipe.instructions" placeholder="Instruktioner" />
-    <AppInput v-model="recipe.mealType" placeholder="Meal type" />
-    <AppInput type="number" v-model="recipe.servings" placeholder="Portioner" />
-    <AppInput type="number" v-model="recipe.prepTimeMinutes" placeholder="Tilberedningstid (min)" />
-
-    <AppButton @click="updateRecipe">
-      Gem ændringer
-    </AppButton>
+    <h1>Edit Recipe</h1>
+    <p v-if="isLoading">Loading recipe...</p>
+    <RecipeForm
+      v-else
+      v-model="recipe"
+      v-model:ingredients="ingredients"
+      :is-saving="isSaving"
+      :error-message="errorMessage"
+      submit-label="Save changes"
+      @submit="submit"
+      @cancel="router.push('/recipes')"
+    />
   </div>
 </template>
 
 <style scoped>
 .page {
-  max-width: 600px;
-  margin: 0 auto;
-  padding: 20px;
+  max-width: 700px;
+  margin: 60px auto;
+  padding: 0 24px;
 }
 </style>
