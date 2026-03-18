@@ -1,4 +1,4 @@
-package dk.dtu._62595.demo.service;
+package dk.dtu._62595.demo.services;
 
 import dk.dtu._62595.demo.dto.AuthResponse;
 import dk.dtu._62595.demo.dto.LoginRequest;
@@ -6,6 +6,10 @@ import dk.dtu._62595.demo.dto.RegisterRequest;
 import dk.dtu._62595.demo.model.User;
 import dk.dtu._62595.demo.repositories.UserRepository;
 import dk.dtu._62595.demo.security.JwtUtil;
+
+import java.util.Optional;
+import java.util.UUID;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import org.springframework.stereotype.Service;
@@ -59,6 +63,6 @@ public class UserService {
     }
 
     public void deleteUserByEmail(String email) {
-    userRepository.findByEmail(email).ifPresent(userRepository::delete);
+        userRepository.findByEmail(email).ifPresent(userRepository::delete);
     }
 }
