@@ -4,6 +4,8 @@ import AppButton from "@/components/AppButton.vue"
 import AppCard from "@/components/AppCard.vue"
 import IngredientSearch from "@/components/IngredientSearch.vue"
 import type { IngredientResult } from "@/components/IngredientSearch.vue"
+import GroupSelector from "./GroupSelector.vue"
+import type { Group } from "@/model/Group"
 
 export interface IngredientLine {
   selected: IngredientResult | null
@@ -23,14 +25,17 @@ export interface RecipeFormData {
 const props = defineProps<{
   modelValue: RecipeFormData
   ingredients: IngredientLine[]
+  group: Group | null
   isSaving: boolean
   errorMessage: string
   submitLabel: string
+  canChangeGroup: boolean
 }>()
 
 const emit = defineEmits<{
   'update:modelValue': [value: RecipeFormData]
   'update:ingredients': [value: IngredientLine[]]
+  'update:group': [value: Group | null]
   'submit': []
   'cancel': []
 }>()
@@ -51,6 +56,10 @@ function removeIngredientLine(index: number) {
 function updateIngredientLine(index: number, updated: IngredientLine) {
   const lines = props.ingredients.map((line, i) => i === index ? updated : line)
   emit('update:ingredients', lines)
+}
+
+function updateGroup(group: Group | null) {
+    emit('update:group', group)
 }
 </script>
 
@@ -76,6 +85,15 @@ function updateIngredientLine(index: number, updated: IngredientLine) {
         label="Instructions"
         placeholder="Step by step instructions"
         @update:model-value="updateField('instructions', $event)"
+      />
+
+      <GroupSelector
+      	v-if="canChangeGroup"
+        :model-value="group"
+        label="Group"
+        placeholder="Group..."
+        @update:model-value="updateGroup"
+        allowNull
       />
 
       <div class="row">

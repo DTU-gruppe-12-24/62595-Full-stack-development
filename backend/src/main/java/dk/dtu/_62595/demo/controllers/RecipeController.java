@@ -131,17 +131,22 @@ public class RecipeController {
         );
 
         // Convert to dto
-        return recipes.stream().map(r -> toDto(r, recipeIngredientRepository.findByRecipe(r))).toList();
+        return recipes.stream().distinct().map(r -> toDto(r, recipeIngredientRepository.findByRecipe(r))).toList();
     }
 
    	@PutMapping("/{recipeId}/group")
-	public void addToGroup(@PathVariable UUID recipeId, @RequestBody UUID groupId) {
+	public void addToGroup(@PathVariable UUID recipeId, @RequestBody(required = false) UUID groupId) {
 		User owner = authController.getLoggedInUser();
-		Group group = groupService.getGroupById(groupId);
-		if (!groupService.canUserViewGroup(group, owner)) throw new AuthorizationDeniedException("You do not have permission to access this group!");
 
 		Recipe recipe = recipeRepository.findById(recipeId).orElseThrow();
 		if (!recipe.getOwner().equals(owner)) throw new AuthorizationDeniedException("You do not have permission to edit this recipe!");
+
+		System.out.println(groupId);
+		Group group = null;
+		if (groupId != null) {
+			group = groupService.getGroupById(groupId);
+			if (!groupService.canUserViewGroup(group, owner)) throw new AuthorizationDeniedException("You do not have permission to access this group!");
+		}
 
 		recipe.setGroup(group);
 		recipeRepository.save(recipe);
@@ -179,6 +184,7 @@ public class RecipeController {
                 recipe.getOwner().getName(),
                 recipe.getOwner().getId(),
                 recipe.getGroup() != null ? recipe.getGroup().getId() : null,
+                recipe.getGroup() != null ? recipe.getGroup().getName() : null,
                 recipe.getName(),
                 recipe.getDescription(),
                 recipe.getInstructions(),

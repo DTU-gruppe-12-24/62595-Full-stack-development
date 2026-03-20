@@ -203,7 +203,7 @@ async function submitCustomIngredient() {
     <AppSection>
       <template #title>Group</template>
       <AppCard>
-        <GroupSelector v-model="activeGroup" />
+        <GroupSelector v-model="activeGroup" persist />
       </AppCard>
     </AppSection>
 

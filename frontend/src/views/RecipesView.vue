@@ -78,6 +78,7 @@ function openRecipe(recipe: Recipe) {
           <p><strong>Prep time:</strong> {{ selectedRecipe.prepTimeMinutes ?? "-" }} min</p>
           <p><strong>Last made:</strong> {{ selectedRecipe.lastMade || "-" }}</p>
           <p><strong>Created by:</strong> {{ selectedRecipe.ownerName }}</p>
+          <p v-if="selectedRecipe.groupId"><strong>Part of group:</strong> {{ selectedRecipe.groupName }}</p>
           <div v-if="selectedRecipe.ingredients?.length" class="ingredients-section">
             <p><strong>Ingredients:</strong></p>
             <ul class="ingredient-list">
