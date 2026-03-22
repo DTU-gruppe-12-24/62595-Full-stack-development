@@ -51,17 +51,30 @@ const router = createRouter({
       name: 'groups',
       component: () => import('@/views/GroupView.vue'),
     },
+    {
+      path: '/groups',
+      name: 'groups',
+      component: () => import('@/views/GroupView.vue'),
+    },
 
     {
-      path: "/recipes/create",
-      component: () => import("../views/CreateRecipeView.vue")
+      path: "/recipes",
+      name: "recipes",
+      component: () => import("../views/RecipesView.vue")
     },
 
     {
       path: "/recipes/:id/edit",
+      name: "recipeEdit",
       component: () => import("../views/EditRecipesView.vue")
-    }
-  ],
+    },
+    {
+      path: "/recipes/create",
+      name: "recipeCreate",
+      component: () => import("../views/CreateRecipeView.vue")
+    },
+
+  ]
 })
 // Nav guard
 router.beforeEach((to) => {

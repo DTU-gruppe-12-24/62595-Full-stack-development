@@ -22,7 +22,6 @@ const suggestions = ref<IngredientResult[]>([])
 const showSuggestions = ref(false)
 let searchTimeout: ReturnType<typeof setTimeout> | null = null
 
-// If parent clears the value, clear the input too
 watch(() => props.modelValue, (val) => {
   if (val === null) query.value = ''
 })
@@ -30,6 +29,7 @@ watch(() => props.modelValue, (val) => {
 function onInput() {
   emit('update:modelValue', null)
   showSuggestions.value = true
+  updateDropdownPosition()
 
   if (searchTimeout) clearTimeout(searchTimeout)
 
@@ -57,8 +57,22 @@ function select(suggestion: IngredientResult) {
   emit('update:modelValue', suggestion)
 }
 
+const inputRef = ref<HTMLInputElement | null>(null)
+const dropdownStyle = ref({})
+
+function updateDropdownPosition() {
+  if (!inputRef.value) return
+  const rect = inputRef.value.getBoundingClientRect()
+  dropdownStyle.value = {
+    position: 'fixed',
+    top: rect.bottom + 4 + 'px',
+    left: rect.left + 'px',
+    width: rect.width + 'px',
+    zIndex: '9999',
+  }
+}
+
 function onBlur() {
-  // Delay hiding so clicks on suggestions register first
   setTimeout(() => { showSuggestions.value = false }, 150)
 }
 </script>
@@ -70,6 +84,7 @@ function onBlur() {
     <div class="input-wrap">
       <input
         id="ingredient-search-input"
+        ref="inputRef"
         class="input"
         type="text"
         :placeholder="placeholder ?? 'Search ingredients…'"
@@ -80,30 +95,34 @@ function onBlur() {
         aria-controls="ingredient-suggestions"
         @input="query = ($event.target as HTMLInputElement).value; onInput()"
         @blur="onBlur"
-        @focus="showSuggestions = true"
+        @focus="showSuggestions = true; updateDropdownPosition()"
       />
 
-      <ul
-        v-if="showSuggestions && suggestions.length > 0"
-        id="ingredient-suggestions"
-        class="suggestions"
-      >
-        <li
-          v-for="s in suggestions"
-          :key="s.ingredientId"
-          class="suggestion-item"
-          @mousedown.prevent="select(s)"
+      <Teleport to="body">
+        <ul
+          v-if="showSuggestions && suggestions.length > 0"
+          id="ingredient-suggestions"
+          class="suggestions"
+          :style="dropdownStyle"
         >
-          {{ s.ingredientName }}
-        </li>
-      </ul>
+          <li
+            v-for="s in suggestions"
+            :key="s.ingredientId"
+            class="suggestion-item"
+            @mousedown.prevent="select(s)"
+          >
+            {{ s.ingredientName }}
+          </li>
+        </ul>
 
-      <p
-        v-if="showSuggestions && query.trim() && suggestions.length === 0"
-        class="no-results"
-      >
-        "{{ query }}" is not a recognised ingredient
-      </p>
+        <p
+          v-if="showSuggestions && query.trim() && suggestions.length === 0"
+          class="no-results"
+          :style="dropdownStyle"
+        >
+          "{{ query }}" is not a recognised ingredient — it will be created when added
+        </p>
+      </Teleport>
     </div>
   </div>
 </template>
@@ -143,17 +162,12 @@ function onBlur() {
 }
 
 .suggestions {
-  position: absolute;
-  top: calc(100% + 4px);
-  left: 0;
-  right: 0;
   background: white;
   border: 2px solid var(--color-primary-light);
   border-radius: 8px;
   list-style: none;
   margin: 0;
   padding: 4px 0;
-  z-index: 200;
   max-height: 220px;
   overflow-y: auto;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
@@ -171,10 +185,6 @@ function onBlur() {
 }
 
 .no-results {
-  position: absolute;
-  top: calc(100% + 4px);
-  left: 0;
-  right: 0;
   background: white;
   border: 2px solid var(--color-primary-light);
   border-radius: 8px;
@@ -182,7 +192,6 @@ function onBlur() {
   font-size: 13px;
   color: #888;
   margin: 0;
-  z-index: 200;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
 }
 </style>

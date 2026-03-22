@@ -41,6 +41,11 @@ export default defineComponent({
       <div class="menu">
         <!-- Show these links only if the user is logged in -->
         <template v-if="loggedIn">
+
+          <router-link to="/recipes" class="menu-item">
+            Recipes
+          </router-link>
+
           <RouterLink to="/calendar" class="menu-item">
             Calendar
           </RouterLink>
