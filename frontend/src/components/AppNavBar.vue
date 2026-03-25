@@ -2,6 +2,7 @@
 import { defineComponent, ref, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { isAuthenticated, logout } from '@/services/authService'
+import { showSuccess } from '@/utilities/notifications';
 
 export default defineComponent({
   name: "AppNavBar",
@@ -16,9 +17,10 @@ export default defineComponent({
     })
 
     async function handleLogout() {
-      await logout()
-      loggedIn.value = false
-      router.push('/sign-in')
+        await logout()
+        loggedIn.value = false
+        showSuccess("Logged out successfully.")
+        router.push('/sign-in')
     }
 
     return { loggedIn, handleLogout }

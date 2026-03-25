@@ -24,7 +24,6 @@ const props = defineProps<{
   modelValue: RecipeFormData
   ingredients: IngredientLine[]
   isSaving: boolean
-  errorMessage: string
   submitLabel: string
 }>()
 
@@ -56,8 +55,6 @@ function updateIngredientLine(index: number, updated: IngredientLine) {
 
 <template>
   <AppCard>
-    <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
-
     <div class="form">
       <AppInput
         :model-value="modelValue.name"

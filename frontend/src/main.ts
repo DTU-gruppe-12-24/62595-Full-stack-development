@@ -5,6 +5,8 @@ import router from './router'
 import './styles/base.css'
 import './styles/theme.css'
 
+import 'vue3-toastify/dist/index.css';
+
 // Setup Font Awesome icons (https://fontawesome.com/search?ic=free-collection)
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'

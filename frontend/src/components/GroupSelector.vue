@@ -2,6 +2,7 @@
 import { ref, computed, onMounted } from 'vue'
 import AppDropdown from '@/components/AppDropdown.vue'
 import { apiFetch } from '@/utilities/apiFetch'
+import { showError } from '@/utilities/notifications'
 
 export interface Group {
   id: string
@@ -41,6 +42,7 @@ onMounted(async () => {
     if (initial) selectedName.value = initial.name
     persistAndEmit(initial)
   } catch (e) {
+    showError(e instanceof Error ? e.message : "" + e)
     console.error(e)
   } finally {
     loading.value = false

@@ -8,6 +8,7 @@ import AppDialog from "@/components/AppDialog.vue"
 import { apiFetch } from "@/utilities/apiFetch"
 import { getStoredUser } from "@/services/authService"
 import type { Recipe } from "@/model/Recipe"
+import { showError } from "@/utilities/notifications"
 
 const router = useRouter()
 const currentUserId = getStoredUser()?.userId
@@ -15,7 +16,6 @@ const currentUserId = getStoredUser()?.userId
 const recipes = ref<Recipe[]>([])
 const selectedRecipe = ref<Recipe | null>(null)
 const isLoading = ref(false)
-const errorMessage = ref("")
 const showRecipeDialog = ref(false)
 
 onMounted(async () => {
@@ -24,11 +24,10 @@ onMounted(async () => {
 
 async function loadRecipes() {
   isLoading.value = true
-  errorMessage.value = ""
   try {
     recipes.value = await apiFetch<Recipe[]>("/api/recipes", "GET")
   } catch (error: any) {
-    errorMessage.value = error.message || "Could not load recipes"
+    showError(error.message || "Could not load recipes")
   } finally {
     isLoading.value = false
   }
@@ -50,7 +49,6 @@ function openRecipe(recipe: Recipe) {
       <AppButton variant="primary" @click="router.push('/recipes/create')">Create Recipe</AppButton>
     </div>
 
-    <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
     <p v-if="isLoading">Loading recipes...</p>
 
     <div v-else class="recipe-grid">
@@ -141,6 +139,4 @@ function openRecipe(recipe: Recipe) {
   gap: 4px;
   font-size: 14px;
 }
-
-.error { color: #c0392b; margin: 0; }
 </style>

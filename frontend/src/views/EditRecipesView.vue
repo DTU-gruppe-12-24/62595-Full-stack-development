@@ -6,6 +6,7 @@ import RecipeForm from "@/components/RecipeForm.vue"
 import type { RecipeFormData, IngredientLine } from "@/components/RecipeForm.vue"
 import { apiFetch } from "@/utilities/apiFetch"
 import type { Recipe } from "@/model/Recipe"
+import { showError } from "@/utilities/notifications"
 
 const route = useRoute()
 const router = useRouter()
@@ -14,7 +15,6 @@ const recipeId = route.params.id as string
 
 const isLoading = ref(false)
 const isSaving = ref(false)
-const errorMessage = ref("")
 
 const recipe = ref<RecipeFormData>({
   name: "",
@@ -48,14 +48,13 @@ onMounted(async () => {
       ingredients.value.push({ selected: null, amount: "", unit: "" })
     }
   } catch (error: any) {
-    errorMessage.value = error.message || "Could not load recipe"
+    showError(error.message || "Could not load recipe")
   } finally {
     isLoading.value = false
   }
 })
 
 async function submit() {
-  errorMessage.value = ""
   isSaving.value = true
   try {
     await apiFetch(`/api/recipes/${recipeId}`, "PUT", {
@@ -70,7 +69,7 @@ async function submit() {
     })
     router.push("/recipes")
   } catch (error: any) {
-    errorMessage.value = error.message || "Could not update recipe"
+    showError(error.message || "Could not update recipe")
   } finally {
     isSaving.value = false
   }
@@ -86,7 +85,6 @@ async function submit() {
       v-model="recipe"
       v-model:ingredients="ingredients"
       :is-saving="isSaving"
-      :error-message="errorMessage"
       submit-label="Save changes"
       @submit="submit"
       @cancel="router.push('/recipes')"
