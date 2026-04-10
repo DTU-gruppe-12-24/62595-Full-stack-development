@@ -6,6 +6,9 @@ import dk.dtu._62595.demo.repositories.GroupRepository;
 import dk.dtu._62595.demo.repositories.IngredientRepository;
 import dk.dtu._62595.demo.repositories.RecipeIngredientRepository;
 import dk.dtu._62595.demo.repositories.RecipeRepository;
+import dk.dtu._62595.demo.services.ExternalRecipeService;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,23 +22,18 @@ import java.util.UUID;
 @RequestMapping("/api/recipes")
 public class RecipeController {
 
-    private final RecipeRepository recipeRepository;
-    private final RecipeIngredientRepository recipeIngredientRepository;
-    private final GroupRepository groupRepository;
-    private final IngredientRepository ingredientRepository;
-    private final AuthController authController;
-
-    public RecipeController(RecipeRepository recipeRepository,
-                            RecipeIngredientRepository recipeIngredientRepository,
-                            GroupRepository groupRepository,
-                            IngredientRepository ingredientRepository,
-                            AuthController authController) {
-        this.recipeRepository = recipeRepository;
-        this.recipeIngredientRepository = recipeIngredientRepository;
-        this.groupRepository = groupRepository;
-        this.ingredientRepository = ingredientRepository;
-        this.authController = authController;
-    }
+	@Autowired
+    private RecipeRepository recipeRepository;
+    @Autowired
+    private RecipeIngredientRepository recipeIngredientRepository;
+    @Autowired
+    private GroupRepository groupRepository;
+    @Autowired
+    private IngredientRepository ingredientRepository;
+    @Autowired
+    private AuthController authController;
+    @Autowired
+    private ExternalRecipeService externalRecipeService;
 
     @PostMapping
     @Transactional
@@ -138,6 +136,11 @@ public class RecipeController {
                     );
                 })
                 .toList();
+    }
+
+    @GetMapping("/external/search")
+    public List<ExternalRecipeDto> externalSearch(@RequestParam String q) {
+        return externalRecipeService.search(q);
     }
 
     private RecipeDto toDto(Recipe recipe, List<RecipeIngredient> ingredients) {
