@@ -38,23 +38,18 @@ jobs:
         working-directory: frontend
         run: npx playwright install --with-deps
 
+      - name: Build frontend
+        working-directory: frontend
+        run: npm run build
+        
       - name: Start backend (test profile)
         working-directory: backend
         run: mvn spring-boot:run -Dspring-boot.run.jvmArguments="-Dspring.profiles.active=test -Dspring.devtools.restart.enabled=false" &
 
-      - name: Start frontend
-        working-directory: frontend
-        run: npm run dev &
-
-      - name: Wait for backend to be ready
+      - name: Wait for site to be ready
         run: |
-          echo "Waiting for backend..."
+          echo "Waiting for site..."
           until curl -s http://localhost:8080/actuator/health; do sleep 2; done
-
-      - name: Wait for frontend to be ready
-        run: |
-          echo "Waiting for frontend..."
-          until curl -s http://localhost:5173; do sleep 2; done
 
       - name: Run Playwright tests
         working-directory: frontend
