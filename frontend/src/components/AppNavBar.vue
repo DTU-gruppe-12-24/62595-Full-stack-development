@@ -50,12 +50,17 @@ export default defineComponent({
             Calendar
           </RouterLink>
 
+
           <RouterLink to="/shopping" class="menu-item">
             Shopping List
           </RouterLink>
 
           <RouterLink to="/groups" class="menu-item">
             Groups
+          </RouterLink>
+
+          <RouterLink to="/statistics" class="menu-item">
+            My statistics
           </RouterLink>
 
           <a class="menu-item" @click.prevent="handleLogout" href="#">
