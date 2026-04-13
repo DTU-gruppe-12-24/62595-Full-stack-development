@@ -73,7 +73,7 @@ public class ExternalRecipeService {
 					"",
 					recipe.get("strInstructions").toString(),
 					null,
-					1,
+					0,
 					0,
 					recipe.get("strMealThumb").toString(),
 					ingredients,

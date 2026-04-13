@@ -24,6 +24,7 @@ let searchTimeout: ReturnType<typeof setTimeout> | null = null
 
 watch(() => props.modelValue, (val) => {
   if (val === null) query.value = ''
+  else if (val.ingredientId === null) query.value = val.ingredientName ?? ''
 })
 
 function onInput() {
