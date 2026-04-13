@@ -7,7 +7,7 @@ const TEST_USER = {
 };
 
 async function globalSetup(config: FullConfig) {
-  const baseURL = (config as any).use?.baseURL || 'http://localhost:5173';
+  const baseURL = (config as any).projects[0].use?.baseURL || 'http://localhost:8080';
   console.log("Using baseURL:", baseURL);
 
   // Register test user
