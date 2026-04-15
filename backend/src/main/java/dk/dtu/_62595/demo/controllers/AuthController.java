@@ -9,9 +9,10 @@ import dk.dtu._62595.demo.model.User;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+
+import java.util.UUID;
 
 @RestController
 @RequestMapping(value = "/api/auth", consumes = { "application/xml", "application/json" })
@@ -41,22 +42,20 @@ public class AuthController {
     }
 
     public User getLoggedInUser() {
-		var authentication = SecurityContextHolder.getContext().getAuthentication();
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
 
-		if (authentication == null || authentication.getPrincipal() == null) {
-			throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "No active session found");
-		}
+        if (authentication == null || !authentication.isAuthenticated() || authentication.getPrincipal() == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "No active session found");
+        }
 
-		Object principal = authentication.getPrincipal();
-		String email;
+        String userIdStr = authentication.getName();
 
-		if (principal instanceof UserDetails userDetails) {
-			email = userDetails.getUsername();
-		} else {
-			email = principal.toString();
-		}
-
-		return userService.find(email)
-				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User record not found in database"));
-	}
+        try {
+            UUID userId = UUID.fromString(userIdStr);
+            return userService.find(userId)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User record not found"));
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid user identifier in token");
+        }
+    }
 }

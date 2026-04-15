@@ -1,40 +1,32 @@
-<script lang="ts">
-import { defineComponent, ref, watch } from 'vue'
+<script setup lang="ts">
+import { ref, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { isAuthenticated, logout } from '@/services/authService'
+import { isAuthenticated } from '@/services/authService'
+import UserProfileDialog from '@/views/UserProfileDialog.vue'
 
-export default defineComponent({
-  name: "AppNavBar",
-  setup() {
-    const router = useRouter()
-    const route = useRoute()
+const router = useRouter()
+const route = useRoute()
 
-    // Re-check auth state whenever the route changes
-    const loggedIn = ref(isAuthenticated())
-    watch(() => route.path, () => {
-      loggedIn.value = isAuthenticated()
-    })
+const loggedIn = ref(isAuthenticated())
+const showProfile = ref(false)
+const currentUserName = ref("User")
 
-    async function handleLogout() {
-      await logout()
-      loggedIn.value = false
-      router.push('/sign-in')
-    }
-
-    return { loggedIn, handleLogout }
-  }
+watch(() => route.path, () => {
+  loggedIn.value = isAuthenticated()
 })
+
+function onLogout() {
+  loggedIn.value = false
+  router.push('/sign-in')
+}
+
 </script>
 
 <template>
   <nav class="navbar">
     <div class="navbar-container">
-
-      <!-- Logo -->
       <div class="logo">
-        <RouterLink to="/" class="menu-item">
-          food plan
-        </RouterLink>
+        <RouterLink to="/" class="menu-item">food plan</RouterLink>
       </div>
 
       <!-- Menu links -->
@@ -63,9 +55,10 @@ export default defineComponent({
             My statistics
           </RouterLink>
 
-          <a class="menu-item" @click.prevent="handleLogout" href="#">
-            Log out
-          </a>
+          <button class="user-pill" @click="showProfile = true">
+            <span class="icon">👤</span>
+            <span>Account</span>
+          </button>
         </template>
         <!-- Show these links only if the user is not logged in -->
         <template v-else>
@@ -74,9 +67,13 @@ export default defineComponent({
           </RouterLink>
         </template>
       </div>
-
     </div>
   </nav>
+
+  <UserProfileDialog
+      v-model="showProfile"
+      @logged-out="onLogout"
+  />
 </template>
 <style scoped>
 
@@ -85,19 +82,13 @@ export default defineComponent({
   top: 0;
   left: 0;
   width: 100%;
-
   height: 64px;
-
   background: var(--color-primary);
   color: white;
-
   display: flex;
   align-items: center;
-
-  padding: 0 24px;
-
+  padding: 0 var(--space-lg);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-
   z-index: 1000;
 }
 
@@ -108,29 +99,33 @@ export default defineComponent({
   align-items: center;
 }
 
-.logo {
-  font-weight: 600;
-  font-size: 18px;
-}
-
 .menu {
   display: flex;
-  gap: 24px;
+  align-items: center;
+  gap: var(--space-lg);
 }
 
 .menu-item {
   color: white;
   text-decoration: none;
   font-weight: 500;
-  transition: opacity 0.2s ease;
 }
 
-.menu-item:hover {
-  opacity: 0.8;
+
+.icon {
+  font-size: 20px;
 }
 
-.router-link-active {
-  border-bottom: 2px solid var(--color-primary-light);
+.user-pill {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  padding: 6px 16px;
+  border-radius: 20px;
+  color: white;
+  cursor: pointer;
+  font-weight: 500;
 }
-
 </style>
