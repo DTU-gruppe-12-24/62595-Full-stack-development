@@ -91,8 +91,6 @@ function applyExternalRecipe(selected: ExternalRecipeDto, index: number) {
     prepTimeMinutes: selected.prepTimeMinutes ?? null
   }
 
-  console.log(selected)
-
   const mappedLines: IngredientLine[] = (selected.ingredients ?? [])
     .filter(i => i && i.ingredientName && i.ingredientName.trim())
         .map(i => ({

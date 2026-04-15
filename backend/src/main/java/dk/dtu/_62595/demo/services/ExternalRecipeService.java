@@ -26,6 +26,17 @@ public class ExternalRecipeService {
 	@Autowired
 	private IngredientRepository ingredientRepository;
 
+	private Float toNumber(String str) {
+		try {
+			if (str.contains("/")) {
+				return Float.parseFloat(str.split("/")[0]) / Float.parseFloat(str.split("/")[1]);
+			}
+			return Float.parseFloat(str);
+		} catch (Exception e) {
+			return null;
+		}
+	}
+
 	@Transactional
 	public List<ExternalRecipeDto> search(String searchTerm) {
 		try {
@@ -52,16 +63,26 @@ public class ExternalRecipeService {
 				var ingredients = new ArrayList<RecipeIngredientDto>();
 				for (int i = 1; i <= 20; i++) {
 					try {
+						if (recipe.get("strMeasure" + i).toString().isBlank()) continue;
+						System.out.println(recipe.get("strMeasure" + i));
 						String name = recipe.get("strIngredient" + i) != null ? recipe.get("strIngredient" + i).toString() : null;
-						String measure = recipe.get("strMeasure" + i) != null ? recipe.get("strMeasure" + i).toString() : null;
+						String strMeasure = recipe.get("strMeasure" + i).toString();
+						List<String> measure = List.of(strMeasure.split(" "));
 
 						var searchResults = ingredientRepository.searchByRelevance(name);
 						var ingredient = !searchResults.isEmpty() ? searchResults.getFirst() : null;
+
+						var stream = measure
+							.subList(0, measure.size())
+							.stream()
+							.map(s -> toNumber(s)).filter(n -> n != null);
+						String measureUnit = (toNumber(measure.getLast()) == null) ? measure.getLast() : "piece";
+						float measureAmount = stream.reduce((a, b) -> a.floatValue() + b.floatValue()).orElse(0f).floatValue();
 						ingredients.add(new RecipeIngredientDto(
 							ingredient != null ? ingredient.getId() : null,
 							ingredient != null ? ingredient.getName() : name,
-							Float.parseFloat(measure.split(" ")[0]),
-							measure.split(" ")[1]
+							measureAmount,
+							measureUnit
 						));
 					} catch (Exception e) {
 						// Ignore missing/invalid ingredients
@@ -70,7 +91,7 @@ public class ExternalRecipeService {
 
 				recipes.add(new ExternalRecipeDto(
 					recipe.get("strMeal").toString(),
-					"",
+					recipe.get("strSource") != null ? recipe.get("strSource").toString() : null,
 					recipe.get("strInstructions").toString(),
 					null,
 					0,
@@ -83,6 +104,7 @@ public class ExternalRecipeService {
 
 			return recipes;
 		} catch (Exception e) {
+			System.err.println(e.getMessage());
 			e.printStackTrace();
 			throw new RuntimeException("Failed to fetch recipes from external API");
 		}

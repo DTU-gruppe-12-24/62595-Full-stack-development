@@ -37,7 +37,7 @@ function onInput(event: Event) {
     <textarea v-if="type === 'textarea'"
         class="input h-full w-full"
         :placeholder="placeholder"
-        :value="modelValue"
+        :value="modelValue as string | number | readonly string[] | null | undefined"
         :min="min"
         :max="max"
         @input="onInput"

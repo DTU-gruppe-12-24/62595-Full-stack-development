@@ -23,12 +23,13 @@ public interface IngredientRepository extends Repository<Ingredient, UUID> {
     @org.springframework.data.jpa.repository.Query(
         """
         SELECT i FROM Ingredient i
-        WHERE LOWER(i.name) LIKE LOWER(CONCAT('%', :query, '%'))
+        WHERE LOWER(i.name) LIKE LOWER(REPLACE(CONCAT('%', :query, '%'), ' ', '%'))
         ORDER BY
             CASE
                 WHEN LOWER(i.name) = LOWER(:query)                    THEN 0
                 WHEN LOWER(i.name) LIKE LOWER(CONCAT(:query, '%'))    THEN 1
-                ELSE                                                       2
+                WHEN LOWER(i.name) LIKE LOWER(CONCAT('%', :query, '%'))    THEN 2
+                ELSE                                                       3
             END,
             i.name
         LIMIT 20
