@@ -227,7 +227,7 @@ async function submitCustomIngredient() {
         <template #title>Items ({{ remainingCount }} left)</template>
         <AppCard class="list-card">
           <div v-if="loading" class="empty">Loading…</div>
-          <div v-else-if="items.length === 0" class="empty">No items yet — add some above.</div>
+          <div v-else-if="items.length === 0" class="empty">No items yet, add some above.</div>
 
           <div v-for="item in items" :key="item.id" class="list-item">
             <AppCheckbox
@@ -263,7 +263,7 @@ async function submitCustomIngredient() {
       </template>
     </AppDialog>
 
-    <!-- Add recipe — not implemented -->
+    <!-- Add recipe (not implemented) -->
     <AppDialog v-model="showAddRecipeDialog" title="Add recipe">
       <p>Not implemented yet.</p>
       <template #footer>
@@ -271,7 +271,7 @@ async function submitCustomIngredient() {
       </template>
     </AppDialog>
 
-    <!-- Generate — not implemented -->
+    <!-- Generate (not implemented) -->
     <AppDialog v-model="showGenerateDialog" title="Generate shopping list">
       <p>Not implemented yet.</p>
       <template #footer>
