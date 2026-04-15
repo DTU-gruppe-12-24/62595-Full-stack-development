@@ -103,4 +103,41 @@ public class GroupService {
 	public void removeGroupMember(Group group, User member) {
 		groupMemberRepository.delete(groupMemberRepository.findById(new GroupMember.GroupMemberId(member.getId(), group.getId())).orElseThrow());
 	}
+	@Transactional
+	public void cleanupUserGroups(User user) {
+		// Get all memberships for this user
+		List<GroupMember> memberships = groupMemberRepository.findByUser(user);
+
+		for (GroupMember membership : memberships) {
+			Group group = membership.getGroup();
+
+			// If the user is the owner, we need a successor
+			if (membership.getRole() == GroupMember.Role.OWNER) {
+				transferOwnershipOrDelete(group, user);
+			}
+
+			// Remove the user from the group (maybe not necessary as it should cascade from user deletion.
+			groupMemberRepository.delete(membership);
+		}
+	}
+
+	private void transferOwnershipOrDelete(Group group, User userBeingDeleted) {
+		List<GroupMember> otherMembers = groupMemberRepository.findByGroup(group).stream()
+				.filter(m -> !m.getUser().getId().equals(userBeingDeleted.getId()))
+				.toList();
+
+		if (otherMembers.isEmpty()) {
+			// No one left to take over => wipe the group
+			groupRepository.deleteById(group.getId());
+		} else {
+			// Find the best successor: Prefer ADMIN, else first available
+			GroupMember successor = otherMembers.stream()
+					.filter(m -> m.getRole() == GroupMember.Role.ADMIN)
+					.findFirst()
+					.orElse(otherMembers.getFirst());
+
+			successor.setRole(GroupMember.Role.OWNER);
+			groupMemberRepository.save(successor);
+		}
+	}
 }
