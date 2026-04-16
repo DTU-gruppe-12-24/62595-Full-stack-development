@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { ref, onMounted } from "vue"
+import { ref, onMounted, onBeforeMount } from "vue"
 import { useRoute, useRouter } from "vue-router"
 
 import RecipeForm from "@/components/RecipeForm.vue"
 import type { RecipeFormData, IngredientLine } from "@/components/RecipeForm.vue"
-import { apiFetch } from "@/utilities/apiFetch"
+import { apiFetch, getMyUser } from "@/utilities/apiFetch"
 import type { Recipe } from "@/model/Recipe"
+import type { Group } from "@/model/Group"
 
 const route = useRoute()
 const router = useRouter()
@@ -27,7 +28,12 @@ const recipe = ref<RecipeFormData>({
 
 const ingredients = ref<IngredientLine[]>([])
 
-onMounted(async () => {
+const group = ref<Group | null>(null);
+
+const myUser = getMyUser()!;
+const canEditGroup = ref(false);
+
+onBeforeMount(async () => {
   isLoading.value = true
   try {
     const data = await apiFetch<Recipe>(`/api/recipes/${recipeId}`, "GET")
@@ -44,9 +50,10 @@ onMounted(async () => {
       amount: ing.amount ?? "",
       unit: ing.unit ?? ""
     }))
-    if (ingredients.value.length === 0) {
+    canEditGroup.value = data.ownerId == myUser.id;
+    group.value = data.groupId ? (await apiFetch<Group>(`/api/group/${data.groupId}`)) : null
+    if (ingredients.value.length === 0)
       ingredients.value.push({ selected: null, amount: "", unit: "" })
-    }
   } catch (error: any) {
     errorMessage.value = error.message || "Could not load recipe"
   } finally {
@@ -68,6 +75,9 @@ async function submit() {
           unit: l.unit.trim() || null
         }))
     })
+
+    if (canEditGroup) await apiFetch(`/api/recipes/${recipeId}/group`, "PUT", group.value?.id)
+
     router.push("/recipes")
   } catch (error: any) {
     errorMessage.value = error.message || "Could not update recipe"
@@ -85,6 +95,8 @@ async function submit() {
       v-else
       v-model="recipe"
       v-model:ingredients="ingredients"
+      v-model:group="group"
+      :canChangeGroup="canEditGroup"
       :is-saving="isSaving"
       :error-message="errorMessage"
       submit-label="Save changes"
