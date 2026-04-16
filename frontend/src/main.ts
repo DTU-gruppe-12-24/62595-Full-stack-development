@@ -19,7 +19,7 @@ library.add([faRightFromBracket, faPenToSquare, faTrash])
 createApp(App)
     .use(router)
     .use(Vue3Toastify, {
-        limit: 1
+        limit: 10
     })
     .component('font-awesome-icon', FontAwesomeIcon)
     .mount('#app')
