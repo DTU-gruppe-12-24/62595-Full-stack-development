@@ -7,6 +7,8 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -64,20 +66,22 @@ public class ExternalRecipeService {
 				for (int i = 1; i <= 20; i++) {
 					try {
 						if (recipe.get("strMeasure" + i).toString().isBlank()) continue;
-						System.out.println(recipe.get("strMeasure" + i));
 						String name = recipe.get("strIngredient" + i) != null ? recipe.get("strIngredient" + i).toString() : null;
 						String strMeasure = recipe.get("strMeasure" + i).toString();
-						List<String> measure = List.of(strMeasure.split(" "));
+						List<String> measure = new ArrayList<>(0); //List.of(strMeasure.split(" "));
 
+						Matcher matcher = Pattern.compile("(\\d+((\\/\\d+)?|(\\.\\d)?)+)").matcher(strMeasure);
+						while (matcher.find()) measure.add(matcher.group());
 						var searchResults = ingredientRepository.searchByRelevance(name);
 						var ingredient = !searchResults.isEmpty() ? searchResults.getFirst() : null;
 
-						var stream = measure
-							.subList(0, measure.size())
-							.stream()
-							.map(s -> toNumber(s)).filter(n -> n != null);
-						String measureUnit = (toNumber(measure.getLast()) == null) ? measure.getLast() : "piece";
-						float measureAmount = stream.reduce((a, b) -> a.floatValue() + b.floatValue()).orElse(0f).floatValue();
+						String measureUnit = strMeasure.replaceAll("(\\d+((\\/\\d+)?|(\\.\\d)?)+)", "").trim();
+						if (measureUnit.isBlank()) measureUnit = "piece";
+						float measureAmount = measure.stream()
+							.map(s -> toNumber(s))
+							.filter(n -> n != null)
+							.reduce((a, b) -> a.floatValue() + b.floatValue())
+							.orElse(0f).floatValue();
 						ingredients.add(new RecipeIngredientDto(
 							ingredient != null ? ingredient.getId() : null,
 							ingredient != null ? ingredient.getName() : name,
@@ -85,6 +89,7 @@ public class ExternalRecipeService {
 							measureUnit
 						));
 					} catch (Exception e) {
+						System.err.println(e.getMessage());
 						// Ignore missing/invalid ingredients
 					}
 				}
