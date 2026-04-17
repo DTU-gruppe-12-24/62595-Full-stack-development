@@ -2,10 +2,14 @@ package dk.dtu._62595.demo.model;
 
 import java.io.Serializable;
 import java.util.UUID;
+import java.util.regex.Pattern;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Table;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.JoinColumn;
@@ -30,11 +34,13 @@ public class RecipeIngredient {
 
 	private Float amount;
 
-	private String unit;
+	@Column(columnDefinition = "VARCHAR(255)")
+	@Enumerated(EnumType.STRING)
+	private Unit unit;
 
 	public RecipeIngredient() {}
 
-	public RecipeIngredient(Recipe recipe, Ingredient ingredient, Float amount, String unit) {
+	public RecipeIngredient(Recipe recipe, Ingredient ingredient, Float amount, Unit unit) {
 		this.id = new RecipeIngredientId(recipe.getId(), ingredient.getId());
 		this.recipe = recipe;
 		this.ingredient = ingredient;
@@ -48,7 +54,7 @@ public class RecipeIngredient {
 	public Recipe getRecipe() { return recipe; }
 	public Ingredient getIngredient() { return ingredient; }
 	public Float getAmount() { return amount; }
-	public String getUnit() { return unit; }
+	public Unit getUnit() { return unit; }
 
 	@Embeddable
 	public static class RecipeIngredientId implements Serializable {
@@ -88,4 +94,48 @@ public class RecipeIngredient {
 			return recipeId.hashCode() + ingredientId.hashCode();
 		}
 	}
+
+	public enum Unit {
+		GRAM("g"),
+		KILOGRAM("kg"),
+		MILLILITER("mL"),
+		DECILITER("dL"),
+		LITER("L"),
+		TABLESPOON("tbsp"),
+		TEASPOON("tsp"),
+		PINCH("pinch"),
+		POUND("lb"),
+		OUNCE("oz"),
+		CUP("cup"),
+		PIECE("piece"),
+		NOTHING("");
+
+		private final String string;
+		private Unit(String string) { this.string = string; }
+
+		public String ToString() {
+			return string;
+		}
+
+		public static Unit fromString(String string) {
+			String check = string.toLowerCase().trim();
+			for (Unit unit : Unit.values()) {
+				if (unit.string.equalsIgnoreCase(check))
+					return unit;
+			}
+
+			if (Pattern.matches("grams?", check)) return GRAM;
+			if (Pattern.matches("kilograms?", check)) return KILOGRAM;
+			if (Pattern.matches("milliliters?", check)) return MILLILITER;
+			if (Pattern.matches("deciliters?", check)) return DECILITER;
+			if (Pattern.matches("liters?", check)) return LITER;
+			if (Pattern.matches("tbl?s(pn?)?|tablespoons?", check)) return TABLESPOON;
+			if (Pattern.matches("ts(pn?)?|teaspoons?", check)) return TEASPOON;
+			if (Pattern.matches("pinch(es)?", check)) return PINCH;
+			if (Pattern.matches("ounce(s)?", check)) return OUNCE;
+			if (Pattern.matches("cups?", check)) return CUP;
+
+			return NOTHING;
+		}
+    }
 }

@@ -2,6 +2,7 @@ package dk.dtu._62595.demo.controllers;
 
 import dk.dtu._62595.demo.dto.*;
 import dk.dtu._62595.demo.model.*;
+import dk.dtu._62595.demo.model.RecipeIngredient.Unit;
 import dk.dtu._62595.demo.repositories.IngredientRepository;
 import dk.dtu._62595.demo.repositories.RecipeIngredientRepository;
 import dk.dtu._62595.demo.repositories.RecipeRepository;
@@ -163,7 +164,7 @@ public class RecipeController {
                                     new Ingredient(r.ingredientName().trim(), null, null, null, null, null, null, null, null)
                             ));
                     return recipeIngredientRepository.save(
-                            new RecipeIngredient(recipe, ingredient, r.amount(), r.unit())
+                            new RecipeIngredient(recipe, ingredient, r.amount(), Unit.fromString(r.unit()))
                     );
                 })
                 .toList();
@@ -175,7 +176,7 @@ public class RecipeController {
                         ri.getIngredient().getId(),
                         ri.getIngredient().getName(),
                         ri.getAmount(),
-                        ri.getUnit()
+                        ri.getUnit().ToString()
                 ))
                 .toList();
 

@@ -57,6 +57,7 @@ function onInput(event: Event) {
   outline: none;
   font-size: 14px;
   transition: 0.2s ease;
+  height: 3rem;
 }
 
 .input:focus {

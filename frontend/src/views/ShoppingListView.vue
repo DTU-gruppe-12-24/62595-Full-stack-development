@@ -5,6 +5,7 @@ import AppContainer from '@/components/AppContainer.vue'
 import AppSection from '@/components/AppSection.vue'
 import AppCard from '@/components/AppCard.vue'
 import AppInput from '@/components/AppInput.vue'
+import AppDropdown from '@/components/AppDropdown.vue'
 import AppButton from '@/components/AppButton.vue'
 import AppCheckbox from '@/components/AppCheckbox.vue'
 import AppText from '@/components/AppText.vue'
@@ -15,13 +16,14 @@ import type { Group } from '@/components/GroupSelector.vue'
 import type { IngredientResult } from '@/components/IngredientSearch.vue'
 
 import { apiFetch } from '@/utilities/apiFetch'
+import { Unit } from '@/model/RecipeIngredient'
 
 interface ShoppingItem {
   id: string
   ingredientId: string
   ingredientName: string
   amount: number
-  unit: string | null
+  unit: Unit | null
   isBought: boolean
 }
 
@@ -104,7 +106,7 @@ function exportList() {
 const showAddDialog = ref(false)
 const selectedIngredient = ref<IngredientResult | null>(null)
 const newAmount = ref<number | ''>('')
-const newUnit = ref('')
+const newUnit = ref<`${Unit}`>('')
 const addError = ref('')
 
 function openAddDialog() {
@@ -122,10 +124,10 @@ async function submitAddItem() {
   if (!activeGroup.value) return
 
   try {
-    const item = await apiFetch<ShoppingItem, { ingredientName: string; amount: number; unit: string }>(
+    const item = await apiFetch<ShoppingItem, { ingredientName: string; amount: number; unit: `${Unit}` }>(
       `/api/shopping-list/${activeGroup.value.id}`,
       'POST',
-      { ingredientName: selectedIngredient.value.ingredientName, amount: Number(newAmount.value), unit: newUnit.value.trim() }
+      { ingredientName: selectedIngredient.value.ingredientName, amount: Number(newAmount.value), unit: newUnit.value }
     )
     const existing = items.value.findIndex(i => i.id === item.id)
     if (existing !== -1) items.value[existing] = item
@@ -253,7 +255,12 @@ async function submitCustomIngredient() {
         />
         <div class="amount-row">
           <AppInput v-model="newAmount" label="Amount" type="number" placeholder="e.g. 500" />
-          <AppInput v-model="newUnit" label="Unit (optional)" placeholder="e.g. grams, loafs" />
+          <AppDropdown
+          		label="Unit (optional)"
+				:values="Object.values(Unit)"
+				v-model="newUnit"
+				placeholder=""
+			/>
         </div>
         <p v-if="addError" class="error-text">{{ addError }}</p>
       </div>

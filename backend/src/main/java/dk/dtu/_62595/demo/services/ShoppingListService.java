@@ -6,6 +6,7 @@ import dk.dtu._62595.demo.model.Group;
 import dk.dtu._62595.demo.model.Ingredient;
 import dk.dtu._62595.demo.model.ShoppingList;
 import dk.dtu._62595.demo.model.User;
+import dk.dtu._62595.demo.model.RecipeIngredient.Unit;
 import dk.dtu._62595.demo.repositories.GroupMemberRepository;
 import dk.dtu._62595.demo.repositories.GroupRepository;
 import dk.dtu._62595.demo.repositories.IngredientRepository;
@@ -78,12 +79,12 @@ public class ShoppingListService {
                     return toDto(shoppingListRepository.save(new ShoppingList(
                             group, ingredient,
                             existing.getAmount() + request.amount(),
-                            request.unit(),
+                            Unit.fromString(request.unit()),
                             existing.isBought()
                     )));
                 })
                 .orElseGet(() -> toDto(shoppingListRepository.save(
-                        new ShoppingList(group, ingredient, request.amount(), request.unit(), false)
+                        new ShoppingList(group, ingredient, request.amount(), Unit.fromString(request.unit()), false)
                 )));
     }
 
@@ -132,7 +133,7 @@ public class ShoppingListService {
                 item.getIngredient().getId(),
                 item.getIngredient().getName(),
                 item.getAmount(),
-                item.getUnit(),
+                item.getUnit().ToString(),
                 item.isBought()
         );
     }
