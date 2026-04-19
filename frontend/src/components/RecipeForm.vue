@@ -27,7 +27,6 @@ const props = defineProps<{
   ingredients: IngredientLine[]
   group: Group | null
   isSaving: boolean
-  errorMessage: string
   submitLabel: string
   canChangeGroup: boolean
 }>()
@@ -65,8 +64,6 @@ function updateGroup(group: Group | null) {
 
 <template>
   <AppCard>
-    <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
-
     <div class="form">
       <AppInput
         :model-value="modelValue.name"
