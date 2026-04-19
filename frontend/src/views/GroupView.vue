@@ -120,6 +120,7 @@ import { apiFetch, getMyUser } from "@/utilities/apiFetch"
 import type { GroupMember } from '@/model/GroupMember'
 import AppSection from '@/components/AppSection.vue'
 import type { User } from '@/model/User'
+import { showError } from '@/utilities/notifications'
 
 const myUser = getMyUser()!;
 
@@ -143,6 +144,7 @@ function getGroups() {
 	apiFetch<{group: Group, role: GroupMember["role"]}[]>("/api/group/me", "GET")
 		.then((result) => groups.value = result)
 		.catch((error) => {
+			showError(error instanceof Error ? error.message : "" + error)
 			console.error(error);
 		});
 }
@@ -159,7 +161,7 @@ function openEditDialog(group: Group, edit: boolean) {
     groupBeingShown.value = group;
     apiFetch<GroupMember[]>(`/api/group/${group.id}/members`)
         .then((members) => groupMembers.value[group.id] = members)
-        .catch((error) => { console.error(error) });
+        .catch((error) => { showError(error instanceof Error ? error.message : "" + error) });
 	editGroupName.value = group.name;
 	showEditDialog.value = true;
 	allowEdit.value = edit
@@ -174,19 +176,19 @@ function submitEditGroup() {
 function createGroup(name: string) {
 	apiFetch<Group, Partial<Group>>("/api/group", "POST", { name })
 		.then((result) => groups.value.push({group: result, role: "OWNER"}))
-		.catch((error) => { console.error(error) });
+		.catch((error) => { showError(error instanceof Error ? error.message : "" + error) });
 }
 
 function updateGroup(group: Group, name: string) {
 	apiFetch<Group, Partial<Group>>("/api/group/" + group.id, "PUT", { name })
 		.then((_) => getGroups())
-		.catch((error) => { console.error(error) });
+		.catch((error) => { showError(error instanceof Error ? error.message : "" + error) });
 }
 
 function deleteGroup(group: Group) {
 	apiFetch("/api/group/" + group.id, "DELETE")
 		.then((_) => getGroups())
-		.catch((error) => { console.error(error); });
+		.catch((error) => { showError(error instanceof Error ? error.message : "" + error) });
 }
 
 function inviteMember() {
@@ -198,10 +200,10 @@ function inviteMember() {
                                 groupMembers.value[group.id] = members
                                 inviteEmail.value = ""
                             })
-                            .catch((error) => { console.error(error) });
-			else console.log("Failed to invite member");
+                            .catch((error) => { showError(error instanceof Error ? error.message : "" + error) });
+			else showError("Failed to invite member");
 		})
-		.catch((error) => { console.error(error); });
+		.catch((error) => { showError(error instanceof Error ? error.message : "" + error) });
 }
 
 function updateMemberRole(member: Omit<GroupMember, "id">) {
@@ -210,6 +212,7 @@ function updateMemberRole(member: Omit<GroupMember, "id">) {
 			groupMembers.value[member.group.id] = response
 		})
         .catch((error) => {
+            showError(error instanceof Error ? error.message : "" + error);
             console.error(error);
             openEditDialog(member.group, true);
         });
@@ -222,7 +225,7 @@ function removeMember(member: Omit<GroupMember, "id">) {
             if (member.user.id != myUser.id) openEditDialog(member.group, allowEdit.value);
             else showEditDialog.value = false;
         })
-		.catch((error) => { console.error(error); });
+		.catch((error) => { showError(error instanceof Error ? error.message : "" + error) });
 }
 
 </script>
