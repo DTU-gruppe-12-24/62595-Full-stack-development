@@ -5,30 +5,28 @@ import AppButton from '@/components/AppButton.vue'
 import AppInput from '@/components/AppInput.vue'
 import AppCard from '@/components/AppCard.vue'
 import { login } from '@/services/authService'
+import { showError, showSuccess } from '@/utilities/notifications'
 
 const router = useRouter()
 
 const email = ref('')
 const password = ref('')
-const errorMessage = ref('')
 const loading = ref(false)
 
 async function handleSubmit() {
-  errorMessage.value = ''
 
-  if (!email.value || !password.value) {
-    errorMessage.value = 'Please fill in all fields.'
-    return
-  }
+  if (!email.value || !password.value)
+      return showError('Please fill in all fields.');
 
   loading.value = true
   try {
-    await login(email.value, password.value)
-    await router.push('/')
+      await login(email.value, password.value)
+      showSuccess('Logged in successfully.')
+      await router.push('/')
   } catch (err: unknown) {
-    errorMessage.value = err instanceof Error ? err.message : 'Login failed.'
+      showError(err instanceof Error ? err.message : 'Login failed.');
   } finally {
-    loading.value = false
+      loading.value = false
   }
 }
 </script>
@@ -61,8 +59,6 @@ async function handleSubmit() {
               @keyup.enter="handleSubmit"
             />
           </div>
-
-          <p v-if="errorMessage" class="error-text">{{ errorMessage }}</p>
         </div>
 
         <template #footer>
@@ -133,12 +129,6 @@ async function handleSubmit() {
   font-size: 0.875rem;
   font-weight: 600;
   color: var(--color-text-light, #222);
-}
-
-.error-text {
-  margin: 4px 0 0;
-  color: #c0392b;
-  font-size: 0.875rem;
 }
 
 .auth-footer {

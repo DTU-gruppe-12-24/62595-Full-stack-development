@@ -1,82 +1,209 @@
 package dk.dtu._62595.demo.controllers;
 
-import dk.dtu._62595.demo.model.Recipe;
-import dk.dtu._62595.demo.model.User;
-import dk.dtu._62595.demo.model.Group;
+import dk.dtu._62595.demo.dto.*;
+import dk.dtu._62595.demo.model.*;
+import dk.dtu._62595.demo.repositories.IngredientRepository;
+import dk.dtu._62595.demo.repositories.RecipeIngredientRepository;
 import dk.dtu._62595.demo.repositories.RecipeRepository;
 import dk.dtu._62595.demo.services.GroupService;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping(value = "/api/recipes", consumes = { "application/xml", "application/json" })
+@RequestMapping("/api/recipes")
 public class RecipeController {
 
-	@Autowired
-    private RecipeRepository recipeRepository;
-    @Autowired
-    private GroupService groupService;
-    @Autowired
-	AuthController authController;
+    private final RecipeRepository recipeRepository;
+    private final RecipeIngredientRepository recipeIngredientRepository;
+    private final IngredientRepository ingredientRepository;
+
+    private final GroupService groupService;
+    private final AuthController authController;
+
+    public RecipeController(RecipeRepository recipeRepository,
+                            RecipeIngredientRepository recipeIngredientRepository,
+                            GroupService groupService,
+                            IngredientRepository ingredientRepository,
+                            AuthController authController) {
+        this.recipeRepository = recipeRepository;
+        this.recipeIngredientRepository = recipeIngredientRepository;
+        this.groupService = groupService;
+        this.ingredientRepository = ingredientRepository;
+        this.authController = authController;
+    }
 
     @PostMapping
     @Transactional
-    public Recipe createRecipe(@RequestBody Recipe recipeRequest) {
-
+    public ResponseEntity<RecipeDto> createRecipe(@RequestBody CreateRecipeRequest request) {
         User owner = authController.getLoggedInUser();
 
         Group group = null;
-
-        if (recipeRequest.getGroup() != null) {
-            group = groupService.getGroupById(recipeRequest.getGroup().getId());
-        }
+        if (request.groupId() != null)
+            group = groupService.getGroupById(request.groupId());
 
         Recipe recipe = new Recipe(
-                owner,
-                group,
-                recipeRequest.getName(),
-                recipeRequest.getDescription(),
-                recipeRequest.getInstructions(),
-                recipeRequest.getMealType(),
-                recipeRequest.getServings(),
-                recipeRequest.getPrepTimeMinutes(),
-                recipeRequest.getImageUrl(),
-                recipeRequest.getLastMade()
+                owner, group, request.name(), request.description(), request.instructions(),
+                request.mealType(), request.servings(), request.prepTimeMinutes(),
+                request.imageUrl(), request.lastMade()
         );
+        recipeRepository.save(recipe);
 
-        return recipeRepository.save(recipe);
+        List<RecipeIngredient> ingredients = saveIngredients(recipe, request.ingredients());
+        return ResponseEntity.status(HttpStatus.CREATED).body(toDto(recipe, ingredients));
     }
 
     @PutMapping("/{id}")
     @Transactional
-    public ResponseEntity<Recipe> updateRecipe(
-            @PathVariable UUID id,
-            @RequestBody Recipe recipeRequest
-    ) {
+    public ResponseEntity<RecipeDto> updateRecipe(@PathVariable UUID id,
+                                                  @RequestBody UpdateRecipeRequest request) {
+        User currentUser = authController.getLoggedInUser();
 
-        Recipe existingRecipe = recipeRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Opskrift ikke fundet"));
+        Recipe recipe = recipeRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Recipe not found"));
 
-        existingRecipe.setName(recipeRequest.getName());
-        existingRecipe.setDescription(recipeRequest.getDescription());
-        existingRecipe.setInstructions(recipeRequest.getInstructions());
-        existingRecipe.setMealType(recipeRequest.getMealType());
-        existingRecipe.setServings(recipeRequest.getServings());
-        existingRecipe.setPrepTimeMinutes(recipeRequest.getPrepTimeMinutes());
-        existingRecipe.setImageUrl(recipeRequest.getImageUrl());
-        existingRecipe.setLastMade(recipeRequest.getLastMade());
+        if (!recipe.getOwner().getId().equals(currentUser.getId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You do not own this recipe");
+        }
+        if (!canUserAccessRecipe(recipe, authController.getLoggedInUser())) throw new AuthorizationDeniedException("You do not have permission to access this recipe!");
 
-        return ResponseEntity.ok(recipeRepository.save(existingRecipe));
+        recipe.setName(request.name());
+        recipe.setDescription(request.description());
+        recipe.setInstructions(request.instructions());
+        recipe.setMealType(request.mealType());
+        recipe.setServings(request.servings());
+        recipe.setPrepTimeMinutes(request.prepTimeMinutes());
+        recipe.setImageUrl(request.imageUrl());
+        recipe.setLastMade(request.lastMade());
+        recipeRepository.save(recipe);
+
+        // Replace all ingredients
+        recipeIngredientRepository.findByRecipe(recipe)
+                .forEach(recipeIngredientRepository::delete);
+        List<RecipeIngredient> ingredients = saveIngredients(recipe, request.ingredients());
+
+        return ResponseEntity.ok(toDto(recipe, ingredients));
+    }
+
+    @DeleteMapping("/{id}")
+    @Transactional
+    public ResponseEntity<Void> deleteRecipe(@PathVariable UUID id) {
+        User currentUser = authController.getLoggedInUser();
+
+        Recipe recipe = recipeRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Recipe not found"));
+
+        if (!recipe.getOwner().getId().equals(currentUser.getId())) throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You do not own this recipe");
+
+        recipeIngredientRepository.findByRecipe(recipe)
+                .forEach(recipeIngredientRepository::delete);
+        recipeRepository.delete(recipe);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/{id}")
-    public Recipe getRecipe(@PathVariable UUID id) {
-        return recipeRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Opskrift ikke fundet"));
+    public RecipeDto getRecipe(@PathVariable UUID id) {
+        Recipe recipe = recipeRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Recipe not found"));
+
+        if (!canUserAccessRecipe(recipe, authController.getLoggedInUser())) throw new AuthorizationDeniedException("You do not have permission to access this recipe!");
+
+        return toDto(recipe, recipeIngredientRepository.findByRecipe(recipe));
     }
+
+    @GetMapping
+    public List<RecipeDto> getAllRecipes() {
+    	User user = authController.getLoggedInUser();
+    	List<Group> groups = groupService.getGroupsForUser(user);
+
+     	// Get all recipes a user has access to (either through ownership or through a group)
+        List<Recipe> recipes = recipeRepository.findByOwner(user);
+        recipes.addAll(
+	        groups.stream().map(group -> recipeRepository.findByGroup(group)).flatMap(Collection::stream).toList()
+        );
+
+        // Convert to dto
+        return recipes.stream().distinct().map(r -> toDto(r, recipeIngredientRepository.findByRecipe(r))).toList();
+    }
+
+   	@PutMapping("/{recipeId}/group")
+	public void addToGroup(@PathVariable UUID recipeId, @RequestBody(required = false) UUID groupId) {
+		User owner = authController.getLoggedInUser();
+
+		Recipe recipe = recipeRepository.findById(recipeId).orElseThrow();
+		if (!recipe.getOwner().equals(owner)) throw new AuthorizationDeniedException("You do not have permission to edit this recipe!");
+
+		System.out.println(groupId);
+		Group group = null;
+		if (groupId != null) {
+			group = groupService.getGroupById(groupId);
+			if (!groupService.canUserViewGroup(group, owner)) throw new AuthorizationDeniedException("You do not have permission to access this group!");
+		}
+
+		recipe.setGroup(group);
+		recipeRepository.save(recipe);
+	}
+
+    private List<RecipeIngredient> saveIngredients(Recipe recipe, List<RecipeIngredientRequest> requests) {
+        if (requests == null || requests.isEmpty()) return List.of();
+        return requests.stream()
+                .filter(r -> r.ingredientName() != null && !r.ingredientName().isBlank())
+                .map(r -> {
+                    Ingredient ingredient = ingredientRepository
+                            .findByName(r.ingredientName().trim())
+                            .orElseGet(() -> ingredientRepository.save(
+                                    new Ingredient(r.ingredientName().trim(), null, null, null, null, null, null, null, null)
+                            ));
+                    return recipeIngredientRepository.save(
+                            new RecipeIngredient(recipe, ingredient, r.amount(), r.unit())
+                    );
+                })
+                .toList();
+    }
+
+    private RecipeDto toDto(Recipe recipe, List<RecipeIngredient> ingredients) {
+        List<RecipeIngredientDto> ingredientDtos = ingredients.stream()
+                .map(ri -> new RecipeIngredientDto(
+                        ri.getIngredient().getId(),
+                        ri.getIngredient().getName(),
+                        ri.getAmount(),
+                        ri.getUnit()
+                ))
+                .toList();
+
+        return new RecipeDto(
+                recipe.getId(),
+                recipe.getOwner().getName(),
+                recipe.getOwner().getId(),
+                recipe.getGroup() != null ? recipe.getGroup().getId() : null,
+                recipe.getGroup() != null ? recipe.getGroup().getName() : null,
+                recipe.getName(),
+                recipe.getDescription(),
+                recipe.getInstructions(),
+                recipe.getMealType(),
+                recipe.getServings(),
+                recipe.getPrepTimeMinutes(),
+                recipe.getImageUrl(),
+                recipe.getLastMade(),
+                ingredientDtos
+        );
+    }
+
+	private boolean canUserAccessRecipe(Recipe recipe, User user) {
+		Group group = recipe.getGroup();
+		if (group != null)
+			if (!groupService.canUserViewGroup(group, user)) return false;
+
+		if (!recipe.getOwner().equals(user)) return false;
+
+		return true;
+	}
 }
