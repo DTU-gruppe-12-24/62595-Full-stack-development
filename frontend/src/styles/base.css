@@ -19,3 +19,8 @@ body {
 button {
     font-family: inherit;
 }
+
+.Toastify__toast-container--top-right {
+	right:1em;
+	top:4em
+}

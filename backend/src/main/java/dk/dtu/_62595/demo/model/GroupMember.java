@@ -42,6 +42,8 @@ public class GroupMember {
 	public Group getGroup() { return group; }
 	public Role getRole() { return role; }
 
+	public void setRole(Role role) { this.role = role; }
+
 	@Embeddable
 	public static class GroupMemberId implements Serializable {
 
