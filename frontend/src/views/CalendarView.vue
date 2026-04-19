@@ -1,15 +1,3 @@
-<script setup lang="ts">
-
-import WeekCalendar from "@/components/AppCalendar.vue"
-
-function handleCellClick(data: {day: Date, slot: string}) {
-
-  console.log("Clicked cell:", data)
-
-}
-
-</script>
-
 <template>
   <div class="page">
     <h1>Calendar</h1>
@@ -25,10 +13,6 @@ function handleCellClick(data: {day: Date, slot: string}) {
     <p v-else-if="errorMessage">
       {{ errorMessage }}
     </p>
-
-    <WeekCalendar
-        @cell-click="handleCellClick"
-    />
 
     <div v-else-if="mealPlans.length > 0">
       <h2>Planned recipes</h2>
@@ -82,9 +66,7 @@ async function selectDate(date: string) {
 </script>
 
 <style scoped>
-
 .page {
-  padding: 30px;
+  padding: 20px;
 }
-
 </style>
