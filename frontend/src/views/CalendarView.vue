@@ -20,6 +20,7 @@
       <ul>
         <li v-for="mealPlan in mealPlans" :key="mealPlan.id">
           {{ mealPlan.recipe.name }} - {{ mealPlan.mealSlot }}
+          <button @click="removeMealPlan(mealPlan.id)">Remove</button>
         </li>
       </ul>
     </div>
@@ -34,7 +35,7 @@
 import { ref } from "vue"
 import AppCalendar from "@/components/AppCalendar.vue"
 import type { MealPlan } from "@/model/MealPlan"
-import { getMealPlansByDate } from "@/services/MealPlanService"
+import { getMealPlansByDate, deleteMealPlan } from "@/services/MealPlanService"
 
 const selectedDate = ref<string | null>(null)
 const mealPlans = ref<MealPlan[]>([])
@@ -63,6 +64,17 @@ async function selectDate(date: string) {
     isLoading.value = false
   }
 }
+
+async function removeMealPlan(id: string) {
+  try {
+    await deleteMealPlan(id)
+    mealPlans.value = mealPlans.value.filter(mealPlan => mealPlan.id !== id)
+  } catch (error) {
+    console.error(error)
+    errorMessage.value = "Could not delete meal plan."
+  }
+}
+
 </script>
 
 <style scoped>
