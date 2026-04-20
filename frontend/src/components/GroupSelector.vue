@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import AppDropdown from '@/components/AppDropdown.vue'
 import { apiFetch } from '@/utilities/apiFetch'
+import { showError } from '@/utilities/notifications'
 
 export interface Group {
   id: string
@@ -10,8 +11,10 @@ export interface Group {
 
 const STORAGE_KEY = 'activeGroupId'
 
-defineProps<{
+const props = defineProps<{
   modelValue: Group | null
+  persist?: boolean
+  allowNull?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -22,7 +25,7 @@ const groups = ref<Group[]>([])
 const selectedName = ref<string | undefined>(undefined)
 const loading = ref(true)
 
-const groupNames = computed(() => groups.value.map(g => g.name))
+const groupNames = computed(() => (props.allowNull ? ["None"] : []).concat(groups.value.map(g => g.name)))
 
 interface GroupMemberResponse {
   group: Group
@@ -34,13 +37,19 @@ onMounted(async () => {
     const memberships = await apiFetch<GroupMemberResponse[]>('/api/group/me')
     groups.value = memberships.map(m => m.group)
 
-    const savedId = localStorage.getItem(STORAGE_KEY)
-    const savedGroup = savedId ? groups.value.find(g => g.id === savedId) ?? null : null
-    const initial = savedGroup ?? groups.value[0] ?? null
+    if (props.modelValue == null) {
+        const savedId = localStorage.getItem(STORAGE_KEY)
+        const savedGroup = props.persist ? (savedId ? groups.value.find(g => g.id === savedId) ?? null : null) : null;
+        const initial = savedGroup ?? (props.allowNull ? null : groups.value[0]) ?? null
 
-    if (initial) selectedName.value = initial.name
-    persistAndEmit(initial)
+        if (initial) selectedName.value = initial.name
+        else if (props.allowNull) selectedName.value = "None"
+        persistAndEmit(initial)
+    } else {
+        selectedName.value = props.modelValue.name
+    }
   } catch (e) {
+    showError(e instanceof Error ? e.message : "" + e)
     console.error(e)
   } finally {
     loading.value = false
@@ -54,11 +63,12 @@ function onChange(name: string) {
 }
 
 function persistAndEmit(group: Group | null) {
-  if (group) {
-    localStorage.setItem(STORAGE_KEY, group.id)
-  } else {
-    localStorage.removeItem(STORAGE_KEY)
-  }
+    if (props.persist)
+        if (group) {
+            localStorage.setItem(STORAGE_KEY, group.id)
+        } else {
+            localStorage.removeItem(STORAGE_KEY)
+        }
   emit('update:modelValue', group)
 }
 </script>

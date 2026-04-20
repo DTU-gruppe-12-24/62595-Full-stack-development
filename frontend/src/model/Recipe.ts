@@ -11,8 +11,8 @@ export type Recipe = {
   id: string
   ownerName: string
   ownerId: string
-  group?: Group
   groupId?: string
+  groupName?: string
   name: string
   description?: string
   instructions?: string

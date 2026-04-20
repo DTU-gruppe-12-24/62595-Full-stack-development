@@ -15,6 +15,7 @@ import type { Group } from '@/components/GroupSelector.vue'
 import type { IngredientResult } from '@/components/IngredientSearch.vue'
 
 import { apiFetch } from '@/utilities/apiFetch'
+import { showError } from '@/utilities/notifications'
 
 interface ShoppingItem {
   id: string
@@ -40,6 +41,7 @@ async function loadItems() {
   try {
     items.value = await apiFetch<ShoppingItem[]>(`/api/shopping-list/${activeGroup.value.id}`)
   } catch (e) {
+    showError(e instanceof Error ? e.message : "" + e);
     console.error(e)
   } finally {
     loading.value = false
@@ -59,14 +61,14 @@ async function toggleBought(item: ShoppingItem) {
     const updated = await apiFetch<ShoppingItem>(`/api/shopping-list/item/${item.id}/toggle`, 'PATCH')
     const index = items.value.findIndex(i => i.id === item.id)
     if (index !== -1) items.value[index] = updated
-  } catch (e) { console.error(e) }
+  } catch (e) { showError(e instanceof Error ? e.message : "" + e) }
 }
 
 async function deleteItem(id: string) {
   try {
     await apiFetch(`/api/shopping-list/item/${id}`, 'DELETE')
     items.value = items.value.filter(i => i.id !== id)
-  } catch (e) { console.error(e) }
+  } catch (e) { showError(e instanceof Error ? e.message : "" + e) }
 }
 
 async function removeBought() {
@@ -74,7 +76,7 @@ async function removeBought() {
   try {
     await apiFetch(`/api/shopping-list/${activeGroup.value.id}/bought`, 'DELETE')
     items.value = items.value.filter(i => !i.isBought)
-  } catch (e) { console.error(e) }
+  } catch (e) { showError(e instanceof Error ? e.message : "" + e) }
 }
 
 async function clearList() {
@@ -82,7 +84,7 @@ async function clearList() {
   try {
     await apiFetch(`/api/shopping-list/${activeGroup.value.id}/clear`, 'DELETE')
     items.value = []
-  } catch (e) { console.error(e) }
+  } catch (e) { showError(e instanceof Error ? e.message : "" + e) }
 }
 
 // Export
@@ -105,20 +107,17 @@ const showAddDialog = ref(false)
 const selectedIngredient = ref<IngredientResult | null>(null)
 const newAmount = ref<number | ''>('')
 const newUnit = ref('')
-const addError = ref('')
 
 function openAddDialog() {
   selectedIngredient.value = null
   newAmount.value = ''
   newUnit.value = ''
-  addError.value = ''
   showAddDialog.value = true
 }
 
 async function submitAddItem() {
-  addError.value = ''
-  if (!selectedIngredient.value) { addError.value = 'Please select or type an ingredient.'; return }
-  if (!newAmount.value || Number(newAmount.value) <= 0) { addError.value = 'Please enter a valid amount.'; return }
+  if (!selectedIngredient.value) { showError('Please select or type an ingredient.'); return }
+  if (!newAmount.value || Number(newAmount.value) <= 0) { showError('Please enter a valid amount.'); return }
   if (!activeGroup.value) return
 
   try {
@@ -132,7 +131,7 @@ async function submitAddItem() {
     else items.value.push(item)
     showAddDialog.value = false
   } catch (e) {
-    addError.value = e instanceof Error ? e.message : 'Failed to add item.'
+    showError(e instanceof Error ? e.message : 'Failed to add item.')
   }
 }
 
@@ -203,7 +202,7 @@ async function submitCustomIngredient() {
     <AppSection>
       <template #title>Group</template>
       <AppCard>
-        <GroupSelector v-model="activeGroup" />
+        <GroupSelector v-model="activeGroup" persist />
       </AppCard>
     </AppSection>
 
@@ -255,7 +254,6 @@ async function submitCustomIngredient() {
           <AppInput v-model="newAmount" label="Amount" type="number" placeholder="e.g. 500" />
           <AppInput v-model="newUnit" label="Unit (optional)" placeholder="e.g. grams, loafs" />
         </div>
-        <p v-if="addError" class="error-text">{{ addError }}</p>
       </div>
       <template #footer>
         <AppButton variant="cancel" @click="showAddDialog = false">Cancel</AppButton>
@@ -366,8 +364,6 @@ async function submitCustomIngredient() {
 
 .amount-row { display: flex; gap: 12px; }
 .amount-row > * { flex: 1; }
-
-.error-text { color: #c0392b; font-size: 0.875rem; margin: 0; }
 .success-text { color: #27ae60; font-size: 0.875rem; margin: 0; }
 .section-label { font-size: 13px; font-weight: 500; color: var(--color-secondary); margin: 4px 0 0; }
 </style>

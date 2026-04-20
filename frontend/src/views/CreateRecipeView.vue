@@ -5,11 +5,11 @@ import { useRouter } from "vue-router"
 import RecipeForm from "@/components/RecipeForm.vue"
 import type { RecipeFormData, IngredientLine } from "@/components/RecipeForm.vue"
 import { apiFetch } from "@/utilities/apiFetch"
+import { showError } from "@/utilities/notifications"
 
 const router = useRouter()
 
 const isSaving = ref(false)
-const errorMessage = ref("")
 
 const recipe = ref<RecipeFormData>({
   name: "",
@@ -23,12 +23,9 @@ const recipe = ref<RecipeFormData>({
 const ingredients = ref<IngredientLine[]>([{ selected: null, amount: "", unit: "" }])
 
 async function submit() {
-  errorMessage.value = ""
 
-  if (!recipe.value.name.trim()) {
-    errorMessage.value = "Name is required"
-    return
-  }
+  if (!recipe.value.name.trim())
+    return showError("Name is required")
 
   isSaving.value = true
   try {
@@ -47,7 +44,7 @@ async function submit() {
     })
     router.push("/recipes")
   } catch (error: any) {
-    errorMessage.value = error.message || "Could not create recipe"
+    showError(error.message || "Could not create recipe")
   } finally {
     isSaving.value = false
   }
@@ -61,7 +58,6 @@ async function submit() {
       v-model="recipe"
       v-model:ingredients="ingredients"
       :is-saving="isSaving"
-      :error-message="errorMessage"
       submit-label="Create Recipe"
       @submit="submit"
       @cancel="router.push('/recipes')"
