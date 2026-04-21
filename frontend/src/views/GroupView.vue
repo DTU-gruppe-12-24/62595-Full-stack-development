@@ -14,8 +14,8 @@
 				<AppButton variant="secondary" @click="() => openEditDialog(group.group, true)">
 					<font-awesome-icon icon="fa-solid fa-pen-to-square" />
 				</AppButton>
-				<AppButton variant="cancel" v-if="group.role == 'OWNER'" @click="() => { showConfirmDeleteDialog = true; groupBeingDeleted = group.group; }" v-on:click.stop>
-					<font-awesome-icon icon="fa-solid fa-trash" class="text-rose-700" />
+				<AppButton variant="danger" v-if="group.role == 'OWNER'" @click="() => { showConfirmDeleteDialog = true; groupBeingDeleted = group.group; }" v-on:click.stop>
+					<font-awesome-icon icon="fa-solid fa-trash" class="text-white" />
 				</AppButton>
 			</div>
 			<div v-else class="flex flex-row justify-end gap-1 w-fit">
@@ -39,7 +39,7 @@
 				Cancel
 			</AppButton>
 			<AppButton variant="secondary" @click="submitCreateGroup">
-				Create
+				Create group
 			</AppButton>
 		</template>
 	</AppDialog>
@@ -91,16 +91,14 @@
 		</AppSection>
 	</AppDialog>
 
-	<AppDialog v-model="showConfirmDeleteDialog" :title="'Are you sure you want to delete \'' + groupBeingDeleted?.name + '\'?'">
-		<template #footer>
-			<AppButton variant="cancel" @click="() => showConfirmDeleteDialog = false">
-				Cancel
-			</AppButton>
-			<AppButton variant="secondary" @click="() => { deleteGroup(groupBeingDeleted!); showConfirmDeleteDialog = false; }">
-				Yes
-			</AppButton>
-		</template>
-	</AppDialog>
+	<AppConfirmDialog
+		v-model="showConfirmDeleteDialog"
+		:title="`Delete group '${groupBeingDeleted?.name ?? ''}'?`"
+		message="Deleting a group cannot be undone."
+		confirm-label="Delete group"
+		confirm-variant="danger"
+		@confirm="() => { deleteGroup(groupBeingDeleted!); showConfirmDeleteDialog = false; }"
+	/>
 </div>
 </template>
 
@@ -113,6 +111,7 @@ import AppCard from "@/components/AppCard.vue"
 import AppButton from "@/components/AppButton.vue"
 import AppText from "@/components/AppText.vue"
 import AppDialog from "@/components/AppDialog.vue"
+import AppConfirmDialog from '@/components/AppConfirmDialog.vue'
 import AppInput from "@/components/AppInput.vue"
 import AppDropdown from "@/components/AppDropdown.vue"
 

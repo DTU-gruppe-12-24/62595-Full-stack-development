@@ -3,6 +3,7 @@ import { ref, watch } from 'vue'
 import AppButton from "@/components/AppButton.vue"
 import AppInput from "@/components/AppInput.vue"
 import AppDialog from "@/components/AppDialog.vue"
+import AppConfirmDialog from '@/components/AppConfirmDialog.vue'
 import { apiFetch } from "@/utilities/apiFetch"
 import { logout } from "@/services/authService"
 import { showError, showSuccess } from '@/utilities/notifications'
@@ -17,6 +18,7 @@ const editType = ref<'name' | 'email' | 'password'>('name')
 const newValue = ref("")
 const currentPassword = ref("")
 const isLoading = ref(false)
+const showDeleteConfirm = ref(false)
 
 async function fetchUser() {
   try {
@@ -72,8 +74,6 @@ async function handleConfirmEdit() {
 }
 
 async function handleDelete() {
-  if (!confirm("Delete your profile and all associated data? This action cannot be undone.")) return
-
   try {
     isLoading.value = true
     await apiFetch("/api/users/me", "DELETE")
@@ -120,7 +120,7 @@ async function handleDelete() {
       <div class="danger-zone">
         <h4>GDPR & Privacy</h4>
         <p>Removing your data is permanent and deletes all recipes you have created, and transfers ownership of any groups you created.</p>
-        <AppButton variant="cancel" @click="handleDelete">Delete My Information</AppButton>
+        <AppButton variant="danger" @click="showDeleteConfirm = true">Delete My Information</AppButton>
       </div>
     </div>
 
@@ -129,8 +129,8 @@ async function handleDelete() {
         <AppButton variant="secondary" @click="performClientLogout">
           Log Out
         </AppButton>
-        <AppButton variant="primary" @click="emit('update:modelValue', false)">
-          Close
+        <AppButton variant="cancel" @click="emit('update:modelValue', false)">
+          Cancel
         </AppButton>
       </div>
     </template>
@@ -155,12 +155,22 @@ async function handleDelete() {
     </div>
 
     <template #footer>
-      <AppButton variant="secondary" @click="isEditing = false">Cancel</AppButton>
+      <AppButton variant="cancel" @click="isEditing = false">Cancel</AppButton>
       <AppButton variant="primary" :disabled="isLoading" @click="handleConfirmEdit">
         Confirm Change
       </AppButton>
     </template>
   </AppDialog>
+
+  <AppConfirmDialog
+    v-model="showDeleteConfirm"
+    title="Delete your account?"
+    message="This deletes your profile and associated data permanently. This action cannot be undone."
+    confirm-label="Delete my account"
+    confirm-variant="danger"
+    :busy="isLoading"
+    @confirm="handleDelete"
+  />
 </template>
 
 <style scoped>

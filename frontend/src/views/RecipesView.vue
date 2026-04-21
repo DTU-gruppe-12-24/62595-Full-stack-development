@@ -97,7 +97,7 @@ function openRecipe(recipe: Recipe) {
       </template>
 
       <template #footer>
-        <AppButton variant="secondary" @click="showRecipeDialog = false">Close</AppButton>
+        <AppButton variant="cancel" @click="showRecipeDialog = false">Cancel</AppButton>
         <AppButton
           v-if="selectedRecipe?.ownerId === currentUserId"
           variant="primary"

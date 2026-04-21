@@ -153,7 +153,7 @@ function updateGroup(group: Group | undefined) {
     </div>
 
     <template #footer>
-      <AppButton variant="secondary" @click="emit('cancel')">Cancel</AppButton>
+      <AppButton variant="cancel" @click="emit('cancel')">Cancel</AppButton>
       <AppButton variant="primary" :disabled="isSaving" @click="emit('submit')">
         {{ isSaving ? 'Saving...' : submitLabel }}
       </AppButton>

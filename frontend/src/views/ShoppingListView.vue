@@ -9,6 +9,7 @@ import AppButton from '@/components/AppButton.vue'
 import AppCheckbox from '@/components/AppCheckbox.vue'
 import AppText from '@/components/AppText.vue'
 import AppDialog from '@/components/AppDialog.vue'
+import AppConfirmDialog from '@/components/AppConfirmDialog.vue'
 import GroupSelector from '@/components/GroupSelector.vue'
 import IngredientSearch from '@/components/IngredientSearch.vue'
 import type { Group } from '@/components/GroupSelector.vue'
@@ -83,6 +84,29 @@ async function removeBought() {
   } catch (e) { showError(e instanceof Error ? e.message : "" + e) }
 }
 
+const showConfirmRemoveBought = ref(false)
+const showConfirmClearList = ref(false)
+
+function requestRemoveBought() {
+  if (!activeGroup.value) return
+  showConfirmRemoveBought.value = true
+}
+
+function requestClearList() {
+  if (!activeGroup.value) return
+  showConfirmClearList.value = true
+}
+
+async function confirmRemoveBought() {
+  showConfirmRemoveBought.value = false
+  await removeBought()
+}
+
+async function confirmClearList() {
+  showConfirmClearList.value = false
+  await clearList()
+}
+
 async function clearList() {
   if (!activeGroup.value) return
   try {
@@ -141,9 +165,6 @@ async function submitAddItem() {
     showError(e instanceof Error ? e.message : 'Failed to add item.')
   }
 }
-
-const showAddRecipeDialog = ref(false)
-const showGenerateDialog = ref(false)
 
 // Add custom ingredient dialog
 const showCustomIngredientDialog = ref(false)
@@ -214,11 +235,10 @@ async function submitCustomIngredient() {
       <AppSection>
         <div class="actions">
           <AppButton variant="primary" @click="openAddDialog">Add item</AppButton>
-          <AppButton variant="secondary" @click="showAddRecipeDialog = true">Add recipe</AppButton>
-          <AppButton variant="secondary" @click="showGenerateDialog = true">Generate shopping list</AppButton>
+          <AppButton variant="secondary" disabled>Generate shopping list (coming soon)</AppButton>
           <AppButton variant="secondary" @click="exportList">Export list</AppButton>
-          <AppButton variant="cancel" @click="removeBought">Remove bought</AppButton>
-          <AppButton variant="cancel" @click="clearList">Clear list</AppButton>
+          <AppButton variant="danger" @click="requestRemoveBought">Remove bought</AppButton>
+          <AppButton variant="danger" @click="requestClearList">Clear list</AppButton>
         </div>
       </AppSection>
 
@@ -259,22 +279,6 @@ async function submitCustomIngredient() {
       <template #footer>
         <AppButton variant="cancel" @click="showAddDialog = false">Cancel</AppButton>
         <AppButton variant="primary" @click="submitAddItem">Add</AppButton>
-      </template>
-    </AppDialog>
-
-    <!-- Add recipe (not implemented) -->
-    <AppDialog v-model="showAddRecipeDialog" title="Add recipe">
-      <AppText>Not implemented yet.</AppText>
-      <template #footer>
-        <AppButton variant="secondary" @click="showAddRecipeDialog = false">Close</AppButton>
-      </template>
-    </AppDialog>
-
-    <!-- Generate (not implemented) -->
-    <AppDialog v-model="showGenerateDialog" title="Generate shopping list">
-      <AppText>Not implemented yet.</AppText>
-      <template #footer>
-        <AppButton variant="secondary" @click="showGenerateDialog = false">Close</AppButton>
       </template>
     </AppDialog>
 
@@ -319,10 +323,26 @@ async function submitCustomIngredient() {
 
     </div>
     <template #footer>
-      <AppButton variant="cancel" @click="showCustomIngredientDialog = false">Close</AppButton>
+      <AppButton variant="cancel" @click="showCustomIngredientDialog = false">Cancel</AppButton>
       <AppButton variant="primary" @click="submitCustomIngredient">Add</AppButton>
     </template>
   </AppDialog>
+
+  <AppConfirmDialog
+    v-model="showConfirmRemoveBought"
+    title="Remove bought items"
+    message="This will remove all bought items from the list. This action cannot be undone."
+    confirm-label="Remove bought items"
+    @confirm="confirmRemoveBought"
+  />
+
+  <AppConfirmDialog
+    v-model="showConfirmClearList"
+    title="Clear shopping list"
+    message="This will remove all items from the shopping list. This action cannot be undone."
+    confirm-label="Clear list"
+    @confirm="confirmClearList"
+  />
 </template>
 
 <style scoped>
