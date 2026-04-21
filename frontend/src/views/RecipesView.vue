@@ -5,13 +5,14 @@ import { useRouter } from "vue-router"
 import AppCard from "@/components/AppCard.vue"
 import AppButton from "@/components/AppButton.vue"
 import AppDialog from "@/components/AppDialog.vue"
+import AppConfirmDialog from "@/components/AppConfirmDialog.vue"
 import AppContainer from "@/components/AppContainer.vue"
 import AppSection from "@/components/AppSection.vue"
 import AppText from "@/components/AppText.vue"
 import { apiFetch } from "@/utilities/apiFetch"
 import { getStoredUser } from "@/services/authService"
 import type { Recipe } from "@/model/Recipe"
-import { showError } from "@/utilities/notifications"
+import { showError, showSuccess } from "@/utilities/notifications"
 
 const router = useRouter()
 const currentUserId = getStoredUser()?.userId
@@ -20,6 +21,7 @@ const recipes = ref<Recipe[]>([])
 const selectedRecipe = ref<Recipe | null>(null)
 const isLoading = ref(false)
 const showRecipeDialog = ref(false)
+const showDeleteConfirm = ref(false)
 
 onMounted(async () => {
   await loadRecipes()
@@ -39,6 +41,27 @@ async function loadRecipes() {
 function openRecipe(recipe: Recipe) {
   selectedRecipe.value = recipe
   showRecipeDialog.value = true
+}
+
+function requestDeleteRecipe() {
+  if (!selectedRecipe.value) return
+  showDeleteConfirm.value = true
+}
+
+async function confirmDeleteRecipe() {
+  if (!selectedRecipe.value) return
+  const recipe = selectedRecipe.value
+
+  try {
+    await apiFetch(`/api/recipes/${recipe.id}`, "DELETE")
+    recipes.value = recipes.value.filter(r => r.id !== recipe.id)
+    showDeleteConfirm.value = false
+    showRecipeDialog.value = false
+    selectedRecipe.value = null
+    showSuccess("Recipe deleted successfully.")
+  } catch (error: any) {
+    showError(error.message || "Could not delete recipe")
+  }
 }
 </script>
 
@@ -100,6 +123,13 @@ function openRecipe(recipe: Recipe) {
         <AppButton variant="cancel" @click="showRecipeDialog = false">Cancel</AppButton>
         <AppButton
           v-if="selectedRecipe?.ownerId === currentUserId"
+          variant="danger"
+          @click="requestDeleteRecipe"
+        >
+          <font-awesome-icon icon="fa-solid fa-trash" class="text-white" />
+        </AppButton>
+        <AppButton
+          v-if="selectedRecipe?.ownerId === currentUserId"
           variant="primary"
           :to="`/recipes/${selectedRecipe!.id}/edit`"
         >
@@ -107,6 +137,15 @@ function openRecipe(recipe: Recipe) {
         </AppButton>
       </template>
     </AppDialog>
+
+    <AppConfirmDialog
+      v-model="showDeleteConfirm"
+      :title="`Delete recipe '${selectedRecipe?.name ?? ''}'?`"
+      message="Deleting a recipe cannot be undone."
+      confirm-label="Delete recipe"
+      confirm-variant="danger"
+      @confirm="confirmDeleteRecipe"
+    />
   </AppContainer>
 </template>
 
