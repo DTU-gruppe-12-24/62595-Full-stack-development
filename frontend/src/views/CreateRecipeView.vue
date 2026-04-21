@@ -4,6 +4,9 @@ import { useRouter } from "vue-router"
 
 import RecipeForm from "@/components/RecipeForm.vue"
 import type { RecipeFormData, IngredientLine } from "@/components/RecipeForm.vue"
+import AppContainer from "@/components/AppContainer.vue"
+import AppSection from "@/components/AppSection.vue"
+import AppText from "@/components/AppText.vue"
 import { apiFetch } from "@/utilities/apiFetch"
 import { showError, showSuccess } from "@/utilities/notifications"
 
@@ -53,17 +56,19 @@ async function submit() {
 </script>
 
 <template>
-  <div class="page">
-    <h1>Create Recipe</h1>
-    <RecipeForm
-      v-model="recipe"
-      v-model:ingredients="ingredients"
-      :is-saving="isSaving"
-      submit-label="Create Recipe"
-      @submit="submit"
-      @cancel="router.push('/recipes')"
-    />
-  </div>
+  <AppContainer class="page">
+    <AppSection class="form-section">
+      <AppText variant="title" tag="h1">Create Recipe</AppText>
+      <RecipeForm
+        v-model="recipe"
+        v-model:ingredients="ingredients"
+        :is-saving="isSaving"
+        submit-label="Create Recipe"
+        @submit="submit"
+        @cancel="router.push('/recipes')"
+      />
+    </AppSection>
+  </AppContainer>
 </template>
 
 <style scoped>
@@ -72,4 +77,6 @@ async function submit() {
   margin: 60px auto;
   padding: 0 24px;
 }
+
+.form-section { margin-top: 0; }
 </style>

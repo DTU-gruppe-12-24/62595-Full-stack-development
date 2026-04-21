@@ -236,7 +236,7 @@ async function submitCustomIngredient() {
               :class="{ 'item-checked': item.isBought }"
               @update:model-value="toggleBought(item)"
             />
-            <button class="delete-btn" @click="deleteItem(item.id)">✕</button>
+            <AppButton variant="ghost" class="delete-btn" @click="deleteItem(item.id)">✕</AppButton>
           </div>
         </AppCard>
       </AppSection>
@@ -264,7 +264,7 @@ async function submitCustomIngredient() {
 
     <!-- Add recipe (not implemented) -->
     <AppDialog v-model="showAddRecipeDialog" title="Add recipe">
-      <p>Not implemented yet.</p>
+      <AppText>Not implemented yet.</AppText>
       <template #footer>
         <AppButton variant="secondary" @click="showAddRecipeDialog = false">Close</AppButton>
       </template>
@@ -272,7 +272,7 @@ async function submitCustomIngredient() {
 
     <!-- Generate (not implemented) -->
     <AppDialog v-model="showGenerateDialog" title="Generate shopping list">
-      <p>Not implemented yet.</p>
+      <AppText>Not implemented yet.</AppText>
       <template #footer>
         <AppButton variant="secondary" @click="showGenerateDialog = false">Close</AppButton>
       </template>
@@ -282,9 +282,9 @@ async function submitCustomIngredient() {
     <AppSection>
       <template #title>Database</template>
       <AppCard>
-        <p style="font-size:14px;color:#888;margin:0 0 12px;">
+        <AppText variant="caption" class="database-help">
           Can't find an ingredient in the search? Add it to the database here.
-        </p>
+        </AppText>
         <AppButton variant="secondary" @click="openCustomIngredientDialog">
           Add custom ingredient
         </AppButton>
@@ -294,11 +294,11 @@ async function submitCustomIngredient() {
   </AppContainer>
 
   <!-- Add custom ingredient dialog -->
-  <AppDialog v-model="showCustomIngredientDialog" title="Add custom ingredient" width="560px">
-    <div class="dialog-form">
-      <AppInput v-model="customIngredient.name" label="Name" placeholder="e.g. Dragon fruit" />
+    <AppDialog v-model="showCustomIngredientDialog" title="Add custom ingredient" width="560px">
+      <div class="dialog-form">
+        <AppInput v-model="customIngredient.name" label="Name" placeholder="e.g. Dragon fruit" />
 
-      <p class="section-label">Nutritional values per 100g (optional)</p>
+      <AppText variant="caption" class="section-label">Nutritional values per 100g (optional)</AppText>
 
       <div class="amount-row">
         <AppInput v-model="customIngredient.calories"      label="Calories (kcal)" type="number" placeholder="e.g. 52" />
@@ -364,4 +364,5 @@ async function submitCustomIngredient() {
 .amount-row { display: flex; gap: 12px; }
 .amount-row > * { flex: 1; }
 .section-label { font-size: 13px; font-weight: 500; color: var(--color-secondary); margin: 4px 0 0; }
+.database-help { margin-bottom: 12px; }
 </style>

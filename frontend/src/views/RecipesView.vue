@@ -5,6 +5,9 @@ import { useRouter } from "vue-router"
 import AppCard from "@/components/AppCard.vue"
 import AppButton from "@/components/AppButton.vue"
 import AppDialog from "@/components/AppDialog.vue"
+import AppContainer from "@/components/AppContainer.vue"
+import AppSection from "@/components/AppSection.vue"
+import AppText from "@/components/AppText.vue"
 import { apiFetch } from "@/utilities/apiFetch"
 import { getStoredUser } from "@/services/authService"
 import type { Recipe } from "@/model/Recipe"
@@ -40,45 +43,49 @@ function openRecipe(recipe: Recipe) {
 </script>
 
 <template>
-  <div class="page">
-    <div class="page-header">
-      <div>
-        <h1>Recipes</h1>
-        <p class="subtitle">Browse recipes and open details in a dialog.</p>
+  <AppContainer class="page">
+    <AppSection class="header-section">
+      <div class="page-header">
+        <div>
+          <AppText variant="title" tag="h1">Recipes</AppText>
+          <AppText variant="caption" class="subtitle">Browse recipes and open details in a dialog.</AppText>
+        </div>
+        <AppButton variant="primary" @click="router.push('/recipes/create')">Create Recipe</AppButton>
       </div>
-      <AppButton variant="primary" @click="router.push('/recipes/create')">Create Recipe</AppButton>
-    </div>
+    </AppSection>
 
-    <p v-if="isLoading">Loading recipes...</p>
+    <AppText v-if="isLoading">Loading recipes...</AppText>
 
-    <div v-else class="recipe-grid">
-      <AppCard
-        v-for="recipe in recipes"
-        :key="recipe.id"
-        class="recipe-card"
-        @click="openRecipe(recipe)"
-      >
-        <h3>{{ recipe.name }}</h3>
-        <p>{{ recipe.description || "No description yet." }}</p>
-        <template #footer>
-          <span class="meta">{{ recipe.mealType || "Unknown type" }}</span>
-        </template>
-      </AppCard>
-    </div>
+    <AppSection v-else>
+      <div class="recipe-grid">
+        <AppCard
+          v-for="recipe in recipes"
+          :key="recipe.id"
+          class="recipe-card"
+          @click="openRecipe(recipe)"
+        >
+          <AppText variant="subtitle" tag="h3">{{ recipe.name }}</AppText>
+          <AppText>{{ recipe.description || "No description yet." }}</AppText>
+          <template #footer>
+            <AppText variant="caption" class="meta">{{ recipe.mealType || "Unknown type" }}</AppText>
+          </template>
+        </AppCard>
+      </div>
+    </AppSection>
 
     <AppDialog v-model="showRecipeDialog" :title="selectedRecipe?.name || 'Recipe details'" width="560px">
       <template v-if="selectedRecipe">
         <div class="detail-list">
-          <p><strong>Description:</strong> {{ selectedRecipe.description || "-" }}</p>
-          <p><strong>Instructions:</strong> {{ selectedRecipe.instructions || "-" }}</p>
-          <p><strong>Meal type:</strong> {{ selectedRecipe.mealType || "-" }}</p>
-          <p><strong>Servings:</strong> {{ selectedRecipe.servings ?? "-" }}</p>
-          <p><strong>Prep time:</strong> {{ selectedRecipe.prepTimeMinutes ?? "-" }} min</p>
-          <p><strong>Last made:</strong> {{ selectedRecipe.lastMade || "-" }}</p>
-          <p><strong>Created by:</strong> {{ selectedRecipe.ownerName }}</p>
-          <p v-if="selectedRecipe.groupId"><strong>Part of group:</strong> {{ selectedRecipe.groupName }}</p>
+          <AppText><strong>Description:</strong> {{ selectedRecipe.description || "-" }}</AppText>
+          <AppText><strong>Instructions:</strong> {{ selectedRecipe.instructions || "-" }}</AppText>
+          <AppText><strong>Meal type:</strong> {{ selectedRecipe.mealType || "-" }}</AppText>
+          <AppText><strong>Servings:</strong> {{ selectedRecipe.servings ?? "-" }}</AppText>
+          <AppText><strong>Prep time:</strong> {{ selectedRecipe.prepTimeMinutes ?? "-" }} min</AppText>
+          <AppText><strong>Last made:</strong> {{ selectedRecipe.lastMade || "-" }}</AppText>
+          <AppText><strong>Created by:</strong> {{ selectedRecipe.ownerName }}</AppText>
+          <AppText v-if="selectedRecipe.groupId"><strong>Part of group:</strong> {{ selectedRecipe.groupName }}</AppText>
           <div v-if="selectedRecipe.ingredients?.length" class="ingredients-section">
-            <p><strong>Ingredients:</strong></p>
+            <AppText><strong>Ingredients:</strong></AppText>
             <ul class="ingredient-list">
               <li v-for="ing in selectedRecipe.ingredients" :key="ing.ingredientId">
                 - {{ ing.ingredientName }}
@@ -100,11 +107,13 @@ function openRecipe(recipe: Recipe) {
         </AppButton>
       </template>
     </AppDialog>
-  </div>
+  </AppContainer>
 </template>
 
 <style scoped>
 .page { padding: 40px; }
+
+.header-section { margin-top: 0; }
 
 .page-header {
   display: flex;

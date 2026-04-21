@@ -2,6 +2,7 @@
 import AppInput from "@/components/AppInput.vue"
 import AppButton from "@/components/AppButton.vue"
 import AppCard from "@/components/AppCard.vue"
+import AppText from "@/components/AppText.vue"
 import IngredientSearch from "@/components/IngredientSearch.vue"
 import type { IngredientResult } from "@/components/IngredientSearch.vue"
 import GroupSelector from "./GroupSelector.vue"
@@ -116,7 +117,7 @@ function updateGroup(group: Group | undefined) {
         />
       </div>
 
-      <p class="section-label">Ingredients</p>
+      <AppText variant="caption" class="section-label">Ingredients</AppText>
 
       <div
         v-for="(line, index) in ingredients"
@@ -145,7 +146,7 @@ function updateGroup(group: Group | undefined) {
             @update:model-value="updateIngredientLine(index, { ...line, unit: $event as string })"
           />
         </div>
-        <button class="remove-btn" @click="removeIngredientLine(index)">✕</button>
+        <AppButton variant="ghost" class="remove-btn" @click="removeIngredientLine(index)">✕</AppButton>
       </div>
 
       <AppButton variant="secondary" @click="addIngredientLine">+ Add ingredient</AppButton>
