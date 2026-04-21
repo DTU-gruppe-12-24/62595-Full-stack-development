@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import { apiFetch } from '@/utilities/apiFetch'
+import { showError } from '@/utilities/notifications';
 
 export interface IngredientResult {
   ingredientId: string
@@ -44,6 +45,7 @@ function onInput() {
         `/api/shopping-list/ingredients/search?q=${encodeURIComponent(query.value)}`
       )
     } catch (e) {
+      showError(e instanceof Error ? e.message : "" + e)
       console.error(e)
       suggestions.value = []
     }
@@ -120,7 +122,7 @@ function onBlur() {
           class="no-results"
           :style="dropdownStyle"
         >
-          "{{ query }}" is not a recognised ingredient — it will be created when added
+          "{{ query }}" is not a recognised ingredient, you can add it on the shopping list page.
         </p>
       </Teleport>
     </div>

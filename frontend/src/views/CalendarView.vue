@@ -1,36 +1,31 @@
+<script setup lang="ts">
+
+import WeekCalendar from "@/components/AppCalendar.vue"
+
+function handleCellClick(data: {day: Date, slot: string}) {
+
+  console.log("Clicked cell:", data)
+
+}
+
+</script>
+
 <template>
 
   <div class="page">
 
-    <h1>Calendar</h1>
-
-    <AppCalendar @select="selectDate" />
-
-    <p v-if="selectedDate">
-      Selected: {{ selectedDate.toDateString() }}
-    </p>
+    <WeekCalendar
+        @cell-click="handleCellClick"
+    />
 
   </div>
 
 </template>
 
-<script setup lang="ts">
-
-import { ref } from 'vue'
-import AppCalendar from '@/components/AppCalendar.vue'
-
-const selectedDate = ref(null as Date | null)
-
-function selectDate(date: Date) {
-  selectedDate.value = date
-}
-
-</script>
-
 <style scoped>
 
 .page {
-  padding: 20px;
+  padding: 30px;
 }
 
 </style>

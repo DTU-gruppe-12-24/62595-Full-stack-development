@@ -9,6 +9,7 @@ public record RecipeDto(
         String ownerName,
         UUID ownerId,
         UUID groupId,
+        String groupName,
         String name,
         String description,
         String instructions,
