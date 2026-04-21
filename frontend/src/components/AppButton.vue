@@ -1,16 +1,27 @@
 <template>
-  <button
+  <component
+      :is="to ? RouterLink : 'button'"
       class="app-button"
       :class="[`app-button--${variant}`]"
+      :to="to"
+      :type="to ? undefined : type"
   >
     <slot />
-  </button>
+  </component>
 </template>
 
 <script setup lang="ts">
-defineProps<{
+import type { RouteLocationRaw } from 'vue-router'
+import { RouterLink } from 'vue-router'
+
+withDefaults(defineProps<{
   variant?: 'primary' | 'secondary' | 'ghost' | 'cancel'
-}>()
+  to?: RouteLocationRaw
+  type?: 'button' | 'submit' | 'reset'
+}>(), {
+  variant: 'primary',
+  type: 'button',
+})
 </script>
 
 <style scoped>
@@ -26,6 +37,7 @@ defineProps<{
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  text-decoration: none;
 }
 
 .app-button:active {

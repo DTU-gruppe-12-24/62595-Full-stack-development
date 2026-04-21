@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { useRouter } from 'vue-router'
 
 import AppContainer from '@/components/AppContainer.vue'
 import AppSection from '@/components/AppSection.vue'
@@ -8,8 +7,6 @@ import AppCard from '@/components/AppCard.vue'
 import AppText from '@/components/AppText.vue'
 import AppButton from '@/components/AppButton.vue'
 import { getStoredUser, isAuthenticated } from '@/services/authService'
-
-const router = useRouter()
 
 const authenticated = computed(() => isAuthenticated())
 const userName = computed(() => getStoredUser()?.name ?? 'there')
@@ -24,8 +21,8 @@ const userName = computed(() => getStoredUser()?.name ?? 'there')
           Plan meals, manage recipes, build shared shopping lists, and keep your food routine organized in one place.
         </AppText>
         <div class="hero-actions">
-          <AppButton variant="primary" @click="router.push('/sign-up')">Get Started</AppButton>
-          <AppButton variant="secondary" @click="router.push('/sign-in')">Sign In</AppButton>
+          <AppButton variant="primary" to="/sign-up">Get Started</AppButton>
+          <AppButton variant="secondary" to="/sign-in">Sign In</AppButton>
         </div>
       </template>
 
@@ -35,8 +32,8 @@ const userName = computed(() => getStoredUser()?.name ?? 'there')
           Pick up where you left off. Jump straight into your recipes, shopping list, and planning tools.
         </AppText>
         <div class="hero-actions">
-          <AppButton variant="primary" @click="router.push('/recipes')">Open Recipes</AppButton>
-          <AppButton variant="secondary" @click="router.push('/shopping')">Open Shopping List</AppButton>
+          <AppButton variant="primary" to="/recipes">Open Recipes</AppButton>
+          <AppButton variant="secondary" to="/shopping">Open Shopping List</AppButton>
         </div>
       </template>
     </AppSection>
@@ -67,7 +64,7 @@ const userName = computed(() => getStoredUser()?.name ?? 'there')
             <AppText variant="subtitle" tag="h2">Plan Your Week</AppText>
             <AppText>Organize breakfast, lunch, and dinner with your weekly calendar.</AppText>
             <template #footer>
-              <AppButton variant="secondary" @click="router.push('/calendar')">Go to Calendar</AppButton>
+              <AppButton variant="secondary" to="/calendar">Go to Calendar</AppButton>
             </template>
           </AppCard>
 
@@ -75,7 +72,7 @@ const userName = computed(() => getStoredUser()?.name ?? 'there')
             <AppText variant="subtitle" tag="h2">Manage Your Groups</AppText>
             <AppText>Invite members, manage roles, and keep planning shared and clear.</AppText>
             <template #footer>
-              <AppButton variant="secondary" @click="router.push('/groups')">Go to Groups</AppButton>
+              <AppButton variant="secondary" to="/groups">Go to Groups</AppButton>
             </template>
           </AppCard>
 
@@ -83,7 +80,7 @@ const userName = computed(() => getStoredUser()?.name ?? 'there')
             <AppText variant="subtitle" tag="h2">Track Your Progress</AppText>
             <AppText>Review your weekly and all-time food planning statistics.</AppText>
             <template #footer>
-              <AppButton variant="secondary" @click="router.push('/statistics')">Go to Statistics</AppButton>
+              <AppButton variant="secondary" to="/statistics">Go to Statistics</AppButton>
             </template>
           </AppCard>
         </div>

@@ -50,7 +50,7 @@ function openRecipe(recipe: Recipe) {
           <AppText variant="title" tag="h1">Recipes</AppText>
           <AppText variant="caption" class="subtitle">Browse recipes and open details in a dialog.</AppText>
         </div>
-        <AppButton variant="primary" @click="router.push('/recipes/create')">Create Recipe</AppButton>
+        <AppButton variant="primary" to="/recipes/create">Create Recipe</AppButton>
       </div>
     </AppSection>
 
@@ -101,7 +101,7 @@ function openRecipe(recipe: Recipe) {
         <AppButton
           v-if="selectedRecipe?.ownerId === currentUserId"
           variant="primary"
-          @click="router.push(`/recipes/${selectedRecipe!.id}/edit`)"
+          :to="`/recipes/${selectedRecipe!.id}/edit`"
         >
           Edit
         </AppButton>
