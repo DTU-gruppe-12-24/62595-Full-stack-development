@@ -27,7 +27,7 @@ interface ShoppingItem {
 }
 
 // Active group
-const activeGroup = ref<Group | null>(null)
+const activeGroup = ref<Group | undefined>(undefined)
 
 watch(activeGroup, () => loadItems())
 

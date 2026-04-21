@@ -25,7 +25,7 @@ export interface RecipeFormData {
 const props = defineProps<{
   modelValue: RecipeFormData
   ingredients: IngredientLine[]
-  group?: Group | null
+  group?: Group
   isSaving: boolean
   submitLabel: string
   canChangeGroup?: boolean
@@ -34,7 +34,7 @@ const props = defineProps<{
 const emit = defineEmits<{
   'update:modelValue': [value: RecipeFormData]
   'update:ingredients': [value: IngredientLine[]]
-  'update:group': [value: Group | null]
+  'update:group': [value: Group | undefined]
   'submit': []
   'cancel': []
 }>()
@@ -57,7 +57,7 @@ function updateIngredientLine(index: number, updated: IngredientLine) {
   emit('update:ingredients', lines)
 }
 
-function updateGroup(group: Group | null) {
+function updateGroup(group: Group | undefined) {
     emit('update:group', group)
 }
 </script>

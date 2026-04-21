@@ -9,7 +9,7 @@ import WeekSelector from "@/components/WeekSelector.vue"
 import type { Group } from "@/components/GroupSelector.vue"
 
 const stats = ref<StatisticsSummary | null>(null)
-const selectedGroup = ref<Group | null>(null)
+const selectedGroup = ref<Group | undefined>(undefined)
 const filterType = ref<'all' | 'week'>('week')
 
 // Date Logic

@@ -28,7 +28,7 @@ const recipe = ref<RecipeFormData>({
 
 const ingredients = ref<IngredientLine[]>([])
 
-const group = ref<Group | null>(null);
+const group = ref<Group | undefined>(undefined);
 
 const myUser = getMyUser()!;
 const canEditGroup = ref(false);
@@ -51,7 +51,7 @@ onBeforeMount(async () => {
       unit: ing.unit ?? ""
     }))
     canEditGroup.value = data.ownerId == myUser.id;
-    group.value = data.groupId ? (await apiFetch<Group>(`/api/group/${data.groupId}`)) : null
+    group.value = data.groupId ? (await apiFetch<Group>(`/api/group/${data.groupId}`)) : undefined
     if (ingredients.value.length === 0)
       ingredients.value.push({ selected: null, amount: "", unit: "" })
   } catch (error: any) {
