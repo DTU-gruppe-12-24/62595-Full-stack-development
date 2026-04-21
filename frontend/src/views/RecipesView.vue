@@ -126,7 +126,7 @@ async function confirmDeleteRecipe() {
           variant="danger"
           @click="requestDeleteRecipe"
         >
-          <font-awesome-icon icon="fa-solid fa-trash" class="text-white" />
+          Delete
         </AppButton>
         <AppButton
           v-if="selectedRecipe?.ownerId === currentUserId"

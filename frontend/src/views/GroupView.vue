@@ -19,7 +19,7 @@
 				</AppButton>
 			</div>
 			<div v-else class="flex flex-row justify-end gap-1 w-fit">
-				<AppButton variant="ghost" @click="() => removeMember({group: group.group, user: myUser, role: 'MEMBER'})" v-on:click.stop>
+				<AppButton variant="ghost" @click="() => requestRemoveMember({group: group.group, user: myUser, role: 'MEMBER'})" v-on:click.stop>
 					<font-awesome-icon icon="fa-solid fa-right-from-bracket" />
 				</AppButton>
 			</div>
@@ -69,7 +69,7 @@
 							:disabled="member.role == 'OWNER' || !allowEdit"
 							v-on:change="() => updateMemberRole(member)"
 						/>
-						<AppButton variant="ghost" @click="() => removeMember(member)" v-if="allowEdit && member.role != 'OWNER'">
+						<AppButton variant="ghost" @click="() => requestRemoveMember(member)" v-if="allowEdit && member.role != 'OWNER'">
 							<font-awesome-icon icon="fa-solid fa-right-from-bracket" />
 						</AppButton>
 					</div>
@@ -99,11 +99,20 @@
 		confirm-variant="danger"
 		@confirm="() => { deleteGroup(groupBeingDeleted!); showConfirmDeleteDialog = false; }"
 	/>
+
+	<AppConfirmDialog
+		v-model="showConfirmMemberRemovalDialog"
+		:title="memberRemovalTitle"
+		:message="memberRemovalMessage"
+		:confirm-label="memberRemovalConfirmLabel"
+		confirm-variant="danger"
+		@confirm="confirmRemoveMember"
+	/>
 </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 
 import type { Group } from "@/model/Group"
 
@@ -136,6 +145,25 @@ const inviteEmail = ref("")
 
 const groupBeingDeleted = ref<Group | null>(null)
 const showConfirmDeleteDialog = ref(false)
+const showConfirmMemberRemovalDialog = ref(false)
+const pendingRemovalMember = ref<Omit<GroupMember, "id"> | null>(null)
+
+const memberRemovalTitle = computed(() => {
+	if (!pendingRemovalMember.value) return 'Confirm action'
+	if (pendingRemovalMember.value.user.id === myUser.id) return `Leave group '${pendingRemovalMember.value.group.name}'?`
+	return `Remove '${pendingRemovalMember.value.user.name}' from group?`
+})
+
+const memberRemovalMessage = computed(() => {
+	if (!pendingRemovalMember.value) return ''
+	if (pendingRemovalMember.value.user.id === myUser.id) return 'You will lose access to this group until you are invited again.'
+	return 'This member will lose access to the group and its shared planning data.'
+})
+
+const memberRemovalConfirmLabel = computed(() => {
+	if (!pendingRemovalMember.value) return 'Confirm'
+	return pendingRemovalMember.value.user.id === myUser.id ? 'Leave group' : 'Remove member'
+})
 
 
 getGroups();
@@ -237,6 +265,19 @@ function removeMember(member: Omit<GroupMember, "id">) {
 			showSuccess(member.user.id != myUser.id ? 'Member removed from group.' : 'You left the group.')
         })
 		.catch((error) => { showError(error instanceof Error ? error.message : "" + error) });
+}
+
+function requestRemoveMember(member: Omit<GroupMember, "id">) {
+	pendingRemovalMember.value = member
+	showConfirmMemberRemovalDialog.value = true
+}
+
+function confirmRemoveMember() {
+	if (!pendingRemovalMember.value) return
+	const member = pendingRemovalMember.value
+	pendingRemovalMember.value = null
+	showConfirmMemberRemovalDialog.value = false
+	removeMember(member)
 }
 
 </script>
