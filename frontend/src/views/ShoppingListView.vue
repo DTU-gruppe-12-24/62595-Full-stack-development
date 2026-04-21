@@ -15,7 +15,7 @@ import type { Group } from '@/components/GroupSelector.vue'
 import type { IngredientResult } from '@/components/IngredientSearch.vue'
 
 import { apiFetch } from '@/utilities/apiFetch'
-import { showError } from '@/utilities/notifications'
+import { showError, showInfo, showSuccess } from '@/utilities/notifications'
 
 interface ShoppingItem {
   id: string
@@ -68,14 +68,18 @@ async function deleteItem(id: string) {
   try {
     await apiFetch(`/api/shopping-list/item/${id}`, 'DELETE')
     items.value = items.value.filter(i => i.id !== id)
+    showSuccess('Item removed from shopping list.')
   } catch (e) { showError(e instanceof Error ? e.message : "" + e) }
 }
 
 async function removeBought() {
   if (!activeGroup.value) return
   try {
+    const removedCount = items.value.filter(i => i.isBought).length
     await apiFetch(`/api/shopping-list/${activeGroup.value.id}/bought`, 'DELETE')
     items.value = items.value.filter(i => !i.isBought)
+    if (removedCount > 0) showSuccess(`Removed ${removedCount} bought item${removedCount === 1 ? '' : 's'}.`)
+    else showInfo('No bought items to remove.')
   } catch (e) { showError(e instanceof Error ? e.message : "" + e) }
 }
 
@@ -84,6 +88,7 @@ async function clearList() {
   try {
     await apiFetch(`/api/shopping-list/${activeGroup.value.id}/clear`, 'DELETE')
     items.value = []
+    showSuccess('Shopping list cleared.')
   } catch (e) { showError(e instanceof Error ? e.message : "" + e) }
 }
 
@@ -100,6 +105,7 @@ function exportList() {
   a.download = 'shopping-list.txt'
   a.click()
   URL.revokeObjectURL(url)
+  showInfo('Shopping list exported.')
 }
 
 // Add item dialog
@@ -130,6 +136,7 @@ async function submitAddItem() {
     if (existing !== -1) items.value[existing] = item
     else items.value.push(item)
     showAddDialog.value = false
+    showSuccess('Item added to shopping list.')
   } catch (e) {
     showError(e instanceof Error ? e.message : 'Failed to add item.')
   }
@@ -140,8 +147,6 @@ const showGenerateDialog = ref(false)
 
 // Add custom ingredient dialog
 const showCustomIngredientDialog = ref(false)
-const customIngredientError = ref('')
-const customIngredientSuccess = ref('')
 const customIngredient = ref({
   name: '',
   calories: '' as number | '',
@@ -159,8 +164,6 @@ function openCustomIngredientDialog() {
     name: '', calories: '', protein: '', carbohydrates: '',
     fat: '', saturatedFat: '', sugars: '', salt: '', price: ''
   }
-  customIngredientError.value = ''
-  customIngredientSuccess.value = ''
   showCustomIngredientDialog.value = true
 }
 
@@ -169,10 +172,8 @@ function toOptionalFloat(val: number | ''): number | null {
 }
 
 async function submitCustomIngredient() {
-  customIngredientError.value = ''
-  customIngredientSuccess.value = ''
   const name = customIngredient.value.name.trim()
-  if (!name) { customIngredientError.value = 'Please enter an ingredient name.'; return }
+  if (!name) { showError('Please enter an ingredient name.'); return }
 
   try {
     await apiFetch('/api/ingredients', 'POST', {
@@ -186,10 +187,10 @@ async function submitCustomIngredient() {
       salt:          toOptionalFloat(customIngredient.value.salt),
       price:         toOptionalFloat(customIngredient.value.price),
     })
-    customIngredientSuccess.value = `"${name}" has been added to the database.`
+    showSuccess(`"${name}" has been added to the database.`)
     customIngredient.value.name = ''
   } catch (e) {
-    customIngredientError.value = e instanceof Error ? e.message : 'Failed to add ingredient.'
+    showError(e instanceof Error ? e.message : 'Failed to add ingredient.')
   }
 }
 </script>
@@ -316,8 +317,6 @@ async function submitCustomIngredient() {
         <AppInput v-model="customIngredient.price"         label="Price (DKK)"     type="number" placeholder="e.g. 12.50" />
       </div>
 
-      <p v-if="customIngredientError" class="error-text">{{ customIngredientError }}</p>
-      <p v-if="customIngredientSuccess" class="success-text">{{ customIngredientSuccess }}</p>
     </div>
     <template #footer>
       <AppButton variant="cancel" @click="showCustomIngredientDialog = false">Close</AppButton>
@@ -364,6 +363,5 @@ async function submitCustomIngredient() {
 
 .amount-row { display: flex; gap: 12px; }
 .amount-row > * { flex: 1; }
-.success-text { color: #27ae60; font-size: 0.875rem; margin: 0; }
 .section-label { font-size: 13px; font-weight: 500; color: var(--color-secondary); margin: 4px 0 0; }
 </style>

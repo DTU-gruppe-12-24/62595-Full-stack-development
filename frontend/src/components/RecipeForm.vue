@@ -25,10 +25,10 @@ export interface RecipeFormData {
 const props = defineProps<{
   modelValue: RecipeFormData
   ingredients: IngredientLine[]
-  group: Group | null
+  group?: Group | null
   isSaving: boolean
   submitLabel: string
-  canChangeGroup: boolean
+  canChangeGroup?: boolean
 }>()
 
 const emit = defineEmits<{

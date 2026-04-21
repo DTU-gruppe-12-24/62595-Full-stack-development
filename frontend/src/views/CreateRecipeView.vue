@@ -5,7 +5,7 @@ import { useRouter } from "vue-router"
 import RecipeForm from "@/components/RecipeForm.vue"
 import type { RecipeFormData, IngredientLine } from "@/components/RecipeForm.vue"
 import { apiFetch } from "@/utilities/apiFetch"
-import { showError } from "@/utilities/notifications"
+import { showError, showSuccess } from "@/utilities/notifications"
 
 const router = useRouter()
 
@@ -42,6 +42,7 @@ async function submit() {
           unit: l.unit.trim() || null
         }))
     })
+    showSuccess('Recipe created successfully.')
     router.push("/recipes")
   } catch (error: any) {
     showError(error.message || "Could not create recipe")

@@ -120,7 +120,7 @@ import { apiFetch, getMyUser } from "@/utilities/apiFetch"
 import type { GroupMember } from '@/model/GroupMember'
 import AppSection from '@/components/AppSection.vue'
 import type { User } from '@/model/User'
-import { showError } from '@/utilities/notifications'
+import { showError, showSuccess } from '@/utilities/notifications'
 
 const myUser = getMyUser()!;
 
@@ -175,19 +175,28 @@ function submitEditGroup() {
 
 function createGroup(name: string) {
 	apiFetch<Group, Partial<Group>>("/api/group", "POST", { name })
-		.then((result) => groups.value.push({group: result, role: "OWNER"}))
+		.then((result) => {
+			groups.value.push({group: result, role: "OWNER"})
+			showSuccess('Group created successfully.')
+		})
 		.catch((error) => { showError(error instanceof Error ? error.message : "" + error) });
 }
 
 function updateGroup(group: Group, name: string) {
 	apiFetch<Group, Partial<Group>>("/api/group/" + group.id, "PUT", { name })
-		.then((_) => getGroups())
+		.then(_ => {
+			getGroups()
+			showSuccess('Group updated successfully.')
+		})
 		.catch((error) => { showError(error instanceof Error ? error.message : "" + error) });
 }
 
 function deleteGroup(group: Group) {
 	apiFetch("/api/group/" + group.id, "DELETE")
-		.then((_) => getGroups())
+		.then(_ => {
+			getGroups()
+			showSuccess('Group deleted successfully.')
+		})
 		.catch((error) => { showError(error instanceof Error ? error.message : "" + error) });
 }
 
@@ -199,6 +208,7 @@ function inviteMember() {
                             .then((members) => {
                                 groupMembers.value[group.id] = members
                                 inviteEmail.value = ""
+                                showSuccess('Member invited successfully.')
                             })
                             .catch((error) => { showError(error instanceof Error ? error.message : "" + error) });
 			else showError("Failed to invite member");
@@ -207,9 +217,10 @@ function inviteMember() {
 }
 
 function updateMemberRole(member: Omit<GroupMember, "id">) {
-    apiFetch<GroupMember[], [{user: User, role: GroupMember["role"]}]>(`/api/group/${member.group.id}/members`, "POST", [member])
+	apiFetch<GroupMember[], [{user: User, role: GroupMember["role"]}]>(`/api/group/${member.group.id}/members`, "POST", [member])
 		.then((response) => {
 			groupMembers.value[member.group.id] = response
+			showSuccess('Member role updated.')
 		})
         .catch((error) => {
             showError(error instanceof Error ? error.message : "" + error);
@@ -219,11 +230,12 @@ function updateMemberRole(member: Omit<GroupMember, "id">) {
 }
 
 function removeMember(member: Omit<GroupMember, "id">) {
-    apiFetch(`/api/group/${member.group.id}/members/${member.user.id}`, "DELETE")
+	apiFetch(`/api/group/${member.group.id}/members/${member.user.id}`, "DELETE")
         .then((_) => {
             getGroups();
             if (member.user.id != myUser.id) openEditDialog(member.group, allowEdit.value);
             else showEditDialog.value = false;
+			showSuccess(member.user.id != myUser.id ? 'Member removed from group.' : 'You left the group.')
         })
 		.catch((error) => { showError(error instanceof Error ? error.message : "" + error) });
 }

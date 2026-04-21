@@ -6,7 +6,7 @@ import RecipeForm from "@/components/RecipeForm.vue"
 import type { RecipeFormData, IngredientLine } from "@/components/RecipeForm.vue"
 import { apiFetch, getMyUser } from "@/utilities/apiFetch"
 import type { Recipe } from "@/model/Recipe"
-import { showError } from "@/utilities/notifications"
+import { showError, showSuccess } from "@/utilities/notifications"
 import type { Group } from "@/model/Group"
 
 const route = useRoute()
@@ -77,6 +77,7 @@ async function submit() {
 
     if (canEditGroup) await apiFetch(`/api/recipes/${recipeId}/group`, "PUT", group.value?.id)
 
+    showSuccess('Recipe updated successfully.')
     router.push("/recipes")
   } catch (error: any) {
     showError(error.message || "Could not update recipe")
