@@ -29,18 +29,37 @@
       No planned recipes for this date.
     </p>
   </div>
+
+  <button v-if="selectedDate" @click="showAdd = !showAdd">
+    Add recipe
+  </button>
+
+  <div v-if="showAdd">
+    <select v-model="selectedRecipeId">
+      <option disabled value="">Select recipe</option>
+      <option v-for="recipe in recipes" :key="recipe.id" :value="recipe.id">
+        {{ recipe.name }}
+      </option>
+    </select>
+
+    <button @click="addMealPlan">Save</button>
+  </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue"
 import AppCalendar from "@/components/AppCalendar.vue"
 import type { MealPlan } from "@/model/MealPlan"
-import { getMealPlansByDate, deleteMealPlan } from "@/services/MealPlanService"
+import { ref, onMounted } from "vue"
+import { getMealPlansByDate, deleteMealPlan, createMealPlan } from "@/services/MealPlanService"
+import { apiFetch } from "@/utilities/apiFetch"
 
 const selectedDate = ref<string | null>(null)
 const mealPlans = ref<MealPlan[]>([])
 const isLoading = ref(false)
 const errorMessage = ref("")
+const showAdd = ref(false)
+const selectedRecipeId = ref("")
+const recipes = ref<any[]>([])
 
 async function selectDate(date: string) {
   selectedDate.value = date
@@ -65,6 +84,25 @@ async function selectDate(date: string) {
   }
 }
 
+async function addMealPlan() {
+  const groupId = localStorage.getItem("activeGroupId")
+
+  if (!groupId || !selectedDate.value || !selectedRecipeId.value) {
+    errorMessage.value = "Missing data."
+    return
+  }
+
+  try {
+    await createMealPlan(groupId, selectedRecipeId.value, selectedDate.value)
+    mealPlans.value = await getMealPlansByDate(groupId, selectedDate.value)
+    showAdd.value = false
+    selectedRecipeId.value = ""
+  } catch (error) {
+    console.error(error)
+    errorMessage.value = "Could not create meal plan."
+  }
+}
+
 async function removeMealPlan(id: string) {
   try {
     await deleteMealPlan(id)
@@ -74,6 +112,19 @@ async function removeMealPlan(id: string) {
     errorMessage.value = "Could not delete meal plan."
   }
 }
+
+async function loadRecipes() {
+  try {
+    recipes.value = await apiFetch("/api/recipes")
+  } catch (error) {
+    console.error(error)
+    errorMessage.value = "Could not load recipes."
+  }
+}
+
+onMounted(() => {
+  loadRecipes()
+})
 
 </script>
 
