@@ -4,14 +4,15 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.Repository;
 
 import dk.dtu._62595.demo.model.User;
 
-public interface UserRepository extends Repository<User, UUID> {
+public interface UserRepository extends JpaRepository<User, UUID> {
     // Persistence operations
     User save(User user);
-    void deleteById(UUID id);
+    void delete(User user);
 
     // Retrieval operations
     Optional<User> findById(UUID id);

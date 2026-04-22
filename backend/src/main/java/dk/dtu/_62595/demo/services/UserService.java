@@ -70,6 +70,9 @@ public class UserService {
     	return userRepository.findById(id);
     }
 
+    public void deleteUserByEmail(String email) {
+        userRepository.findByEmail(email).ifPresent(userRepository::delete);
+    }
     @Transactional
     public AuthResponse updateUser(UUID id, UserUpdateRequest request) {
         User user = userRepository.findById(id)

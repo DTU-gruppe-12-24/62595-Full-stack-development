@@ -57,6 +57,8 @@ async function submit() {
     <RecipeForm
       v-model="recipe"
       v-model:ingredients="ingredients"
+      :group="null"
+      :can-change-group="true"
       :is-saving="isSaving"
       submit-label="Create Recipe"
       @submit="submit"
