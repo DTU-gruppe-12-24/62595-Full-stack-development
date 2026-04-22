@@ -4,11 +4,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.Repository;
 
 import dk.dtu._62595.demo.model.Ingredient;
 
-public interface IngredientRepository extends Repository<Ingredient, UUID> {
+public interface IngredientRepository extends JpaRepository<Ingredient, UUID> {
 
     // Persistence operations
     Ingredient save(Ingredient ingredient);
@@ -23,12 +24,13 @@ public interface IngredientRepository extends Repository<Ingredient, UUID> {
     @org.springframework.data.jpa.repository.Query(
         """
         SELECT i FROM Ingredient i
-        WHERE LOWER(i.name) LIKE LOWER(CONCAT('%', :query, '%'))
+        WHERE LOWER(i.name) LIKE LOWER(REPLACE(CONCAT('%', :query, '%'), ' ', '%'))
         ORDER BY
             CASE
                 WHEN LOWER(i.name) = LOWER(:query)                    THEN 0
                 WHEN LOWER(i.name) LIKE LOWER(CONCAT(:query, '%'))    THEN 1
-                ELSE                                                       2
+                WHEN LOWER(i.name) LIKE LOWER(CONCAT('%', :query, '%'))    THEN 2
+                ELSE                                                       3
             END,
             i.name
         LIMIT 20

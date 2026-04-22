@@ -29,7 +29,6 @@ const props = defineProps<{
   ingredients: IngredientLine[]
   group: Group | null
   isSaving: boolean
-  errorMessage: string
   submitLabel: string
   canChangeGroup: boolean
 }>()
@@ -67,8 +66,6 @@ function updateGroup(group: Group | null) {
 
 <template>
   <AppCard>
-    <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
-
     <div class="form">
       <AppInput
         :model-value="modelValue.name"
@@ -80,13 +77,16 @@ function updateGroup(group: Group | null) {
         :model-value="modelValue.description"
         label="Description"
         placeholder="Description"
+        type="textarea"
         @update:model-value="updateField('description', $event)"
       />
       <AppInput
         :model-value="modelValue.instructions"
         label="Instructions"
         placeholder="Step by step instructions"
+        type="textarea"
         @update:model-value="updateField('instructions', $event)"
+        class="h-48"
       />
 
       <GroupSelector

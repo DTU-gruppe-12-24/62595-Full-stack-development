@@ -5,6 +5,7 @@ import AppButton from '@/components/AppButton.vue'
 import AppInput from '@/components/AppInput.vue'
 import AppCard from '@/components/AppCard.vue'
 import { register } from '@/services/authService'
+import { showError, showSuccess } from '@/utilities/notifications'
 
 const router = useRouter()
 
@@ -12,33 +13,25 @@ const name = ref('')
 const email = ref('')
 const password = ref('')
 const confirmPassword = ref('')
-const errorMessage = ref('')
 const loading = ref(false)
 
 async function handleSubmit() {
-  errorMessage.value = ''
+  if (!name.value || !email.value || !password.value || !confirmPassword.value)
+      return showError('Please fill in all fields.')
 
-  if (!name.value || !email.value || !password.value || !confirmPassword.value) {
-    errorMessage.value = 'Please fill in all fields.'
-    return
-  }
+  if (password.value !== confirmPassword.value)
+      return showError('Passwords do not match.')
 
-  if (password.value !== confirmPassword.value) {
-    errorMessage.value = 'Passwords do not match.'
-    return
-  }
-
-  if (password.value.length < 8) {
-    errorMessage.value = 'Password must be at least 8 characters.'
-    return
-  }
+  if (password.value.length < 8)
+      return showError('Password must be at least 8 characters.')
 
   loading.value = true
   try {
     await register(name.value, email.value, password.value)
+    showSuccess('Signed up successfully.')
     await router.push('/')
   } catch (err: unknown) {
-    errorMessage.value = err instanceof Error ? err.message : 'Registration failed.'
+      showError(err instanceof Error ? err.message : 'Registration failed.')
   } finally {
     loading.value = false
   }
@@ -95,8 +88,6 @@ async function handleSubmit() {
                 @keyup.enter="handleSubmit"
             />
           </div>
-
-          <p v-if="errorMessage" class="error-text">{{ errorMessage }}</p>
         </div>
 
         <template #footer>
@@ -167,12 +158,6 @@ async function handleSubmit() {
   font-size: 0.875rem;
   font-weight: 600;
   color: var(--color-text-light, #222);
-}
-
-.error-text {
-  margin: 4px 0 0;
-  color: #c0392b;
-  font-size: 0.875rem;
 }
 
 .auth-footer {

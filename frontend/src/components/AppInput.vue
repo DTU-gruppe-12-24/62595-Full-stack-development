@@ -25,11 +25,19 @@ function onInput(event: Event) {
       {{ label }}
     </label>
 
-    <input
-        class="input"
+    <input v-if="type !== 'textarea'"
+        class="input h-full w-full"
         :type="type || 'text'"
         :placeholder="placeholder"
         :value="modelValue"
+        :min="min"
+        :max="max"
+        @input="onInput"
+    />
+    <textarea v-if="type === 'textarea'"
+        class="input h-full w-full"
+        :placeholder="placeholder"
+        :value="modelValue as string | number | readonly string[] | null | undefined"
         :min="min"
         :max="max"
         @input="onInput"

@@ -4,13 +4,14 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.Repository;
 
 import dk.dtu._62595.demo.model.Group;
 import dk.dtu._62595.demo.model.Ingredient;
 import dk.dtu._62595.demo.model.ShoppingList;
 
-public interface ShoppingListRepository extends Repository<ShoppingList, UUID> {
+public interface ShoppingListRepository extends JpaRepository<ShoppingList, UUID> {
 	// Persistence operations
 	ShoppingList save(ShoppingList entity);
 	void deleteById(UUID id);

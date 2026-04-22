@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { isAuthenticated } from '@/services/authService'
+import { isAuthenticated, logout } from '@/services/authService'
+import { showSuccess } from '@/utilities/notifications';
 import UserProfileDialog from '@/views/UserProfileDialog.vue'
 
 const router = useRouter()
@@ -17,6 +18,7 @@ watch(() => route.path, () => {
 
 function onLogout() {
   loggedIn.value = false
+  showSuccess("Logged out successfully.")
   router.push('/sign-in')
 }
 
