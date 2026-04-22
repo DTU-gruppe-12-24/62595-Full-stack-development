@@ -1,25 +1,42 @@
 package dk.dtu._62595.demo.controllers;
 
-import dk.dtu._62595.demo.dto.*;
-import dk.dtu._62595.demo.model.*;
-import dk.dtu._62595.demo.model.RecipeIngredient.Unit;
-import dk.dtu._62595.demo.repositories.IngredientRepository;
-import dk.dtu._62595.demo.repositories.RecipeIngredientRepository;
-import dk.dtu._62595.demo.repositories.RecipeRepository;
-import dk.dtu._62595.demo.services.ExternalRecipeService;
-import dk.dtu._62595.demo.services.GroupService;
+import java.util.Collection;
+import java.util.List;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.UUID;
+import dk.dtu._62595.demo.dto.CreateRecipeRequest;
+import dk.dtu._62595.demo.dto.ExternalRecipeDto;
+import dk.dtu._62595.demo.dto.RecipeDto;
+import dk.dtu._62595.demo.dto.RecipeIngredientDto;
+import dk.dtu._62595.demo.dto.RecipeIngredientRequest;
+import dk.dtu._62595.demo.dto.UpdateRecipeRequest;
+import dk.dtu._62595.demo.model.Group;
+import dk.dtu._62595.demo.model.Ingredient;
+import dk.dtu._62595.demo.model.Recipe;
+import dk.dtu._62595.demo.model.RecipeIngredient;
+import dk.dtu._62595.demo.model.RecipeIngredient.Unit;
+import dk.dtu._62595.demo.model.User;
+import dk.dtu._62595.demo.repositories.IngredientRepository;
+import dk.dtu._62595.demo.repositories.RecipeIngredientRepository;
+import dk.dtu._62595.demo.repositories.RecipeRepository;
+import dk.dtu._62595.demo.services.ExternalRecipeService;
+import dk.dtu._62595.demo.services.GroupService;
 
 @RestController
 @RequestMapping("/api/recipes")
@@ -177,7 +194,7 @@ public class RecipeController {
                         ri.getIngredient().getId(),
                         ri.getIngredient().getName(),
                         ri.getAmount(),
-                        ri.getUnit().ToString()
+                        ri.getUnit().toString()
                 ))
                 .toList();
 
@@ -204,8 +221,6 @@ public class RecipeController {
 		if (group != null)
 			if (!groupService.canUserViewGroup(group, user)) return false;
 
-		if (!recipe.getOwner().equals(user)) return false;
-
-		return true;
+		return recipe.getOwner().equals(user);
 	}
 }

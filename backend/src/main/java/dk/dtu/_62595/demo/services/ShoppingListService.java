@@ -1,20 +1,21 @@
 package dk.dtu._62595.demo.services;
 
+import java.util.List;
+import java.util.UUID;
+
+import org.springframework.stereotype.Service;
+
 import dk.dtu._62595.demo.dto.AddShoppingListItemRequest;
 import dk.dtu._62595.demo.dto.ShoppingListItemDto;
 import dk.dtu._62595.demo.model.Group;
 import dk.dtu._62595.demo.model.Ingredient;
+import dk.dtu._62595.demo.model.RecipeIngredient.Unit;
 import dk.dtu._62595.demo.model.ShoppingList;
 import dk.dtu._62595.demo.model.User;
-import dk.dtu._62595.demo.model.RecipeIngredient.Unit;
 import dk.dtu._62595.demo.repositories.GroupMemberRepository;
 import dk.dtu._62595.demo.repositories.GroupRepository;
 import dk.dtu._62595.demo.repositories.IngredientRepository;
 import dk.dtu._62595.demo.repositories.ShoppingListRepository;
-import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.UUID;
 
 @Service
 public class ShoppingListService {
@@ -133,7 +134,7 @@ public class ShoppingListService {
                 item.getIngredient().getId(),
                 item.getIngredient().getName(),
                 item.getAmount(),
-                item.getUnit().ToString(),
+                item.getUnit().toString(),
                 item.isBought()
         );
     }

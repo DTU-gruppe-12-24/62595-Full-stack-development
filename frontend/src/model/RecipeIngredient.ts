@@ -26,6 +26,7 @@ export enum Unit {
 	POUND = "lb",
 	OUNCE = "oz",
 	CUP = "cup",
+	TIN = "tin",
     PIECE = "piece",
 	NOTHING = ""
 }

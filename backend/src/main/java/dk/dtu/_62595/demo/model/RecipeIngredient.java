@@ -10,10 +10,10 @@ import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.Table;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MapsId;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "recipe_ingredients")
@@ -107,13 +107,16 @@ public class RecipeIngredient {
 		POUND("lb"),
 		OUNCE("oz"),
 		CUP("cup"),
+		TIN("tin"),
 		PIECE("piece"),
 		NOTHING("");
 
 		private final String string;
 		private Unit(String string) { this.string = string; }
 
-		public String ToString() {
+		@Override
+		public String toString() {
+			System.out.println("Test");
 			return string;
 		}
 
@@ -134,6 +137,7 @@ public class RecipeIngredient {
 			if (Pattern.matches("pinch(es)?", check)) return PINCH;
 			if (Pattern.matches("ounce(s)?", check)) return OUNCE;
 			if (Pattern.matches("cups?", check)) return CUP;
+			if (Pattern.matches("tins?", check)) return TIN;
 
 			return NOTHING;
 		}
