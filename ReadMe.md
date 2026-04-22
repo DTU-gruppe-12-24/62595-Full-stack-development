@@ -8,6 +8,10 @@ An available MYSQL server is required (change the url, username and password in 
 
 Can for example be run through docker, compose example is available in `backend/docker-compose.yml`
 
+## Setup environment
+
+To run the project a few environment variables must be set. This can be done by copying the `.env.example` file in the `backend` folder to the same folder but being called `.env` and changing any values that should be different.
+
 ## Run project
 
 **Backend:**
