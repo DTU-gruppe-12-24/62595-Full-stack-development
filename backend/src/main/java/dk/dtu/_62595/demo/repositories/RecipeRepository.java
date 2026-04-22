@@ -4,13 +4,14 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.Repository;
 
 import dk.dtu._62595.demo.model.Group;
 import dk.dtu._62595.demo.model.Recipe;
 import dk.dtu._62595.demo.model.User;
 
-public interface RecipeRepository extends Repository<Recipe, UUID> {
+public interface RecipeRepository extends JpaRepository<Recipe, UUID> {
     // Persistence operations
     Recipe save(Recipe recipe);
     void deleteById(UUID id);
