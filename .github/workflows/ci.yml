@@ -49,7 +49,11 @@ jobs:
       - name: Wait for site to be ready
         run: |
           echo "Waiting for site..."
-          until curl -s http://localhost:8080/actuator/health; do sleep 2; done
+          for i in $(seq 1 10);
+          do
+              if curl -s http://localhost:8080/actuator/health; then break; fi
+              sleep 2
+          done
 
       - name: Run Playwright tests
         working-directory: frontend
