@@ -80,7 +80,6 @@ async function searchExternalRecipes() {
 
 function applyExternalRecipe(selected: ExternalRecipeDto, index: number) {
   selectedExternalIndex.value = index
-  errorMessage.value = ""
 
   recipe.value = {
     name: selected.name ?? "",
