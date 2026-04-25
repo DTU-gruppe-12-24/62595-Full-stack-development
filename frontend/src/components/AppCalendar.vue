@@ -95,7 +95,7 @@ function getShortName(name?: string): string {
             @click="$emit('cell-click', { day, slot })"
         >
           <span v-if="getMealPlan(day, slot)" class="meal-name">
-            {{ getShortName(getMealPlan(day, slot)?.recipe.name) }}
+            {{ getShortName((getMealPlan(day, slot) as any)?.recipe?.name ?? (getMealPlan(day, slot) as any)?.recipeName ?? "Recipe") }}
           </span>
 
           <span v-else class="placeholder">+</span>
