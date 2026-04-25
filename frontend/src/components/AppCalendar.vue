@@ -1,8 +1,13 @@
 <script setup lang="ts">
 import { ref, computed } from "vue"
 import WeekSelector from "@/components/WeekSelector.vue"
+import type { MealPlan } from "@/model/MealPlan"
 
 defineEmits(["cell-click"])
+
+const props = defineProps<{
+  mealPlans?: MealPlan[]
+}>()
 
 const mealSlots = ["Breakfast", "Lunch", "Dinner"]
 
@@ -31,17 +36,42 @@ function formatDay(day: Date) {
     day: "numeric"
   })
 }
+
+function formatDate(date: Date): string {
+  return date.toISOString().slice(0, 10)
+}
+
+function normalizeSlot(slot: string): string {
+  return slot.toUpperCase()
+}
+
+function getMealPlan(day: Date, slot: string): MealPlan | undefined {
+  const date = formatDate(day)
+  const normalizedSlot = normalizeSlot(slot)
+
+  return props.mealPlans?.find(mealPlan => {
+    const mealDate =
+        mealPlan.scheduledDate instanceof Date
+            ? formatDate(mealPlan.scheduledDate)
+            : String(mealPlan.scheduledDate)
+
+    return mealDate === date && mealPlan.mealSlot === normalizedSlot
+  })
+}
+
+function getShortName(name?: string): string {
+  if (!name) return ""
+  return name.length > 10 ? name.slice(0, 10) + "..." : name
+}
 </script>
 
 <template>
   <div class="calendar">
-
     <div class="calendar-header">
       <WeekSelector v-model="currentMonday" />
     </div>
 
     <div class="calendar-grid">
-
       <div></div>
 
       <div
@@ -53,7 +83,6 @@ function formatDay(day: Date) {
       </div>
 
       <template v-for="slot in mealSlots" :key="slot">
-
         <div class="slot-label">
           {{ slot }}
         </div>
@@ -62,22 +91,24 @@ function formatDay(day: Date) {
             v-for="day in weekDays"
             :key="slot + day.toISOString()"
             class="cell"
+            :class="{ 'has-plan': getMealPlan(day, slot) }"
             @click="$emit('cell-click', { day, slot })"
         >
-          <span class="placeholder">+</span>
+          <span v-if="getMealPlan(day, slot)" class="meal-name">
+            {{ getShortName(getMealPlan(day, slot)?.recipe.name) }}
+          </span>
+
+          <span v-else class="placeholder">+</span>
         </div>
-
       </template>
-
     </div>
-
   </div>
 </template>
 
 <style scoped>
 .calendar {
   width: 100%;
-  max-width: 900px;
+  max-width: 1100px;
   margin: auto;
 }
 
@@ -105,19 +136,31 @@ function formatDay(day: Date) {
 
 .cell {
   border: 1px solid #ddd;
-  min-height: 70px;
+  min-height: 90px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  padding: 8px;
+  text-align: center;
 }
 
 .cell:hover {
   background: var(--color-primary-soft);
 }
 
+.cell.has-plan {
+  background: var(--color-primary-soft);
+  border-color: var(--color-primary);
+}
+
 .placeholder {
   opacity: 0.5;
   font-size: 20px;
+}
+
+.meal-name {
+  font-weight: 600;
+  font-size: 14px;
 }
 </style>

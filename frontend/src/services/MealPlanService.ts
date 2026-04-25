@@ -9,7 +9,7 @@ export async function deleteMealPlan(id: string): Promise<void> {
     await apiFetch<void>(`DELETE /api/meal-plans/${id}`)
 }
 
-export async function createMealPlan(groupId: string, recipeId: string, date: string): Promise<void> {
+export async function createMealPlan(groupId: string, recipeId: string, date: string, mealSlot: string): Promise<void> {
     await apiFetch(
         "/api/meal-plans",
         "POST",
