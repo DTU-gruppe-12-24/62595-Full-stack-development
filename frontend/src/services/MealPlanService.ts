@@ -21,3 +21,9 @@ export async function createMealPlan(groupId: string, recipeId: string, date: st
         }
     )
 }
+
+export async function getMealPlansByRange(groupId: string, start: string, end: string): Promise<MealPlan[]> {
+    return await apiFetch<MealPlan[]>(
+        `/api/meal-plans/range?groupId=${groupId}&start=${start}&end=${end}`
+    )
+}

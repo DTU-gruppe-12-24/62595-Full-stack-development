@@ -3,7 +3,7 @@
     <h1>Calendar</h1>
 
     <AppCalendar
-        :meal-plans="mealPlans"
+        :meal-plans="weekMealPlans"
         @cell-click="selectCell"
     />
   </div>
@@ -24,11 +24,11 @@
       Loading meal plans...
     </p>
 
-    <div v-else-if="mealPlans.length > 0" class="meal-plan-list">
+    <div v-else-if="selectedDateMealPlans.length > 0" class="meal-plan-list">
       <h4 class="section-title">Planned recipes</h4>
 
       <div
-          v-for="mealPlan in mealPlans"
+          v-for="mealPlan in selectedDateMealPlans"
           :key="mealPlan.id"
           class="meal-plan-item"
       >
@@ -76,16 +76,13 @@ import AppCalendar from "@/components/AppCalendar.vue"
 import AppButton from "@/components/AppButton.vue"
 import AppDialog from "@/components/AppDialog.vue"
 import type { MealPlan } from "@/model/MealPlan"
-import {
-  getMealPlansByDate,
-  deleteMealPlan,
-  createMealPlan
-} from "@/services/MealPlanService"
+import {getMealPlansByDate, deleteMealPlan, createMealPlan, getMealPlansByRange} from "@/services/MealPlanService"
 import { apiFetch } from "@/utilities/apiFetch"
 
 const selectedDate = ref<string | null>(null)
 const selectedMealSlot = ref("")
-const mealPlans = ref<MealPlan[]>([])
+const weekMealPlans = ref<MealPlan[]>([])
+const selectedDateMealPlans = ref<MealPlan[]>([])
 const isLoading = ref(false)
 const errorMessage = ref("")
 const showAdd = ref(false)
@@ -100,7 +97,7 @@ async function selectCell(payload: { day: Date; slot: string }) {
   selectedDate.value = formatDate(payload.day)
   selectedMealSlot.value = payload.slot.toUpperCase()
   errorMessage.value = ""
-  mealPlans.value = []
+  selectedDateMealPlans.value = []
   selectedRecipeId.value = ""
   showAdd.value = true
 
@@ -113,7 +110,7 @@ async function selectCell(payload: { day: Date; slot: string }) {
 
   try {
     isLoading.value = true
-    mealPlans.value = await getMealPlansByDate(
+    selectedDateMealPlans.value = await getMealPlansByDate(
         groupId,
         selectedDate.value
     )
@@ -146,7 +143,7 @@ async function addMealPlan() {
         selectedMealSlot.value
     )
 
-    mealPlans.value = await getMealPlansByDate(
+    selectedDateMealPlans.value = await getMealPlansByDate(
         groupId,
         selectedDate.value
     )
@@ -157,12 +154,13 @@ async function addMealPlan() {
     console.error(error)
     errorMessage.value = "Could not create meal plan."
   }
+  await loadWeekMealPlans(new Date(selectedDate.value))
 }
 
 async function removeMealPlan(id: string) {
   try {
     await deleteMealPlan(id)
-    mealPlans.value = mealPlans.value.filter(
+    selectedDateMealPlans.value = selectedDateMealPlans.value.filter(
         m => m.id !== id
     )
   } catch (error) {
@@ -180,8 +178,38 @@ async function loadRecipes() {
   }
 }
 
+function getWeekStart(date: Date): string {
+  const d = new Date(date)
+  const day = d.getDay()
+  const diff = d.getDate() - (day === 0 ? 6 : day - 1)
+  d.setDate(diff)
+  return d.toISOString().slice(0, 10)
+}
+
+function getWeekEnd(date: Date): string {
+  const d = new Date(date)
+  const day = d.getDay()
+  const diff = d.getDate() - (day === 0 ? 6 : day - 1) + 6
+  d.setDate(diff)
+  return d.toISOString().slice(0, 10)
+}
+
+async function loadWeekMealPlans(date: Date = new Date()) {
+  const groupId = localStorage.getItem("activeGroupId")
+
+  if (!groupId) {
+    return
+  }
+
+  const start = getWeekStart(date)
+  const end = getWeekEnd(date)
+
+  weekMealPlans.value = await getMealPlansByRange(groupId, start, end)
+}
+
 onMounted(() => {
   loadRecipes()
+  loadWeekMealPlans()
 })
 </script>
 
