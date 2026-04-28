@@ -75,13 +75,16 @@ function updateGroup(group: Group | null) {
         :model-value="modelValue.description"
         label="Description"
         placeholder="Description"
+        type="textarea"
         @update:model-value="updateField('description', $event)"
       />
       <AppInput
         :model-value="modelValue.instructions"
         label="Instructions"
         placeholder="Step by step instructions"
+        type="textarea"
         @update:model-value="updateField('instructions', $event)"
+        class="h-48"
       />
 
       <GroupSelector
