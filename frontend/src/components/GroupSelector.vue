@@ -12,13 +12,13 @@ export interface Group {
 const STORAGE_KEY = 'activeGroupId'
 
 const props = defineProps<{
-  modelValue: Group | null
+  modelValue?: Group
   persist?: boolean
   allowNull?: boolean
 }>()
 
 const emit = defineEmits<{
-  'update:modelValue': [value: Group | null]
+  'update:modelValue': [value: Group | undefined]
 }>()
 
 const groups = ref<Group[]>([])
@@ -37,10 +37,10 @@ onMounted(async () => {
     const memberships = await apiFetch<GroupMemberResponse[]>('/api/group/me')
     groups.value = memberships.map(m => m.group)
 
-    if (props.modelValue == null) {
+    if (!props.modelValue) {
         const savedId = localStorage.getItem(STORAGE_KEY)
-        const savedGroup = props.persist ? (savedId ? groups.value.find(g => g.id === savedId) ?? null : null) : null;
-        const initial = savedGroup ?? (props.allowNull ? null : groups.value[0]) ?? null
+        const savedGroup = props.persist ? (savedId ? groups.value.find(g => g.id === savedId) : undefined) : undefined;
+        const initial = savedGroup ?? (props.allowNull ? undefined : groups.value[0])
 
         if (initial) selectedName.value = initial.name
         else if (props.allowNull) selectedName.value = "None"
@@ -58,11 +58,11 @@ onMounted(async () => {
 
 function onChange(name: string) {
   selectedName.value = name
-  const group = groups.value.find(g => g.name === name) ?? null
+  const group = groups.value.find(g => g.name === name)
   persistAndEmit(group)
 }
 
-function persistAndEmit(group: Group | null) {
+function persistAndEmit(group: Group | undefined) {
     if (props.persist)
         if (group) {
             localStorage.setItem(STORAGE_KEY, group.id)

@@ -3,6 +3,7 @@ import { ref, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { isAuthenticated, logout } from '@/services/authService'
 import { showSuccess } from '@/utilities/notifications';
+import AppButton from '@/components/AppButton.vue'
 import UserProfileDialog from '@/views/UserProfileDialog.vue'
 
 const router = useRouter()
@@ -57,10 +58,10 @@ function onLogout() {
             My statistics
           </RouterLink>
 
-          <button class="user-pill" @click="showProfile = true">
+          <AppButton variant="ghost" class="user-pill" @click="showProfile = true">
             <span class="icon">👤</span>
             <span>Account</span>
-          </button>
+          </AppButton>
         </template>
         <!-- Show these links only if the user is not logged in -->
         <template v-else>
