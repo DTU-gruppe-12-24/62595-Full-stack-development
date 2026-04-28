@@ -50,12 +50,10 @@ function getMealPlan(day: Date, slot: string): MealPlan | undefined {
   const normalizedSlot = normalizeSlot(slot)
 
   return props.mealPlans?.find(mealPlan => {
-    const mealDate =
-        mealPlan.scheduledDate instanceof Date
-            ? formatDate(mealPlan.scheduledDate)
-            : String(mealPlan.scheduledDate)
-
-    return mealDate === date && mealPlan.mealSlot === normalizedSlot
+    return (
+        mealPlan.scheduledDate === date &&
+        mealPlan.mealSlot === normalizedSlot
+    )
   })
 }
 

@@ -1,6 +1,7 @@
 <template>
   <div class="page">
     <h1>Calendar</h1>
+    <GroupSelector v-model="activeGroup" persist />
 
     <AppCalendar
         :meal-plans="weekMealPlans"
@@ -33,7 +34,7 @@
           class="meal-plan-item"
       >
         <div>
-          <p class="meal-name">{{ mealPlan.recipe.name }}</p>
+          <p class="meal-name">{{ mealPlan.recipeName }}</p>
           <p class="meal-slot">{{ mealPlan.mealSlot }}</p>
         </div>
 
@@ -78,6 +79,8 @@ import AppDialog from "@/components/AppDialog.vue"
 import type { MealPlan } from "@/model/MealPlan"
 import {getMealPlansByDate, deleteMealPlan, createMealPlan, getMealPlansByRange} from "@/services/MealPlanService"
 import { apiFetch } from "@/utilities/apiFetch"
+import GroupSelector from "@/components/GroupSelector.vue"
+import type { Group } from "@/model/Group"
 
 const selectedDate = ref<string | null>(null)
 const selectedMealSlot = ref("")
@@ -88,6 +91,8 @@ const errorMessage = ref("")
 const showAdd = ref(false)
 const selectedRecipeId = ref("")
 const recipes = ref<any[]>([])
+const activeGroup = ref<Group | null>(null)
+const groupId = activeGroup.value?.id
 
 function formatDate(date: Date): string {
   return date.toISOString().slice(0, 10)
@@ -101,7 +106,7 @@ async function selectCell(payload: { day: Date; slot: string }) {
   selectedRecipeId.value = ""
   showAdd.value = true
 
-  const groupId = localStorage.getItem("activeGroupId")
+  const groupId = activeGroup.value?.id
 
   if (!groupId) {
     errorMessage.value = "No active group selected."
@@ -123,7 +128,7 @@ async function selectCell(payload: { day: Date; slot: string }) {
 }
 
 async function addMealPlan() {
-  const groupId = localStorage.getItem("activeGroupId")
+  const groupId = activeGroup.value?.id
 
   if (
       !groupId ||
@@ -195,7 +200,7 @@ function getWeekEnd(date: Date): string {
 }
 
 async function loadWeekMealPlans(date: Date = new Date()) {
-  const groupId = localStorage.getItem("activeGroupId")
+  const groupId = activeGroup.value?.id
 
   if (!groupId) {
     return
