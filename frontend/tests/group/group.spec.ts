@@ -3,9 +3,9 @@ import { expect, Page } from '@playwright/test';
 
 test.describe('Groups', () => {
 
-    test.beforeEach(async ({ page }) => {
+  test.beforeEach(async ({ page }) => {
     await page.goto('/');
-    await page.getByRole('link', { name: 'Groups' }).click();
+    await page.getByRole('link', { name: "Groups", exact: true }).click();
   });
 
   async function createGroup(page: Page, name: string) {
@@ -18,7 +18,7 @@ test.describe('Groups', () => {
   async function deleteGroup(page: Page, name: string) {
     const row = page.getByText(name).locator('..');
     await row.getByRole('button', { name: 'Delete' }).click();
-    await page.getByRole('button', { name: 'Yes' }).click();
+    await page.getByRole('button', { name: 'Delete group' }).click();
     await expect(page.getByText(name)).not.toBeVisible();
   }
 

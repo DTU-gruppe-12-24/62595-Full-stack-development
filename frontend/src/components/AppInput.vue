@@ -1,3 +1,9 @@
+<script lang="ts">
+export default {
+  inheritAttrs: false
+}
+</script>
+
 <script setup lang="ts">
 
 defineProps<{
@@ -26,21 +32,23 @@ function onInput(event: Event) {
     </label>
 
     <input v-if="type !== 'textarea'"
-        class="input h-full w-full"
-        :type="type || 'text'"
-        :placeholder="placeholder"
-        :value="modelValue"
-        :min="min"
-        :max="max"
-        @input="onInput"
+           class="input h-full w-full"
+           v-bind="$attrs"
+           :type="type || 'text'"
+           :placeholder="placeholder"
+           :value="modelValue"
+           :min="min"
+           :max="max"
+           @input="onInput"
     />
     <textarea v-if="type === 'textarea'"
-        class="input h-full w-full"
-        :placeholder="placeholder"
-        :value="modelValue as string | number | readonly string[] | null | undefined"
-        :min="min"
-        :max="max"
-        @input="onInput"
+              class="input h-full w-full"
+              v-bind="$attrs"
+              :placeholder="placeholder"
+              :value="modelValue as string | number | readonly string[] | null | undefined"
+              :min="min"
+              :max="max"
+              @input="onInput"
     />
   </div>
 </template>

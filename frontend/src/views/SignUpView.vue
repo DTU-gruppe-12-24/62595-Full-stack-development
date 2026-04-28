@@ -85,7 +85,6 @@ async function handleSubmit() {
                 v-model="confirmPassword"
                 type="password"
                 placeholder="Repeat your password"
-                @keyup.enter="handleSubmit"
             />
           </div>
         </div>

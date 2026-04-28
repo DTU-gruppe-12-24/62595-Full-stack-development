@@ -7,8 +7,11 @@ import AppInput from "@/components/AppInput.vue"
 import AppButton from "@/components/AppButton.vue"
 import RecipeForm from "@/components/RecipeForm.vue"
 import type { RecipeFormData, IngredientLine } from "@/components/RecipeForm.vue"
+import AppContainer from "@/components/AppContainer.vue"
+import AppSection from "@/components/AppSection.vue"
+import AppText from "@/components/AppText.vue"
 import { apiFetch } from "@/utilities/apiFetch"
-import { showError } from "@/utilities/notifications"
+import { showError, showSuccess } from "@/utilities/notifications"
 
 interface ExternalIngredientDto {
   ingredientId: string | null
@@ -130,6 +133,7 @@ async function submit() {
           unit: l.unit.trim() || null
         }))
     })
+    showSuccess('Recipe created successfully.')
     router.push("/recipes")
   } catch (error: any) {
     showError(error.message || "Could not create recipe")
@@ -140,75 +144,75 @@ async function submit() {
 </script>
 
 <template>
-  <div class="page">
-    <h1>Create Recipe</h1>
+  <AppContainer class="page">
+    <AppSection class="form-section">
+      <AppText variant="title" tag="h1">Create Recipe</AppText>
 
-    <AppCard>
-      <div class="external-search">
-        <h2 class="section-title">Import from external recipe</h2>
-        <p class="section-subtitle">
-          Search by name, pick a result, then adjust anything before saving.
-        </p>
+      <AppCard>
+        <div class="external-search">
+          <h2 class="section-title">Import from external recipe</h2>
+          <p class="section-subtitle">
+            Search by name, pick a result, then adjust anything before saving.
+          </p>
 
-        <div class="search-row">
-          <div class="search-input">
-          	<form v-on:submit.prevent="searchExternalRecipes">
-              <AppInput
-                :model-value="externalSearchQuery"
-                label="External recipe search"
-                placeholder="e.g. Arrabiata"
-                @update:model-value="externalSearchQuery = String($event)"
-              />
-          	</form>
-          </div>
-          <AppButton
-            variant="secondary"
-            @click="searchExternalRecipes"
-          >
-            {{ isSearchingExternal ? "Searching..." : "Search" }}
-          </AppButton>
-        </div>
-
-        <p v-if="externalSearchError" class="error">{{ externalSearchError }}</p>
-
-        <div v-if="externalResults.length > 0" class="results">
-          <button
-            v-for="(result, index) in externalResults"
-            :key="`${result.name}-${index}`"
-            class="result-item"
-            :class="{ selected: selectedExternalIndex === index }"
-            type="button"
-            @click="applyExternalRecipe(result, index)"
-          >
-            <img
-              v-if="result.imageUrl"
-              :src="result.imageUrl"
-              :alt="result.name"
-              class="thumb"
-            />
-            <div class="result-content">
-              <p class="result-name">{{ result.name }}</p>
-              <p v-if="result.source" class="result-source">{{ result.source }}</p>
-              <p class="result-meta">
-                {{ result.ingredients?.length ?? 0 }} ingredients
-              </p>
+          <div class="search-row">
+            <div class="search-input">
+              <form v-on:submit.prevent="searchExternalRecipes">
+                <AppInput
+                  :model-value="externalSearchQuery"
+                  label="External recipe search"
+                  placeholder="e.g. Arrabiata"
+                  @update:model-value="externalSearchQuery = String($event)"
+                />
+              </form>
             </div>
-          </button>
-        </div>
-      </div>
-    </AppCard>
+            <AppButton
+              variant="secondary"
+              @click="searchExternalRecipes"
+            >
+              {{ isSearchingExternal ? "Searching..." : "Search" }}
+            </AppButton>
+          </div>
 
-    <RecipeForm
-      v-model="recipe"
-      v-model:ingredients="ingredients"
-      :group="null"
-      :can-change-group="true"
-      :is-saving="isSaving"
-      submit-label="Create Recipe"
-      @submit="submit"
-      @cancel="router.push('/recipes')"
-    />
-  </div>
+          <p v-if="externalSearchError" class="error">{{ externalSearchError }}</p>
+
+          <div v-if="externalResults.length > 0" class="results">
+            <button
+              v-for="(result, index) in externalResults"
+              :key="`${result.name}-${index}`"
+              class="result-item"
+              :class="{ selected: selectedExternalIndex === index }"
+              type="button"
+              @click="applyExternalRecipe(result, index)"
+            >
+              <img
+                v-if="result.imageUrl"
+                :src="result.imageUrl"
+                :alt="result.name"
+                class="thumb"
+              />
+              <div class="result-content">
+                <p class="result-name">{{ result.name }}</p>
+                <p v-if="result.source" class="result-source">{{ result.source }}</p>
+                <p class="result-meta">
+                  {{ result.ingredients?.length ?? 0 }} ingredients
+                </p>
+              </div>
+            </button>
+          </div>
+        </div>
+      </AppCard>
+
+      <RecipeForm
+        v-model="recipe"
+        v-model:ingredients="ingredients"
+        :is-saving="isSaving"
+        submit-label="Create Recipe"
+        @submit="submit"
+        @cancel="router.push('/recipes')"
+      />
+    </AppSection>
+  </AppContainer>
 </template>
 
 <style scoped>
@@ -220,6 +224,8 @@ async function submit() {
   flex-direction: column;
   gap: 16px;
 }
+
+.form-section { margin-top: 0; }
 
 .external-search {
   display: flex;
@@ -300,11 +306,5 @@ async function submit() {
   margin: 2px 0 0;
   color: #666;
   font-size: 13px;
-}
-
-.error {
-  color: #b00020;
-  font-size: 14px;
-  margin: 0;
 }
 </style>

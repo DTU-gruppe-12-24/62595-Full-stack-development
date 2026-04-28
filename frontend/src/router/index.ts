@@ -5,6 +5,7 @@ import { isAuthenticated } from '@/services/authService'
 // Auth views
 import SignInView from '@/views/SignInView.vue'
 import SignUpView from '@/views/SignUpView.vue'
+import HomeView from '@/views/HomeView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -25,7 +26,8 @@ const router = createRouter({
     {
       path: '/',
       name: 'home',
-      component: () => import('@/views/ComponentPreview.vue')
+      component: HomeView,
+      meta: { public: true },
     },
 
     {
@@ -79,6 +81,7 @@ const router = createRouter({
 // Nav guard
 router.beforeEach((to) => {
   const authenticated = isAuthenticated()
+  const isAuthPage = to.name === 'sign-in' || to.name === 'sign-up'
 
   // Redirect unauthenticated users to sign-in
   if (!to.meta.public && !authenticated) {
@@ -86,7 +89,7 @@ router.beforeEach((to) => {
   }
 
   // Redirect logged-in users away from sign-in/sign-up
-  if (to.meta.public && authenticated) {
+  if (isAuthPage && authenticated) {
     return { name: 'home' }
   }
 })
