@@ -56,7 +56,6 @@ async function handleSubmit() {
               v-model="password"
               type="password"
               placeholder="Your password"
-              @keyup.enter="handleSubmit"
             />
           </div>
         </div>
