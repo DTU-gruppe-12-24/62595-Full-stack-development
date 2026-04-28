@@ -41,24 +41,29 @@ async function handleSubmit() {
         </div>
 
         <div class="auth-form">
-          <div class="field">
-            <label class="field-label" for="email">Email</label>
-            <AppInput
-              v-model="email"
-              type="email"
-              placeholder="you@example.com"
-            />
-          </div>
+          <form @submit.prevent="handleSubmit">
+            <div class="field">
 
-          <div class="field">
-            <label class="field-label" for="password">Password</label>
-            <AppInput
-              v-model="password"
-              type="password"
-              placeholder="Your password"
-              @keyup.enter="handleSubmit"
-            />
-          </div>
+              <label class="field-label" for="email">Email</label>
+              <AppInput
+                v-model="email"
+                type="email"
+                placeholder="you@example.com"
+                autocomplete="email"
+              />
+            </div>
+
+            <div class="field">
+              <label class="field-label" for="password">Password</label>
+              <AppInput
+                v-model="password"
+                type="password"
+                placeholder="Your password"
+                autocomplete="current-password"
+                @keyup.enter="handleSubmit"
+              />
+            </div>
+          </form>
         </div>
 
         <template #footer>

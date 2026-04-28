@@ -48,46 +48,53 @@ async function handleSubmit() {
         </div>
 
         <div class="auth-form">
-          <div class="field">
-            <label class="field-label" for="name">Name</label>
-            <AppInput
-                id="name"
-                v-model="name"
-                type="text"
-                placeholder="Your name"
-            />
-          </div>
+          <form @submit.prevent="handleSubmit">
 
-          <div class="field">
-            <label class="field-label" for="email">Email</label>
-            <AppInput
-                id="email"
-                v-model="email"
-                type="email"
-                placeholder="you@example.com"
-            />
-          </div>
+            <div class="field">
+              <label class="field-label" for="name">Name</label>
+              <AppInput
+                  id="name"
+                  v-model="name"
+                  type="text"
+                  placeholder="Your name"
+                  autocomplete="name"
+              />
+            </div>
 
-          <div class="field">
-            <label class="field-label" for="password">Password</label>
-            <AppInput
-                id="password"
-                v-model="password"
-                type="password"
-                placeholder="At least 8 characters"
-            />
-          </div>
+            <div class="field">
+              <label class="field-label" for="email">Email</label>
+              <AppInput
+                  id="email"
+                  v-model="email"
+                  type="email"
+                  placeholder="you@example.com"
+                  autocomplete="email"
+              />
+            </div>
 
-          <div class="field">
-            <label class="field-label" for="confirmPassword">Confirm password</label>
-            <AppInput
-                id="confirmPassword"
-                v-model="confirmPassword"
-                type="password"
-                placeholder="Repeat your password"
-                @keyup.enter="handleSubmit"
-            />
-          </div>
+            <div class="field">
+              <label class="field-label" for="password">Password</label>
+              <AppInput
+                  id="password"
+                  v-model="password"
+                  type="password"
+                  placeholder="At least 8 characters"
+                  autocomplete="new-password"
+              />
+            </div>
+
+            <div class="field">
+              <label class="field-label" for="confirmPassword">Confirm password</label>
+              <AppInput
+                  id="confirmPassword"
+                  v-model="confirmPassword"
+                  type="password"
+                  placeholder="Repeat your password"
+                  autocomplete="new-password"
+                  @keyup.enter="handleSubmit"
+              />
+            </div>
+          </form>
         </div>
 
         <template #footer>
