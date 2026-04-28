@@ -96,27 +96,34 @@ public class RecipeIngredient {
 	}
 
 	public enum Unit {
-		GRAM("g"),
-		KILOGRAM("kg"),
-		MILLILITER("mL"),
-		DECILITER("dL"),
-		LITER("L"),
-		TABLESPOON("tbsp"),
-		TEASPOON("tsp"),
-		PINCH("pinch"),
-		POUND("lb"),
-		OUNCE("oz"),
-		CUP("cup"),
-		TIN("tin"),
-		PIECE("piece"),
-		NOTHING("");
+		GRAM("g", 1.0f),
+		KILOGRAM("kg", 1000.0f),
+		MILLILITER("mL", 1.0f),
+		DECILITER("dL", 100.0f),
+		LITER("L", 1000.0f),
+		TABLESPOON("tbsp", 15.0f),
+		TEASPOON("tsp", 5.0f),
+		PINCH("pinch", 0.36f),
+		POUND("lb", 453.6f),
+		OUNCE("oz", 28.35f),
+		CUP("cup", 240.0f),
+		TIN("tin", 400.0f),
+		PIECE("piece", 50.0f),
+		NOTHING("", 0.0f);
 
 		private final String string;
-		private Unit(String string) { this.string = string; }
+		private final float gramsPerUnit;
+		private Unit(String string, float gramsPerUnit) {
+			this.string = string;
+			this.gramsPerUnit = gramsPerUnit;
+		}
+
+		public float getGramsPerUnit() {
+			return gramsPerUnit;
+		}
 
 		@Override
 		public String toString() {
-			System.out.println("Test");
 			return string;
 		}
 
