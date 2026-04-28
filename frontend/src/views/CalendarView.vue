@@ -1,7 +1,9 @@
 <template>
   <div class="page">
     <h1>Calendar</h1>
-    <GroupSelector v-model="activeGroup" persist />
+    <div class="group-selector-wrapper">
+      <GroupSelector v-model="activeGroup" persist />
+    </div>
 
     <AppCalendar
         :meal-plans="weekMealPlans"
@@ -255,5 +257,10 @@ onMounted(() => {
   width: 100%;
   padding: 8px;
   margin-top: 8px;
+}
+
+.group-selector-wrapper {
+  max-width: 200px;
+  margin-bottom: 20px;
 }
 </style>
