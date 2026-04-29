@@ -8,25 +8,24 @@ import { login } from '@/services/authService'
 import { showError, showSuccess } from '@/utilities/notifications'
 
 const router = useRouter()
-
 const email = ref('')
 const password = ref('')
 const loading = ref(false)
 
 async function handleSubmit() {
-
-  if (!email.value || !password.value)
-      return showError('Please fill in all fields.');
+  if (!email.value || !password.value) {
+    return showError('Please fill in all fields.');
+  }
 
   loading.value = true
   try {
-      await login(email.value, password.value)
-      showSuccess('Logged in successfully.')
-      await router.push('/')
+    await login(email.value, password.value)
+    showSuccess('Logged in successfully.')
+    await router.push('/')
   } catch (err: unknown) {
-      showError(err instanceof Error ? err.message : 'Login failed.');
+    showError(err instanceof Error ? err.message : 'Login failed.');
   } finally {
-      loading.value = false
+    loading.value = false
   }
 }
 </script>
@@ -41,7 +40,7 @@ async function handleSubmit() {
         </div>
 
         <div class="auth-form">
-          <form @submit.prevent="handleSubmit">
+          <form id="login-form" @submit.prevent="handleSubmit">
             <div class="field">
 
               <label class="field-label" for="email">Email</label>
@@ -70,9 +69,10 @@ async function handleSubmit() {
         <template #footer>
           <div class="auth-footer">
             <AppButton
-              variant="primary"
-              :disabled="loading"
-              @click="handleSubmit"
+                variant="primary"
+                type="submit"
+                form="login-form"
+                :disabled="loading"
             >
               {{ loading ? 'Signing in…' : 'Sign in' }}
             </AppButton>

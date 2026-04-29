@@ -30,7 +30,7 @@ async function globalSetup(config: FullConfig) {
 
   await page.getByRole('button', { name: /sign in/i }).click();
 
-  await page.waitForURL(`${baseURL}/`);
+  await page.waitForURL(`${baseURL}`);
 
   await page.context().storageState({ path: './storageState.json' });
 

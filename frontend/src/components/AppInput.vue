@@ -5,7 +5,6 @@ export default {
 </script>
 
 <script setup lang="ts">
-
 defineProps<{
   modelValue?: unknown
   placeholder?: string
@@ -28,7 +27,7 @@ function onInput(event: Event) {
 
 <template>
   <div class="input-wrapper">
-    <label v-if="label" class="label">
+    <label v-if="label" :for="id" class="label">
       {{ label }}
     </label>
 
@@ -48,9 +47,7 @@ function onInput(event: Event) {
               v-bind="$attrs"
               :id="id"
               :placeholder="placeholder"
-              :value="modelValue as string | number | readonly string[] | null | undefined"
-              :min="min"
-              :max="max"
+              :value="modelValue as any"
               @input="onInput"
     />
   </div>
