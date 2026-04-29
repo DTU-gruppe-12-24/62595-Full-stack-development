@@ -9,6 +9,7 @@ export default {
 defineProps<{
   modelValue?: unknown
   placeholder?: string
+  id?: string
   label?: string
   type?: string
   min?: string
@@ -34,6 +35,7 @@ function onInput(event: Event) {
     <input v-if="type !== 'textarea'"
            class="input h-full w-full"
            v-bind="$attrs"
+           :id="id"
            :type="type || 'text'"
            :placeholder="placeholder"
            :value="modelValue"
@@ -44,6 +46,7 @@ function onInput(event: Event) {
     <textarea v-if="type === 'textarea'"
               class="input h-full w-full"
               v-bind="$attrs"
+              :id="id"
               :placeholder="placeholder"
               :value="modelValue as string | number | readonly string[] | null | undefined"
               :min="min"

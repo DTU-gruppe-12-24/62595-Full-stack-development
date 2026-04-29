@@ -46,6 +46,7 @@ async function handleSubmit() {
 
               <label class="field-label" for="email">Email</label>
               <AppInput
+                id="email"
                 v-model="email"
                 type="email"
                 placeholder="you@example.com"
@@ -56,6 +57,7 @@ async function handleSubmit() {
             <div class="field">
               <label class="field-label" for="password">Password</label>
               <AppInput
+                id="password"
                 v-model="password"
                 type="password"
                 placeholder="Your password"
