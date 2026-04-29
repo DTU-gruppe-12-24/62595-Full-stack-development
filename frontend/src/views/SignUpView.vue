@@ -91,7 +91,6 @@ async function handleSubmit() {
                   type="password"
                   placeholder="Repeat your password"
                   autocomplete="new-password"
-                  @keyup.enter="handleSubmit"
               />
             </div>
           </form>

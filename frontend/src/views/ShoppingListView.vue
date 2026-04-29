@@ -9,13 +9,14 @@ import AppButton from '@/components/AppButton.vue'
 import AppCheckbox from '@/components/AppCheckbox.vue'
 import AppText from '@/components/AppText.vue'
 import AppDialog from '@/components/AppDialog.vue'
+import AppConfirmDialog from '@/components/AppConfirmDialog.vue'
 import GroupSelector from '@/components/GroupSelector.vue'
 import IngredientSearch from '@/components/IngredientSearch.vue'
 import type { Group } from '@/components/GroupSelector.vue'
 import type { IngredientResult } from '@/components/IngredientSearch.vue'
 
 import { apiFetch } from '@/utilities/apiFetch'
-import { showError } from '@/utilities/notifications'
+import { showError, showInfo, showSuccess } from '@/utilities/notifications'
 
 interface ShoppingItem {
   id: string
@@ -27,7 +28,7 @@ interface ShoppingItem {
 }
 
 // Active group
-const activeGroup = ref<Group | null>(null)
+const activeGroup = ref<Group | undefined>(undefined)
 
 watch(activeGroup, () => loadItems())
 
@@ -68,15 +69,42 @@ async function deleteItem(id: string) {
   try {
     await apiFetch(`/api/shopping-list/item/${id}`, 'DELETE')
     items.value = items.value.filter(i => i.id !== id)
+    showSuccess('Item removed from shopping list.')
   } catch (e) { showError(e instanceof Error ? e.message : "" + e) }
 }
 
 async function removeBought() {
   if (!activeGroup.value) return
   try {
+    const removedCount = items.value.filter(i => i.isBought).length
     await apiFetch(`/api/shopping-list/${activeGroup.value.id}/bought`, 'DELETE')
     items.value = items.value.filter(i => !i.isBought)
+    if (removedCount > 0) showSuccess(`Removed ${removedCount} bought item${removedCount === 1 ? '' : 's'}.`)
+    else showInfo('No bought items to remove.')
   } catch (e) { showError(e instanceof Error ? e.message : "" + e) }
+}
+
+const showConfirmRemoveBought = ref(false)
+const showConfirmClearList = ref(false)
+
+function requestRemoveBought() {
+  if (!activeGroup.value) return
+  showConfirmRemoveBought.value = true
+}
+
+function requestClearList() {
+  if (!activeGroup.value) return
+  showConfirmClearList.value = true
+}
+
+async function confirmRemoveBought() {
+  showConfirmRemoveBought.value = false
+  await removeBought()
+}
+
+async function confirmClearList() {
+  showConfirmClearList.value = false
+  await clearList()
 }
 
 async function clearList() {
@@ -84,6 +112,7 @@ async function clearList() {
   try {
     await apiFetch(`/api/shopping-list/${activeGroup.value.id}/clear`, 'DELETE')
     items.value = []
+    showSuccess('Shopping list cleared.')
   } catch (e) { showError(e instanceof Error ? e.message : "" + e) }
 }
 
@@ -100,6 +129,7 @@ function exportList() {
   a.download = 'shopping-list.txt'
   a.click()
   URL.revokeObjectURL(url)
+  showInfo('Shopping list exported.')
 }
 
 // Add item dialog
@@ -130,18 +160,14 @@ async function submitAddItem() {
     if (existing !== -1) items.value[existing] = item
     else items.value.push(item)
     showAddDialog.value = false
+    showSuccess('Item added to shopping list.')
   } catch (e) {
     showError(e instanceof Error ? e.message : 'Failed to add item.')
   }
 }
 
-const showAddRecipeDialog = ref(false)
-const showGenerateDialog = ref(false)
-
 // Add custom ingredient dialog
 const showCustomIngredientDialog = ref(false)
-const customIngredientError = ref('')
-const customIngredientSuccess = ref('')
 const customIngredient = ref({
   name: '',
   calories: '' as number | '',
@@ -159,8 +185,6 @@ function openCustomIngredientDialog() {
     name: '', calories: '', protein: '', carbohydrates: '',
     fat: '', saturatedFat: '', sugars: '', salt: '', price: ''
   }
-  customIngredientError.value = ''
-  customIngredientSuccess.value = ''
   showCustomIngredientDialog.value = true
 }
 
@@ -169,10 +193,8 @@ function toOptionalFloat(val: number | ''): number | null {
 }
 
 async function submitCustomIngredient() {
-  customIngredientError.value = ''
-  customIngredientSuccess.value = ''
   const name = customIngredient.value.name.trim()
-  if (!name) { customIngredientError.value = 'Please enter an ingredient name.'; return }
+  if (!name) { showError('Please enter an ingredient name.'); return }
 
   try {
     await apiFetch('/api/ingredients', 'POST', {
@@ -186,10 +208,10 @@ async function submitCustomIngredient() {
       salt:          toOptionalFloat(customIngredient.value.salt),
       price:         toOptionalFloat(customIngredient.value.price),
     })
-    customIngredientSuccess.value = `"${name}" has been added to the database.`
+    showSuccess(`"${name}" has been added to the database.`)
     customIngredient.value.name = ''
   } catch (e) {
-    customIngredientError.value = e instanceof Error ? e.message : 'Failed to add ingredient.'
+    showError(e instanceof Error ? e.message : 'Failed to add ingredient.')
   }
 }
 </script>
@@ -213,11 +235,10 @@ async function submitCustomIngredient() {
       <AppSection>
         <div class="actions">
           <AppButton variant="primary" @click="openAddDialog">Add item</AppButton>
-          <AppButton variant="secondary" @click="showAddRecipeDialog = true">Add recipe</AppButton>
-          <AppButton variant="secondary" @click="showGenerateDialog = true">Generate shopping list</AppButton>
+          <AppButton variant="secondary" disabled>Generate shopping list (coming soon)</AppButton>
           <AppButton variant="secondary" @click="exportList">Export list</AppButton>
-          <AppButton variant="cancel" @click="removeBought">Remove bought</AppButton>
-          <AppButton variant="cancel" @click="clearList">Clear list</AppButton>
+          <AppButton variant="danger" @click="requestRemoveBought">Remove bought</AppButton>
+          <AppButton variant="danger" @click="requestClearList">Clear list</AppButton>
         </div>
       </AppSection>
 
@@ -235,7 +256,7 @@ async function submitCustomIngredient() {
               :class="{ 'item-checked': item.isBought }"
               @update:model-value="toggleBought(item)"
             />
-            <button class="delete-btn" @click="deleteItem(item.id)">✕</button>
+            <AppButton variant="ghost" class="delete-btn" @click="deleteItem(item.id)">✕</AppButton>
           </div>
         </AppCard>
       </AppSection>
@@ -261,29 +282,13 @@ async function submitCustomIngredient() {
       </template>
     </AppDialog>
 
-    <!-- Add recipe (not implemented) -->
-    <AppDialog v-model="showAddRecipeDialog" title="Add recipe">
-      <p>Not implemented yet.</p>
-      <template #footer>
-        <AppButton variant="secondary" @click="showAddRecipeDialog = false">Close</AppButton>
-      </template>
-    </AppDialog>
-
-    <!-- Generate (not implemented) -->
-    <AppDialog v-model="showGenerateDialog" title="Generate shopping list">
-      <p>Not implemented yet.</p>
-      <template #footer>
-        <AppButton variant="secondary" @click="showGenerateDialog = false">Close</AppButton>
-      </template>
-    </AppDialog>
-
     <!-- Add custom ingredient button, shown outside the group guard -->
     <AppSection>
       <template #title>Database</template>
       <AppCard>
-        <p style="font-size:14px;color:#888;margin:0 0 12px;">
+        <AppText variant="caption" class="database-help">
           Can't find an ingredient in the search? Add it to the database here.
-        </p>
+        </AppText>
         <AppButton variant="secondary" @click="openCustomIngredientDialog">
           Add custom ingredient
         </AppButton>
@@ -293,11 +298,11 @@ async function submitCustomIngredient() {
   </AppContainer>
 
   <!-- Add custom ingredient dialog -->
-  <AppDialog v-model="showCustomIngredientDialog" title="Add custom ingredient" width="560px">
-    <div class="dialog-form">
-      <AppInput v-model="customIngredient.name" label="Name" placeholder="e.g. Dragon fruit" />
+    <AppDialog v-model="showCustomIngredientDialog" title="Add custom ingredient" width="560px">
+      <div class="dialog-form">
+        <AppInput v-model="customIngredient.name" label="Name" placeholder="e.g. Dragon fruit" />
 
-      <p class="section-label">Nutritional values per 100g (optional)</p>
+      <AppText variant="caption" class="section-label">Nutritional values per 100g (optional)</AppText>
 
       <div class="amount-row">
         <AppInput v-model="customIngredient.calories"      label="Calories (kcal)" type="number" placeholder="e.g. 52" />
@@ -316,14 +321,28 @@ async function submitCustomIngredient() {
         <AppInput v-model="customIngredient.price"         label="Price (DKK)"     type="number" placeholder="e.g. 12.50" />
       </div>
 
-      <p v-if="customIngredientError" class="error-text">{{ customIngredientError }}</p>
-      <p v-if="customIngredientSuccess" class="success-text">{{ customIngredientSuccess }}</p>
     </div>
     <template #footer>
-      <AppButton variant="cancel" @click="showCustomIngredientDialog = false">Close</AppButton>
+      <AppButton variant="cancel" @click="showCustomIngredientDialog = false">Cancel</AppButton>
       <AppButton variant="primary" @click="submitCustomIngredient">Add</AppButton>
     </template>
   </AppDialog>
+
+  <AppConfirmDialog
+    v-model="showConfirmRemoveBought"
+    title="Remove bought items"
+    message="This will remove all bought items from the list. This action cannot be undone."
+    confirm-label="Remove bought items"
+    @confirm="confirmRemoveBought"
+  />
+
+  <AppConfirmDialog
+    v-model="showConfirmClearList"
+    title="Clear shopping list"
+    message="This will remove all items from the shopping list. This action cannot be undone."
+    confirm-label="Clear list"
+    @confirm="confirmClearList"
+  />
 </template>
 
 <style scoped>
@@ -364,6 +383,6 @@ async function submitCustomIngredient() {
 
 .amount-row { display: flex; gap: 12px; }
 .amount-row > * { flex: 1; }
-.success-text { color: #27ae60; font-size: 0.875rem; margin: 0; }
 .section-label { font-size: 13px; font-weight: 500; color: var(--color-secondary); margin: 4px 0 0; }
+.database-help { margin-bottom: 12px; }
 </style>

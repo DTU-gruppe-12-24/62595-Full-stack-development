@@ -60,7 +60,6 @@ async function handleSubmit() {
                 type="password"
                 placeholder="Your password"
                 autocomplete="current-password"
-                @keyup.enter="handleSubmit"
               />
             </div>
           </form>
