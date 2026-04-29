@@ -385,4 +385,8 @@ async function submitCustomIngredient() {
 .amount-row > * { flex: 1; }
 .section-label { font-size: 13px; font-weight: 500; color: var(--color-secondary); margin: 4px 0 0; }
 .database-help { margin-bottom: 12px; }
+
+@media (max-width: 480px) {
+  .amount-row { flex-direction: column; gap: 8px; }
+}
 </style>

@@ -40,6 +40,7 @@ function formatDay(day: Date) {
       <WeekSelector v-model="currentMonday" />
     </div>
 
+    <div class="calendar-scroll">
     <div class="calendar-grid">
 
       <div></div>
@@ -70,6 +71,7 @@ function formatDay(day: Date) {
       </template>
 
     </div>
+    </div>
 
   </div>
 </template>
@@ -87,9 +89,16 @@ function formatDay(day: Date) {
   margin-bottom: 16px;
 }
 
+.calendar-scroll {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
 .calendar-grid {
   display: grid;
-  grid-template-columns: 120px repeat(7, 1fr);
+  grid-template-columns: 90px repeat(7, minmax(80px, 1fr));
+  min-width: 650px;
 }
 
 .day-header {

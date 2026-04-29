@@ -152,6 +152,15 @@ async function confirmDeleteRecipe() {
 <style scoped>
 .page { padding: 40px; }
 
+@media (max-width: 640px) {
+  .page { padding: 16px; }
+
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
 .header-section { margin-top: 0; }
 
 .page-header {

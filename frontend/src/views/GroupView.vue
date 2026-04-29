@@ -3,7 +3,7 @@
 	<AppCard
 		v-for="group in groups"
 		flex hover
-		class="max-w-1/2 hover:cursor-pointer"
+		class="w-full max-w-xl hover:cursor-pointer"
 		@click="() => openEditDialog(group.group, group.role != 'MEMBER')"
 	>
 		<div class="flex flex-row justify-between items-center w-full">
