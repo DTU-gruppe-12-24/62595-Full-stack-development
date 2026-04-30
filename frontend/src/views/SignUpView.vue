@@ -22,6 +22,11 @@ async function handleSubmit() {
   if (password.value !== confirmPassword.value)
       return showError('Passwords do not match.')
 
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email.value)) {
+    return showError('Please enter a valid email address.');
+  }
+
   if (password.value.length < 8)
       return showError('Password must be at least 8 characters.')
 
@@ -48,7 +53,7 @@ async function handleSubmit() {
         </div>
 
         <div class="auth-form">
-          <form @submit.prevent="handleSubmit">
+          <form id="signup-form" @submit.prevent="handleSubmit">
 
             <div class="field">
               <label class="field-label" for="name">Name</label>
@@ -100,8 +105,9 @@ async function handleSubmit() {
           <div class="auth-footer">
             <AppButton
               variant="primary"
+              type="submit"
+              form="signup-form"
               :disabled="loading"
-              @click="handleSubmit"
             >
               {{ loading ? 'Creating account…' : 'Create account' }}
             </AppButton>

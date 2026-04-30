@@ -17,6 +17,11 @@ async function handleSubmit() {
     return showError('Please fill in all fields.');
   }
 
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email.value)) {
+    return showError('Please enter a valid email address.');
+  }
+
   loading.value = true
   try {
     await login(email.value, password.value)
