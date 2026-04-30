@@ -2,11 +2,13 @@
 import AppInput from "@/components/AppInput.vue"
 import AppButton from "@/components/AppButton.vue"
 import AppCard from "@/components/AppCard.vue"
+import AppDropdown from "@/components/AppDropdown.vue"
 import AppText from "@/components/AppText.vue"
 import IngredientSearch from "@/components/IngredientSearch.vue"
 import type { IngredientResult } from "@/components/IngredientSearch.vue"
 import GroupSelector from "./GroupSelector.vue"
 import type { Group } from "@/model/Group"
+import { Unit } from "@/model/RecipeIngredient"
 
 export interface IngredientLine {
   selected: IngredientResult | null
@@ -143,11 +145,12 @@ function updateGroup(group: Group | undefined) {
           />
         </div>
         <div class="ingredient-unit">
-          <AppInput
-            :model-value="line.unit"
-            placeholder="Unit"
-            @update:model-value="updateIngredientLine(index, { ...line, unit: $event as string })"
-          />
+          <AppDropdown
+				:values="Object.values(Unit)"
+				v-model="line.unit"
+				placeholder=""
+				@update:model-value="updateIngredientLine(index, { ...line, unit: $event })"
+			/>
         </div>
         <AppButton variant="ghost" class="remove-btn" @click="removeIngredientLine(index)">✕</AppButton>
       </div>

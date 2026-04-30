@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import dk.dtu._62595.demo.dto.ExternalRecipeDto;
 import dk.dtu._62595.demo.dto.RecipeIngredientDto;
+import dk.dtu._62595.demo.model.RecipeIngredient;
 import dk.dtu._62595.demo.repositories.IngredientRepository;
 
 @Service
@@ -75,18 +76,19 @@ public class ExternalRecipeService {
 						var searchResults = ingredientRepository.searchByRelevance(name);
 						var ingredient = !searchResults.isEmpty() ? searchResults.getFirst() : null;
 
-						String measureUnit = strMeasure.replaceAll("(\\d+((\\/\\d+)?|(\\.\\d)?)+)", "").trim();
-						if (measureUnit.isBlank()) measureUnit = "piece";
+						RecipeIngredient.Unit measureUnit = RecipeIngredient.Unit.fromString(strMeasure.replaceAll("(\\d+((\\/\\d+)?|(\\.\\d)?)+)", "").trim());
+						if (measureUnit == RecipeIngredient.Unit.NOTHING) measureUnit = RecipeIngredient.Unit.PIECE;
+						System.out.println(measureUnit);
 						float measureAmount = measure.stream()
-							.map(s -> toNumber(s))
-							.filter(n -> n != null)
-							.reduce((a, b) -> a.floatValue() + b.floatValue())
-							.orElse(0f).floatValue();
+                                                        .map(s -> toNumber(s))
+                                                        .filter(n -> n != null)
+                                                        .reduce((a, b) -> a + b)
+                                                        .orElse(0f);
 						ingredients.add(new RecipeIngredientDto(
 							ingredient != null ? ingredient.getId() : null,
 							ingredient != null ? ingredient.getName() : name,
 							measureAmount,
-							measureUnit
+							measureUnit.toString()
 						));
 					} catch (Exception e) {
 						System.err.println(e.getMessage());

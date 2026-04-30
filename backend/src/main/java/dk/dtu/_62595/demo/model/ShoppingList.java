@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 
 import java.util.UUID;
 
+import dk.dtu._62595.demo.model.RecipeIngredient.Unit;
+
 @Entity
 @Table(name = "shopping_lists")
 public class ShoppingList {
@@ -23,15 +25,15 @@ public class ShoppingList {
     @Column(nullable = false)
     private float amount;
 
-    @Column(nullable = true)
-    private String unit;
+    @Column(nullable = true, columnDefinition = "VARCHAR(255)")
+    private Unit unit;
 
     @Column(name = "is_bought", nullable = false)
     private boolean isBought;
 
     public ShoppingList() {}
 
-    public ShoppingList(Group group, Ingredient ingredient, float amount, String unit, boolean isBought) {
+    public ShoppingList(Group group, Ingredient ingredient, float amount, Unit unit, boolean isBought) {
         this.id = UUID.randomUUID();
         this.group = group;
         this.ingredient = ingredient;
@@ -44,6 +46,6 @@ public class ShoppingList {
     public Group getGroup() { return group; }
     public Ingredient getIngredient() { return ingredient; }
     public float getAmount() { return amount; }
-    public String getUnit() { return unit; }
+    public Unit getUnit() { return unit; }
     public boolean isBought() { return isBought; }
 }

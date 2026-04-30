@@ -157,6 +157,7 @@ function onBlur() {
   font-size: 14px;
   transition: 0.2s ease;
   box-sizing: border-box;
+  height: 3rem;
 }
 
 .input:focus {
