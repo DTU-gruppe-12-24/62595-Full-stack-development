@@ -100,6 +100,13 @@ const mostCooked = computed(() => {
   margin: 0 auto;
 }
 
+@media (max-width: 640px) {
+  .statistics-page {
+    padding: 16px;
+    max-width: 100%;
+  }
+}
+
 .stats-header {
   display: flex;
   flex-direction: column;

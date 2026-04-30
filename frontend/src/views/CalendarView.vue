@@ -31,6 +31,12 @@ function handleCellClick(data: {day: Date, slot: string}) {
   padding: 30px;
 }
 
+@media (max-width: 640px) {
+  .page {
+    padding: 16px;
+  }
+}
+
 .calendar-section {
   margin-top: 0;
 }

@@ -82,6 +82,16 @@ function resetToToday() {
   min-width: 180px;
 }
 
+@media (max-width: 400px) {
+  .date-info {
+    min-width: 120px;
+  }
+
+  .range {
+    font-size: 0.78rem;
+  }
+}
+
 .current-badge {
   font-size: 0.65rem;
   text-transform: uppercase;

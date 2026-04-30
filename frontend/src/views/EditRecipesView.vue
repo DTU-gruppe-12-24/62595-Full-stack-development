@@ -117,5 +117,12 @@ async function submit() {
   padding: 0 24px;
 }
 
+@media (max-width: 640px) {
+  .page {
+    margin: 16px auto;
+    padding: 0 16px;
+  }
+}
+
 .form-section { margin-top: 0; }
 </style>
