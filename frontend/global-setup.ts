@@ -25,8 +25,8 @@ async function globalSetup(config: FullConfig) {
   await page.waitForLoadState('networkidle');
 
   // Fill using generic selectors
-  await page.getByLabel('Email').fill('user@example.com');
-  await page.getByLabel('Password').fill('password123');
+  await page.getByLabel('Email').fill(TEST_USER.email);
+  await page.getByLabel('Password').fill(TEST_USER.password);
 
   await page.getByRole('button', { name: /sign in/i }).click();
 
