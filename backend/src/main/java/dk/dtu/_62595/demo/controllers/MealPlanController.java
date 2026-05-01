@@ -1,4 +1,4 @@
-package dk.dtu._62595.demo.controller;
+package dk.dtu._62595.demo.controllers;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 import dk.dtu._62595.demo.dto.CreateMealPlanRequest;
 import dk.dtu._62595.demo.dto.MealPlanResponse;
-import dk.dtu._62595.demo.service.MealPlanService;
+import dk.dtu._62595.demo.services.MealPlanService;
 
 @RestController
 @RequestMapping("/api/meal-plans")

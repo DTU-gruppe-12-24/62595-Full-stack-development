@@ -53,11 +53,6 @@ const router = createRouter({
       name: 'groups',
       component: () => import('@/views/GroupView.vue'),
     },
-    {
-      path: '/groups',
-      name: 'groups',
-      component: () => import('@/views/GroupView.vue'),
-    },
 
     {
       path: "/recipes",

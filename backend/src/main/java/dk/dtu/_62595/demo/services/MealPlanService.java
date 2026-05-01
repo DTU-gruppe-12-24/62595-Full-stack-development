@@ -1,4 +1,4 @@
-package dk.dtu._62595.demo.service;
+package dk.dtu._62595.demo.services;
 
 import java.time.LocalDate;
 import java.util.List;
