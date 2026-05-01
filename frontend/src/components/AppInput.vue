@@ -1,8 +1,14 @@
-<script setup lang="ts">
+<script lang="ts">
+export default {
+  inheritAttrs: false
+}
+</script>
 
+<script setup lang="ts">
 defineProps<{
   modelValue?: unknown
   placeholder?: string
+  id?: string
   label?: string
   type?: string
   min?: string
@@ -21,18 +27,28 @@ function onInput(event: Event) {
 
 <template>
   <div class="input-wrapper">
-    <label v-if="label" class="label">
+    <label v-if="label" :for="id" class="label">
       {{ label }}
     </label>
 
-    <input
-        class="input"
-        :type="type || 'text'"
-        :placeholder="placeholder"
-        :value="modelValue"
-        :min="min"
-        :max="max"
-        @input="onInput"
+    <input v-if="type !== 'textarea'"
+           class="input h-full w-full"
+           v-bind="$attrs"
+           :id="id"
+           :type="type || 'text'"
+           :placeholder="placeholder"
+           :value="modelValue"
+           :min="min"
+           :max="max"
+           @input="onInput"
+    />
+    <textarea v-if="type === 'textarea'"
+              class="input h-full w-full"
+              v-bind="$attrs"
+              :id="id"
+              :placeholder="placeholder"
+              :value="modelValue as any"
+              @input="onInput"
     />
   </div>
 </template>
@@ -57,6 +73,7 @@ function onInput(event: Event) {
   outline: none;
   font-size: 14px;
   transition: 0.2s ease;
+  height: 3rem;
 }
 
 .input:focus {

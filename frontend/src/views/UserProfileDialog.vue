@@ -3,8 +3,10 @@ import { ref, watch } from 'vue'
 import AppButton from "@/components/AppButton.vue"
 import AppInput from "@/components/AppInput.vue"
 import AppDialog from "@/components/AppDialog.vue"
+import AppConfirmDialog from '@/components/AppConfirmDialog.vue'
 import { apiFetch } from "@/utilities/apiFetch"
 import { logout } from "@/services/authService"
+import { showError, showSuccess } from '@/utilities/notifications'
 
 const props = defineProps<{ modelValue: boolean }>()
 const emit = defineEmits(['update:modelValue', 'logged-out'])
@@ -16,12 +18,13 @@ const editType = ref<'name' | 'email' | 'password'>('name')
 const newValue = ref("")
 const currentPassword = ref("")
 const isLoading = ref(false)
+const showDeleteConfirm = ref(false)
 
 async function fetchUser() {
   try {
     user.value = await apiFetch("/api/users/me", "GET")
   } catch (e) {
-    console.error("Failed to fetch user data")
+    showError(e instanceof Error ? e.message : 'Failed to fetch user data')
   }
 }
 
@@ -44,7 +47,7 @@ function openEdit(type: 'name' | 'email' | 'password') {
 
 async function handleConfirmEdit() {
   if (editType.value === 'password' && newValue.value.length < 8) {
-    return alert("New password must be at least 8 characters.")
+    return showError('New password must be at least 8 characters.')
   }
 
   isLoading.value = true
@@ -62,23 +65,22 @@ async function handleConfirmEdit() {
 
     await fetchUser()
     isEditing.value = false
-    alert("Changes saved!")
+    showSuccess('Changes saved!')
   } catch (e: any) {
-    alert(e.message || "Update failed. Please verify your current password.")
+    showError(e.message || 'Update failed. Please verify your current password.')
   } finally {
     isLoading.value = false
   }
 }
 
 async function handleDelete() {
-  if (!confirm("Delete your profile and all associated data? This action cannot be undone.")) return
-
   try {
     isLoading.value = true
     await apiFetch("/api/users/me", "DELETE")
+    showSuccess('Account deleted successfully.')
     await performClientLogout()
   } catch (e: any) {
-    alert("Error deleting account")
+    showError(e.message || 'Error deleting account')
   } finally {
     isLoading.value = false
   }
@@ -118,7 +120,7 @@ async function handleDelete() {
       <div class="danger-zone">
         <h4>GDPR & Privacy</h4>
         <p>Removing your data is permanent and deletes all recipes you have created, and transfers ownership of any groups you created.</p>
-        <AppButton variant="cancel" @click="handleDelete">Delete My Information</AppButton>
+        <AppButton variant="danger" @click="showDeleteConfirm = true">Delete My Information</AppButton>
       </div>
     </div>
 
@@ -127,8 +129,8 @@ async function handleDelete() {
         <AppButton variant="secondary" @click="performClientLogout">
           Log Out
         </AppButton>
-        <AppButton variant="primary" @click="emit('update:modelValue', false)">
-          Close
+        <AppButton variant="cancel" @click="emit('update:modelValue', false)">
+          Cancel
         </AppButton>
       </div>
     </template>
@@ -153,12 +155,22 @@ async function handleDelete() {
     </div>
 
     <template #footer>
-      <AppButton variant="secondary" @click="isEditing = false">Cancel</AppButton>
+      <AppButton variant="cancel" @click="isEditing = false">Cancel</AppButton>
       <AppButton variant="primary" :disabled="isLoading" @click="handleConfirmEdit">
         Confirm Change
       </AppButton>
     </template>
   </AppDialog>
+
+  <AppConfirmDialog
+    v-model="showDeleteConfirm"
+    title="Delete your account?"
+    message="This deletes your profile and associated data permanently. This action cannot be undone."
+    confirm-label="Delete my account"
+    confirm-variant="danger"
+    :busy="isLoading"
+    @confirm="handleDelete"
+  />
 </template>
 
 <style scoped>

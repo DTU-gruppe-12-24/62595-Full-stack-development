@@ -3,7 +3,7 @@
 	<AppCard
 		v-for="group in groups"
 		flex hover
-		class="max-w-1/2 hover:cursor-pointer"
+		class="w-full max-w-xl hover:cursor-pointer"
 		@click="() => openEditDialog(group.group, group.role != 'MEMBER')"
 	>
 		<div class="flex flex-row justify-between items-center w-full">
@@ -11,15 +11,19 @@
 				{{ group.group.name }}
 			</AppText>
 			<div v-if="group.role != 'MEMBER'" class="flex flex-row justify-end gap-1 w-fit">
-				<AppButton variant="secondary" @click="() => openEditDialog(group.group, true)">
+				<AppButton 
+					variant="secondary"
+					aria-label="Edit"
+					@click="() => openEditDialog(group.group, true)"
+					>
 					<font-awesome-icon icon="fa-solid fa-pen-to-square" />
 				</AppButton>
-				<AppButton variant="cancel" v-if="group.role == 'OWNER'" @click="() => { showConfirmDeleteDialog = true; groupBeingDeleted = group.group; }" v-on:click.stop>
-					<font-awesome-icon icon="fa-solid fa-trash" class="text-rose-700" />
+				<AppButton variant="danger" aria-label="Delete" v-if="group.role == 'OWNER'" @click="() => { showConfirmDeleteDialog = true; groupBeingDeleted = group.group; }" v-on:click.stop>
+					<font-awesome-icon icon="fa-solid fa-trash" class="text-white" />
 				</AppButton>
 			</div>
 			<div v-else class="flex flex-row justify-end gap-1 w-fit">
-				<AppButton variant="ghost" @click="() => removeMember({group: group.group, user: myUser, role: 'MEMBER'})" v-on:click.stop>
+				<AppButton variant="ghost" @click="() => requestRemoveMember({group: group.group, user: myUser, role: 'MEMBER'})" v-on:click.stop>
 					<font-awesome-icon icon="fa-solid fa-right-from-bracket" />
 				</AppButton>
 			</div>
@@ -39,7 +43,7 @@
 				Cancel
 			</AppButton>
 			<AppButton variant="secondary" @click="submitCreateGroup">
-				Create
+				Create group
 			</AppButton>
 		</template>
 	</AppDialog>
@@ -69,7 +73,7 @@
 							:disabled="member.role == 'OWNER' || !allowEdit"
 							v-on:change="() => updateMemberRole(member)"
 						/>
-						<AppButton variant="ghost" @click="() => removeMember(member)" v-if="allowEdit && member.role != 'OWNER'">
+						<AppButton variant="ghost" @click="() => requestRemoveMember(member)" v-if="allowEdit && member.role != 'OWNER'">
 							<font-awesome-icon icon="fa-solid fa-right-from-bracket" />
 						</AppButton>
 					</div>
@@ -91,21 +95,28 @@
 		</AppSection>
 	</AppDialog>
 
-	<AppDialog v-model="showConfirmDeleteDialog" :title="'Are you sure you want to delete \'' + groupBeingDeleted?.name + '\'?'">
-		<template #footer>
-			<AppButton variant="cancel" @click="() => showConfirmDeleteDialog = false">
-				Cancel
-			</AppButton>
-			<AppButton variant="secondary" @click="() => { deleteGroup(groupBeingDeleted!); showConfirmDeleteDialog = false; }">
-				Yes
-			</AppButton>
-		</template>
-	</AppDialog>
+	<AppConfirmDialog
+		v-model="showConfirmDeleteDialog"
+		:title="`Delete group '${groupBeingDeleted?.name ?? ''}'?`"
+		message="Deleting a group cannot be undone."
+		confirm-label="Delete group"
+		confirm-variant="danger"
+		@confirm="() => { deleteGroup(groupBeingDeleted!); showConfirmDeleteDialog = false; }"
+	/>
+
+	<AppConfirmDialog
+		v-model="showConfirmMemberRemovalDialog"
+		:title="memberRemovalTitle"
+		:message="memberRemovalMessage"
+		:confirm-label="memberRemovalConfirmLabel"
+		confirm-variant="danger"
+		@confirm="confirmRemoveMember"
+	/>
 </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 
 import type { Group } from "@/model/Group"
 
@@ -113,6 +124,7 @@ import AppCard from "@/components/AppCard.vue"
 import AppButton from "@/components/AppButton.vue"
 import AppText from "@/components/AppText.vue"
 import AppDialog from "@/components/AppDialog.vue"
+import AppConfirmDialog from '@/components/AppConfirmDialog.vue'
 import AppInput from "@/components/AppInput.vue"
 import AppDropdown from "@/components/AppDropdown.vue"
 
@@ -120,7 +132,7 @@ import { apiFetch, getMyUser } from "@/utilities/apiFetch"
 import type { GroupMember } from '@/model/GroupMember'
 import AppSection from '@/components/AppSection.vue'
 import type { User } from '@/model/User'
-import { showError } from '@/utilities/notifications'
+import { showError, showSuccess } from '@/utilities/notifications'
 
 const myUser = getMyUser()!;
 
@@ -137,6 +149,25 @@ const inviteEmail = ref("")
 
 const groupBeingDeleted = ref<Group | null>(null)
 const showConfirmDeleteDialog = ref(false)
+const showConfirmMemberRemovalDialog = ref(false)
+const pendingRemovalMember = ref<Omit<GroupMember, "id"> | null>(null)
+
+const memberRemovalTitle = computed(() => {
+	if (!pendingRemovalMember.value) return 'Confirm action'
+	if (pendingRemovalMember.value.user.id === myUser.id) return `Leave group '${pendingRemovalMember.value.group.name}'?`
+	return `Remove '${pendingRemovalMember.value.user.name}' from group?`
+})
+
+const memberRemovalMessage = computed(() => {
+	if (!pendingRemovalMember.value) return ''
+	if (pendingRemovalMember.value.user.id === myUser.id) return 'You will lose access to this group until you are invited again.'
+	return 'This member will lose access to the group and its shared planning data.'
+})
+
+const memberRemovalConfirmLabel = computed(() => {
+	if (!pendingRemovalMember.value) return 'Confirm'
+	return pendingRemovalMember.value.user.id === myUser.id ? 'Leave group' : 'Remove member'
+})
 
 
 getGroups();
@@ -175,19 +206,28 @@ function submitEditGroup() {
 
 function createGroup(name: string) {
 	apiFetch<Group, Partial<Group>>("/api/group", "POST", { name })
-		.then((result) => groups.value.push({group: result, role: "OWNER"}))
+		.then((result) => {
+			groups.value.push({group: result, role: "OWNER"})
+			showSuccess('Group created successfully.')
+		})
 		.catch((error) => { showError(error instanceof Error ? error.message : "" + error) });
 }
 
 function updateGroup(group: Group, name: string) {
 	apiFetch<Group, Partial<Group>>("/api/group/" + group.id, "PUT", { name })
-		.then((_) => getGroups())
+		.then(_ => {
+			getGroups()
+			showSuccess('Group updated successfully.')
+		})
 		.catch((error) => { showError(error instanceof Error ? error.message : "" + error) });
 }
 
 function deleteGroup(group: Group) {
 	apiFetch("/api/group/" + group.id, "DELETE")
-		.then((_) => getGroups())
+		.then(_ => {
+			getGroups()
+			showSuccess('Group deleted successfully.')
+		})
 		.catch((error) => { showError(error instanceof Error ? error.message : "" + error) });
 }
 
@@ -199,6 +239,7 @@ function inviteMember() {
                             .then((members) => {
                                 groupMembers.value[group.id] = members
                                 inviteEmail.value = ""
+                                showSuccess('Member invited successfully.')
                             })
                             .catch((error) => { showError(error instanceof Error ? error.message : "" + error) });
 			else showError("Failed to invite member");
@@ -207,9 +248,10 @@ function inviteMember() {
 }
 
 function updateMemberRole(member: Omit<GroupMember, "id">) {
-    apiFetch<GroupMember[], [{user: User, role: GroupMember["role"]}]>(`/api/group/${member.group.id}/members`, "POST", [member])
+	apiFetch<GroupMember[], [{user: User, role: GroupMember["role"]}]>(`/api/group/${member.group.id}/members`, "POST", [member])
 		.then((response) => {
 			groupMembers.value[member.group.id] = response
+			showSuccess('Member role updated.')
 		})
         .catch((error) => {
             showError(error instanceof Error ? error.message : "" + error);
@@ -219,13 +261,27 @@ function updateMemberRole(member: Omit<GroupMember, "id">) {
 }
 
 function removeMember(member: Omit<GroupMember, "id">) {
-    apiFetch(`/api/group/${member.group.id}/members/${member.user.id}`, "DELETE")
+	apiFetch(`/api/group/${member.group.id}/members/${member.user.id}`, "DELETE")
         .then((_) => {
             getGroups();
             if (member.user.id != myUser.id) openEditDialog(member.group, allowEdit.value);
             else showEditDialog.value = false;
+			showSuccess(member.user.id != myUser.id ? 'Member removed from group.' : 'You left the group.')
         })
 		.catch((error) => { showError(error instanceof Error ? error.message : "" + error) });
+}
+
+function requestRemoveMember(member: Omit<GroupMember, "id">) {
+	pendingRemovalMember.value = member
+	showConfirmMemberRemovalDialog.value = true
+}
+
+function confirmRemoveMember() {
+	if (!pendingRemovalMember.value) return
+	const member = pendingRemovalMember.value
+	pendingRemovalMember.value = null
+	showConfirmMemberRemovalDialog.value = false
+	removeMember(member)
 }
 
 </script>

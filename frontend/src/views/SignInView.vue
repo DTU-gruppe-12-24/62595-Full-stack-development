@@ -8,25 +8,29 @@ import { login } from '@/services/authService'
 import { showError, showSuccess } from '@/utilities/notifications'
 
 const router = useRouter()
-
 const email = ref('')
 const password = ref('')
 const loading = ref(false)
 
 async function handleSubmit() {
+  if (!email.value || !password.value) {
+    return showError('Please fill in all fields.');
+  }
 
-  if (!email.value || !password.value)
-      return showError('Please fill in all fields.');
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email.value)) {
+    return showError('Please enter a valid email address.');
+  }
 
   loading.value = true
   try {
-      await login(email.value, password.value)
-      showSuccess('Logged in successfully.')
-      await router.push('/')
+    await login(email.value, password.value)
+    showSuccess('Logged in successfully.')
+    await router.push('/')
   } catch (err: unknown) {
-      showError(err instanceof Error ? err.message : 'Login failed.');
+    showError(err instanceof Error ? err.message : 'Login failed.');
   } finally {
-      loading.value = false
+    loading.value = false
   }
 }
 </script>
@@ -41,32 +45,39 @@ async function handleSubmit() {
         </div>
 
         <div class="auth-form">
-          <div class="field">
-            <label class="field-label" for="email">Email</label>
-            <AppInput
-              v-model="email"
-              type="email"
-              placeholder="you@example.com"
-            />
-          </div>
+          <form id="login-form" @submit.prevent="handleSubmit">
+            <div class="field">
 
-          <div class="field">
-            <label class="field-label" for="password">Password</label>
-            <AppInput
-              v-model="password"
-              type="password"
-              placeholder="Your password"
-              @keyup.enter="handleSubmit"
-            />
-          </div>
+              <label class="field-label" for="email">Email</label>
+              <AppInput
+                id="email"
+                v-model="email"
+                type="email"
+                placeholder="you@example.com"
+                autocomplete="email"
+              />
+            </div>
+
+            <div class="field">
+              <label class="field-label" for="password">Password</label>
+              <AppInput
+                id="password"
+                v-model="password"
+                type="password"
+                placeholder="Your password"
+                autocomplete="current-password"
+              />
+            </div>
+          </form>
         </div>
 
         <template #footer>
           <div class="auth-footer">
             <AppButton
-              variant="primary"
-              :disabled="loading"
-              @click="handleSubmit"
+                variant="primary"
+                type="submit"
+                form="login-form"
+                :disabled="loading"
             >
               {{ loading ? 'Signing in…' : 'Sign in' }}
             </AppButton>

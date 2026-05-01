@@ -4,12 +4,16 @@ import { getStatistics } from "@/services/StatisticsService"
 import type { StatisticsSummary } from "@/services/StatisticsService"
 
 import AppCard from "@/components/AppCard.vue"
+import AppButton from "@/components/AppButton.vue"
+import AppContainer from "@/components/AppContainer.vue"
+import AppSection from "@/components/AppSection.vue"
+import AppText from "@/components/AppText.vue"
 import GroupSelector from "@/components/GroupSelector.vue"
 import WeekSelector from "@/components/WeekSelector.vue"
 import type { Group } from "@/components/GroupSelector.vue"
 
 const stats = ref<StatisticsSummary | null>(null)
-const selectedGroup = ref<Group | null>(null)
+const selectedGroup = ref<Group | undefined>(undefined)
 const filterType = ref<'all' | 'week'>('week')
 
 // Date Logic
@@ -37,54 +41,56 @@ const mostCooked = computed(() => {
 </script>
 
 <template>
-  <div class="statistics-page">
-    <header class="stats-header">
+  <AppContainer class="statistics-page">
+    <AppSection class="stats-header">
       <div class="top-row">
         <GroupSelector v-model="selectedGroup" />
 
         <div class="toggle-group">
-          <button :class="{ active: filterType === 'all' }" @click="filterType = 'all'">All Time</button>
-          <button :class="{ active: filterType === 'week' }" @click="filterType = 'week'">Weekly</button>
+          <AppButton :class="['toggle-btn', { active: filterType === 'all' }]" variant="ghost" @click="filterType = 'all'">All Time</AppButton>
+          <AppButton :class="['toggle-btn', { active: filterType === 'week' }]" variant="ghost" @click="filterType = 'week'">Weekly</AppButton>
         </div>
       </div>
 
       <div v-if="filterType === 'week'" class="sub-row">
         <WeekSelector v-model="currentMonday" />
       </div>
-    </header>
+    </AppSection>
 
-    <div v-if="!stats" class="loading">Select a group to see statistics...</div>
+    <AppText v-if="!stats" class="loading">Select a group to see statistics...</AppText>
 
-    <div v-else class="stats-grid">
-      <AppCard class="stat-card">
-        <h2>Meals Planned</h2>
-        <p class="big-number">{{ stats.general.totalMealsPlanned }}</p>
-      </AppCard>
+    <AppSection v-else class="stats-section">
+      <div class="stats-grid">
+        <AppCard class="stat-card">
+          <AppText variant="subtitle" tag="h2">Meals Planned</AppText>
+          <AppText class="big-number">{{ stats.general.totalMealsPlanned }}</AppText>
+        </AppCard>
 
-      <AppCard class="stat-card">
-        <h2>Calories</h2>
-        <p class="big-number">{{ Math.round(stats.nutrition.calories) }} <small>kcal</small></p>
-      </AppCard>
+        <AppCard class="stat-card">
+          <AppText variant="subtitle" tag="h2">Calories</AppText>
+          <AppText class="big-number">{{ Math.round(stats.nutrition.calories) }} <small>kcal</small></AppText>
+        </AppCard>
 
-      <AppCard class="stat-card">
-        <h2>Top Recipes</h2>
-        <ul class="list">
-          <li v-for="[name, count] in mostCooked" :key="name">
-            <span>{{ name }}</span><strong>{{ count }}</strong>
-          </li>
-        </ul>
-      </AppCard>
+        <AppCard class="stat-card">
+          <AppText variant="subtitle" tag="h2">Top Recipes</AppText>
+          <ul class="list">
+            <li v-for="[name, count] in mostCooked" :key="name">
+              <span>{{ name }}</span><strong>{{ count }}</strong>
+            </li>
+          </ul>
+        </AppCard>
 
-      <AppCard class="stat-card">
-        <h2>Macros (g)</h2>
-        <ul class="list">
-          <li><span>Protein</span> <strong>{{ stats.nutrition.protein.toFixed(0) }}</strong></li>
-          <li><span>Carbs</span> <strong>{{ stats.nutrition.carbohydrates.toFixed(0) }}</strong></li>
-          <li><span>Fat</span> <strong>{{ stats.nutrition.fat.toFixed(0) }}</strong></li>
-        </ul>
-      </AppCard>
-    </div>
-  </div>
+        <AppCard class="stat-card">
+          <AppText variant="subtitle" tag="h2">Macros (g)</AppText>
+          <ul class="list">
+            <li><span>Protein</span> <strong>{{ stats.nutrition.protein.toFixed(0) }}</strong></li>
+            <li><span>Carbs</span> <strong>{{ stats.nutrition.carbohydrates.toFixed(0) }}</strong></li>
+            <li><span>Fat</span> <strong>{{ stats.nutrition.fat.toFixed(0) }}</strong></li>
+          </ul>
+        </AppCard>
+      </div>
+    </AppSection>
+  </AppContainer>
 </template>
 
 <style scoped>
@@ -94,8 +100,14 @@ const mostCooked = computed(() => {
   margin: 0 auto;
 }
 
+@media (max-width: 640px) {
+  .statistics-page {
+    padding: 16px;
+    max-width: 100%;
+  }
+}
+
 .stats-header {
-  margin-bottom: 32px;
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -121,20 +133,19 @@ const mostCooked = computed(() => {
   border-radius: 10px;
 }
 
-.toggle-group button {
-  border: none;
-  background: none;
-  padding: 8px 20px;
-  cursor: pointer;
+.toggle-btn {
   border-radius: 8px;
-  font-weight: 500;
+  padding: 8px 20px;
+  color: var(--color-text-light);
 }
 
-.toggle-group button.active {
+.toggle-btn.active {
   background: white;
   color: var(--color-primary);
   box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
+
+.stats-section { margin-top: 0; }
 
 .stats-grid {
   display: grid;

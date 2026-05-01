@@ -2,10 +2,13 @@
 import AppInput from "@/components/AppInput.vue"
 import AppButton from "@/components/AppButton.vue"
 import AppCard from "@/components/AppCard.vue"
+import AppDropdown from "@/components/AppDropdown.vue"
+import AppText from "@/components/AppText.vue"
 import IngredientSearch from "@/components/IngredientSearch.vue"
 import type { IngredientResult } from "@/components/IngredientSearch.vue"
 import GroupSelector from "./GroupSelector.vue"
 import type { Group } from "@/model/Group"
+import { Unit } from "@/model/RecipeIngredient"
 
 export interface IngredientLine {
   selected: IngredientResult | null
@@ -25,16 +28,16 @@ export interface RecipeFormData {
 const props = defineProps<{
   modelValue: RecipeFormData
   ingredients: IngredientLine[]
-  group: Group | null
+  group?: Group
   isSaving: boolean
   submitLabel: string
-  canChangeGroup: boolean
+  canChangeGroup?: boolean
 }>()
 
 const emit = defineEmits<{
   'update:modelValue': [value: RecipeFormData]
   'update:ingredients': [value: IngredientLine[]]
-  'update:group': [value: Group | null]
+  'update:group': [value: Group | undefined]
   'submit': []
   'cancel': []
 }>()
@@ -57,7 +60,7 @@ function updateIngredientLine(index: number, updated: IngredientLine) {
   emit('update:ingredients', lines)
 }
 
-function updateGroup(group: Group | null) {
+function updateGroup(group: Group | undefined) {
     emit('update:group', group)
 }
 </script>
@@ -75,13 +78,16 @@ function updateGroup(group: Group | null) {
         :model-value="modelValue.description"
         label="Description"
         placeholder="Description"
+        type="textarea"
         @update:model-value="updateField('description', $event)"
       />
       <AppInput
         :model-value="modelValue.instructions"
         label="Instructions"
         placeholder="Step by step instructions"
+        type="textarea"
         @update:model-value="updateField('instructions', $event)"
+        class="h-48"
       />
 
       <GroupSelector
@@ -116,7 +122,7 @@ function updateGroup(group: Group | null) {
         />
       </div>
 
-      <p class="section-label">Ingredients</p>
+      <AppText variant="caption" class="section-label">Ingredients</AppText>
 
       <div
         v-for="(line, index) in ingredients"
@@ -139,20 +145,21 @@ function updateGroup(group: Group | null) {
           />
         </div>
         <div class="ingredient-unit">
-          <AppInput
-            :model-value="line.unit"
-            placeholder="Unit"
-            @update:model-value="updateIngredientLine(index, { ...line, unit: $event as string })"
-          />
+          <AppDropdown
+				:values="Object.values(Unit)"
+				v-model="line.unit"
+				placeholder=""
+				@update:model-value="updateIngredientLine(index, { ...line, unit: $event })"
+			/>
         </div>
-        <button class="remove-btn" @click="removeIngredientLine(index)">✕</button>
+        <AppButton variant="ghost" class="remove-btn" @click="removeIngredientLine(index)">✕</AppButton>
       </div>
 
       <AppButton variant="secondary" @click="addIngredientLine">+ Add ingredient</AppButton>
     </div>
 
     <template #footer>
-      <AppButton variant="secondary" @click="emit('cancel')">Cancel</AppButton>
+      <AppButton variant="cancel" @click="emit('cancel')">Cancel</AppButton>
       <AppButton variant="primary" :disabled="isSaving" @click="emit('submit')">
         {{ isSaving ? 'Saving...' : submitLabel }}
       </AppButton>

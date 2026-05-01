@@ -11,5 +11,22 @@ export type RecipeIngredient = {
 	recipe: Recipe;
 	ingredient: Ingredient;
 	amount: number;
-	unit: string;
+	unit: Unit;
 };
+
+export enum Unit {
+    GRAM = "g",
+	KILOGRAM = "kg",
+	MILLILITER = "mL",
+	DECILITER = "dL",
+	LITER = "L",
+	TABLESPOON = "tbsp",
+	TEASPOON = "tsp",
+	PINCH = "pinch",
+	POUND = "lb",
+	OUNCE = "oz",
+	CUP = "cup",
+	TIN = "tin",
+    PIECE = "piece",
+	NOTHING = ""
+}

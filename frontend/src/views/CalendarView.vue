@@ -1,84 +1,44 @@
-<template>
-  <div class="page">
-    <h1>Calendar</h1>
-
-    <AppCalendar @select="selectDate" />
-
-    <p v-if="selectedDate">
-      Selected: {{ selectedDate }}
-    </p>
-
-    <p v-if="isLoading">Loading meal plans...</p>
-
-    <p v-else-if="errorMessage">
-      {{ errorMessage }}
-    </p>
-
-    <div v-else-if="mealPlans.length > 0">
-      <h2>Planned recipes</h2>
-
-      <ul>
-        <li v-for="mealPlan in mealPlans" :key="mealPlan.id">
-          {{ mealPlan.recipe.name }} - {{ mealPlan.mealSlot }}
-          <button @click="removeMealPlan(mealPlan.id)">Remove</button>
-        </li>
-      </ul>
-    </div>
-
-    <p v-else-if="selectedDate">
-      No planned recipes for this date.
-    </p>
-  </div>
-</template>
-
 <script setup lang="ts">
-import { ref } from "vue"
-import AppCalendar from "@/components/AppCalendar.vue"
-import type { MealPlan } from "@/model/MealPlan"
-import { getMealPlansByDate, deleteMealPlan } from "@/services/MealPlanService"
 
-const selectedDate = ref<string | null>(null)
-const mealPlans = ref<MealPlan[]>([])
-const isLoading = ref(false)
-const errorMessage = ref("")
+import WeekCalendar from "@/components/AppCalendar.vue"
+import AppContainer from "@/components/AppContainer.vue"
+import AppSection from "@/components/AppSection.vue"
+import AppText from "@/components/AppText.vue"
 
-async function selectDate(date: string) {
-  selectedDate.value = date
-  errorMessage.value = ""
-  mealPlans.value = []
+function handleCellClick(data: {day: Date, slot: string}) {
 
-  const groupId = localStorage.getItem("activeGroupId")
+  console.log("Clicked cell:", data)
 
-  if (!groupId) {
-    errorMessage.value = "No active group selected."
-    return
-  }
-
-  try {
-    isLoading.value = true
-    mealPlans.value = await getMealPlansByDate(groupId, date)
-  } catch (error) {
-    console.error(error)
-    errorMessage.value = "Could not load meal plans."
-  } finally {
-    isLoading.value = false
-  }
-}
-
-async function removeMealPlan(id: string) {
-  try {
-    await deleteMealPlan(id)
-    mealPlans.value = mealPlans.value.filter(mealPlan => mealPlan.id !== id)
-  } catch (error) {
-    console.error(error)
-    errorMessage.value = "Could not delete meal plan."
-  }
 }
 
 </script>
 
+<template>
+  <AppContainer class="page">
+    <AppSection class="calendar-section">
+      <AppText variant="title" tag="h1">Calendar</AppText>
+      <WeekCalendar
+          @cell-click="handleCellClick"
+      />
+    </AppSection>
+  </AppContainer>
+
+</template>
+
 <style scoped>
+
 .page {
-  padding: 20px;
+  padding: 30px;
 }
+
+@media (max-width: 640px) {
+  .page {
+    padding: 16px;
+  }
+}
+
+.calendar-section {
+  margin-top: 0;
+}
+
 </style>

@@ -25,6 +25,7 @@ let searchTimeout: ReturnType<typeof setTimeout> | null = null
 
 watch(() => props.modelValue, (val) => {
   if (val === null) query.value = ''
+  else query.value = val.ingredientName ?? ''
 })
 
 function onInput() {
@@ -156,6 +157,7 @@ function onBlur() {
   font-size: 14px;
   transition: 0.2s ease;
   box-sizing: border-box;
+  height: 3rem;
 }
 
 .input:focus {

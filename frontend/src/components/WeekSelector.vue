@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import AppButton from '@/components/AppButton.vue'
+import AppText from '@/components/AppText.vue'
 
 const props = defineProps<{
   modelValue: Date
@@ -44,14 +46,14 @@ function resetToToday() {
 
 <template>
   <div class="week-selector" :class="{ 'is-current': isCurrentWeek }">
-    <button class="nav-btn" @click="changeWeek(-1)">←</button>
+    <AppButton variant="ghost" class="nav-btn" @click="changeWeek(-1)">←</AppButton>
 
     <div class="date-info" @click="resetToToday">
-      <span v-if="isCurrentWeek" class="current-badge">Current Week</span>
-      <span class="range">{{ dateRangeLabel }}</span>
+      <AppText v-if="isCurrentWeek" variant="caption" class="current-badge">Current Week</AppText>
+      <AppText class="range">{{ dateRangeLabel }}</AppText>
     </div>
 
-    <button class="nav-btn" @click="changeWeek(1)">→</button>
+    <AppButton variant="ghost" class="nav-btn" @click="changeWeek(1)">→</AppButton>
   </div>
 </template>
 
@@ -80,6 +82,16 @@ function resetToToday() {
   min-width: 180px;
 }
 
+@media (max-width: 400px) {
+  .date-info {
+    min-width: 120px;
+  }
+
+  .range {
+    font-size: 0.78rem;
+  }
+}
+
 .current-badge {
   font-size: 0.65rem;
   text-transform: uppercase;
@@ -95,11 +107,8 @@ function resetToToday() {
 }
 
 .nav-btn {
-  background: none;
-  border: none;
   font-size: 1.2rem;
   color: var(--color-primary);
-  cursor: pointer;
   padding: 0 10px;
   transition: transform 0.2s;
 }

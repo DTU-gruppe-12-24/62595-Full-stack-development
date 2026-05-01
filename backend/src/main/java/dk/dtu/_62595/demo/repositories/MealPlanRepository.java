@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.springframework.data.jpa.repository.JpaRepository;
 import dk.dtu._62595.demo.dto.NutritionStatistics;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.Repository;
@@ -14,7 +15,7 @@ import dk.dtu._62595.demo.model.MealPlan;
 import dk.dtu._62595.demo.model.Recipe;
 import org.springframework.data.repository.query.Param;
 
-public interface MealPlanRepository extends Repository<MealPlan, UUID> {
+public interface MealPlanRepository extends JpaRepository<MealPlan, UUID> {
     // Persistence operations
     MealPlan save(MealPlan mealPlan);
 

@@ -1,16 +1,28 @@
 <template>
-  <button
+  <component
+      :is="to ? RouterLink : 'button'"
       class="app-button"
       :class="[`app-button--${variant}`]"
+      :to="to"
+      :type="to ? undefined : type"
+      v-bind="$attrs"
   >
     <slot />
-  </button>
+  </component>
 </template>
 
 <script setup lang="ts">
-defineProps<{
-  variant?: 'primary' | 'secondary' | 'ghost' | 'cancel'
-}>()
+import type { RouteLocationRaw } from 'vue-router'
+import { RouterLink } from 'vue-router'
+
+withDefaults(defineProps<{
+  variant?: 'primary' | 'secondary' | 'ghost' | 'cancel' | 'danger'
+  to?: RouteLocationRaw
+  type?: 'button' | 'submit' | 'reset'
+}>(), {
+  variant: 'primary',
+  type: 'button',
+})
 </script>
 
 <style scoped>
@@ -26,6 +38,7 @@ defineProps<{
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  text-decoration: none;
 }
 
 .app-button:active {
@@ -47,6 +60,10 @@ defineProps<{
   color: white;
 }
 
+.app-button--secondary:hover {
+  background: var(--color-secondary-dark);
+}
+
 .app-button--cancel {
   background: #e2e8f0;
   color: #475569;
@@ -63,5 +80,20 @@ defineProps<{
 }
 .app-button--ghost:hover {
   background: #f8fafc;
+}
+
+.app-button--danger {
+  background: #dc2626;
+  color: white;
+}
+
+.app-button--danger:hover {
+  background: #b91c1c;
+}
+
+.app-button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
 }
 </style>

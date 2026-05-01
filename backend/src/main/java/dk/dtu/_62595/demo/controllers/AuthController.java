@@ -6,6 +6,7 @@ import dk.dtu._62595.demo.dto.RegisterRequest;
 import dk.dtu._62595.demo.services.UserService;
 import dk.dtu._62595.demo.model.User;
 
+import dk.dtu._62595.demo.services.ValidationService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -26,12 +27,14 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<AuthResponse> register(@RequestBody RegisterRequest request) {
+        ValidationService.validateRegister(request);
         AuthResponse response = userService.register(request);
         return ResponseEntity.ok(response);
     }
 
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest request) {
+        ValidationService.validateLogin(request);
         AuthResponse response = userService.login(request);
         return ResponseEntity.ok(response);
     }
