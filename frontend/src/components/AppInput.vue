@@ -5,10 +5,10 @@ export default {
 </script>
 
 <script setup lang="ts">
-
 defineProps<{
   modelValue?: unknown
   placeholder?: string
+  id?: string
   label?: string
   type?: string
   min?: string
@@ -27,13 +27,14 @@ function onInput(event: Event) {
 
 <template>
   <div class="input-wrapper">
-    <label v-if="label" class="label">
+    <label v-if="label" :for="id" class="label">
       {{ label }}
     </label>
 
     <input v-if="type !== 'textarea'"
            class="input h-full w-full"
            v-bind="$attrs"
+           :id="id"
            :type="type || 'text'"
            :placeholder="placeholder"
            :value="modelValue"
@@ -44,10 +45,9 @@ function onInput(event: Event) {
     <textarea v-if="type === 'textarea'"
               class="input h-full w-full"
               v-bind="$attrs"
+              :id="id"
               :placeholder="placeholder"
-              :value="modelValue as string | number | readonly string[] | null | undefined"
-              :min="min"
-              :max="max"
+              :value="modelValue as any"
               @input="onInput"
     />
   </div>

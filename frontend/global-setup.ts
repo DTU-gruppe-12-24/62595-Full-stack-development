@@ -25,12 +25,12 @@ async function globalSetup(config: FullConfig) {
   await page.waitForLoadState('networkidle');
 
   // Fill using generic selectors
-  await page.locator('input[type="email"]').first().fill(TEST_USER.email);
-  await page.locator('input[type="password"]').first().fill(TEST_USER.password);
+  await page.getByLabel('Email').fill(TEST_USER.email);
+  await page.getByLabel('Password').fill(TEST_USER.password);
 
   await page.getByRole('button', { name: /sign in/i }).click();
 
-  await page.waitForURL(`${baseURL}/`);
+  await page.waitForURL(`${baseURL}`);
 
   await page.context().storageState({ path: './storageState.json' });
 

@@ -5,6 +5,7 @@
       :class="[`app-button--${variant}`]"
       :to="to"
       :type="to ? undefined : type"
+      v-bind="$attrs"
   >
     <slot />
   </component>
