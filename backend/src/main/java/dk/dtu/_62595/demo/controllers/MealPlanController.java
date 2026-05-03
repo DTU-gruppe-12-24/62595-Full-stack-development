@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import dk.dtu._62595.demo.dto.CreateMealPlanRequest;
 import dk.dtu._62595.demo.dto.MealPlanResponse;
 import dk.dtu._62595.demo.services.MealPlanService;
+import dk.dtu._62595.demo.dto.UpdateMealPlanRequest;
 
 @RestController
 @RequestMapping("/api/meal-plans")
@@ -50,4 +51,14 @@ public class MealPlanController {
     public void delete(@PathVariable UUID id) {
         mealPlanService.delete(id);
     }
+
+    @PutMapping("/{id}")
+    public MealPlanResponse update(
+            @PathVariable UUID id,
+            @RequestBody UpdateMealPlanRequest request
+    ) {
+        return mealPlanService.update(id, request);
+    }
 }
+
+

@@ -27,3 +27,14 @@ export async function getMealPlansByRange(groupId: string, start: string, end: s
         `/api/meal-plans/range?groupId=${groupId}&start=${start}&end=${end}`
     )
 }
+
+export async function updateMealPlan(
+    id: string,
+    scheduledDate: string,
+    mealSlot: string
+): Promise<MealPlan> {
+    return await apiFetch(`/api/meal-plans/${id}`, "PUT", {
+        scheduledDate,
+        mealSlot
+    })
+}
