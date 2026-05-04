@@ -105,12 +105,10 @@ function applyExternalRecipe(selected: ExternalRecipeDto, index: number) {
         })
   )
 
-  console.log(mappedLines)
 
   ingredients.value = mappedLines.length > 0
     ? mappedLines
       : [{ selected: null, amount: "", unit: "" }]
-  console.log(ingredients.value)
 }
 
 async function submit() {
@@ -161,6 +159,7 @@ async function submit() {
                 <AppInput
                   :model-value="externalSearchQuery"
                   label="External recipe search"
+                  id="ExternalSearchInput"
                   placeholder="e.g. Arrabiata"
                   @update:model-value="externalSearchQuery = String($event)"
                 />

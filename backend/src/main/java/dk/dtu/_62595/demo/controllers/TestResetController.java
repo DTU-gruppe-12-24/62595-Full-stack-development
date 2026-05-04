@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @Profile("test")
 @RestController
-@RequestMapping("/api/test")
+@RequestMapping(value = "/api/test", produces="application/json")
 public class TestResetController {
 
     public final GroupRepository groupRepository;

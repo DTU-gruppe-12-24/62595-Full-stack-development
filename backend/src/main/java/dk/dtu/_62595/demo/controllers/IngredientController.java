@@ -8,7 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/ingredients")
+@RequestMapping(value = "/api/ingredients", produces="application/json")
 public class IngredientController {
 
     private final IngredientRepository ingredientRepository;

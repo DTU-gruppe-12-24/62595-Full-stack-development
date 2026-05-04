@@ -11,7 +11,7 @@ async function globalSetup(config: FullConfig) {
   console.log("Using baseURL:", baseURL);
 
   // Register test user
-  await fetch('http://localhost:8080/api/auth/register', {
+  await fetch(baseURL + '/api/auth/register', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(TEST_USER),
