@@ -93,7 +93,7 @@ const errorMessage = ref("")
 const showAdd = ref(false)
 const selectedRecipeId = ref("")
 const recipes = ref<any[]>([])
-const activeGroup = ref<Group | null>(null)
+const activeGroup = ref<Group | undefined>(undefined)
 const groupId = activeGroup.value?.id
 
 function formatDate(date: Date): string {
