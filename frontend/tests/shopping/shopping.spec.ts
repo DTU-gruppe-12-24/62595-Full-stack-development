@@ -39,12 +39,29 @@ async function addShoppingItem(
     return response.json();
 }
 
+async function createIngredient(
+    request: Page["request"],
+    ingredientName: string
+) {
+    const authToken = (await request.storageState()).origins[0].localStorage.find(a => a.name == "auth_token")?.value;
+    const response = await request.fetch(`/api/ingredients`, {
+        method: "POST",
+        data: {
+            name: ingredientName,
+        },
+        headers: { "Authorization": `Bearer ${authToken}` }
+    });
+    if (response.status() < 200 || response.status() >= 300)
+        throw Error("API Failed: " + await response.text());
+    return response.json();
+}
+
 async function selectGroup(page: Page, groupName: string) {
     await page.reload();
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState();
 
     await expect(page.getByLabel('Active group')).toBeVisible();
-    expect((await page.getByRole("option", { name: groupName }).all()).length).toBeGreaterThan(0);
+    await page.getByRole("option", { name: groupName }).waitFor({ state: "attached" });
     await page.getByLabel('Active group').selectOption({ label: groupName });
     await page.waitForLoadState('networkidle');
     await expect(page.getByRole("heading", { name: "Items" })).toBeVisible();
@@ -55,7 +72,6 @@ async function clearShoppingList(page: Page) {
     const clearDialog = page.getByRole('heading', { name: 'Clear shopping list' }).locator("..").locator("..");
     await clearDialog.waitFor();
     await clearDialog.getByRole('button', { name: 'Clear list' }).click();
-    await page.waitForTimeout(50);
 }
 
 test.describe('Shopping list', () => {
@@ -68,20 +84,26 @@ test.describe('Shopping list', () => {
     test('can add an item from the dialog', async ({ page }) => {
         const group = await ensureGroup(page.request);
         const ingredientName = `Milk ${Date.now()}`;
-        await page.request.post('/api/ingredients', { data: { name: ingredientName } });
+        await createIngredient(page.request, ingredientName);
 
         await selectGroup(page, group.name);
+        await clearShoppingList(page);
+
+        await expect(page.getByText('Items (0 left)')).toBeVisible();
 
         await page.getByRole('button', { name: 'Add item' }).click();
         await expect(page.getByRole('heading', { name: 'Add ingredient' })).toBeVisible();
 
+        await page.getByLabel('Ingredient').focus();
         await page.getByLabel('Ingredient').fill(ingredientName);
-        await page.getByText(ingredientName).first().click();
+        await page.locator("#ingredient-suggestions").waitFor({ state: "visible" });
+        await page.locator("#ingredient-suggestions").getByText(ingredientName).click();
         await page.getByLabel('Amount').fill('2');
         await page.getByRole('button', { name: 'Add', exact: true }).click();
 
-        await page.getByText(ingredientName).waitFor();
-        await expect(page.getByText(ingredientName)).toBeVisible();
+        await expect(page.getByText('Please select or type an ingredient')).not.toBeVisible();
+        await page.locator(".list-item").waitFor();
+        await expect(page.getByText('Items (1 left)')).toBeVisible();
     });
 
     test('can toggle and remove items', async ({ page }) => {
@@ -95,7 +117,7 @@ test.describe('Shopping list', () => {
         await page.reload();
         await selectGroup(page, group.name);
 
-        await page.getByText('Items (1 left)').waitFor();
+        await expect(page.getByText('Items (1 left)')).toBeVisible();
 
         const itemRow = page.getByText(item.ingredientName).locator("..").locator("input");
         expect(await itemRow.isChecked()).toBe(false);
@@ -108,11 +130,9 @@ test.describe('Shopping list', () => {
         const itemRow2 = page.getByText(item.ingredientName).locator("..").locator("input");
         expect(await itemRow2.isChecked()).toBe(true);
 
-        await page.getByText('Items (0 left)').waitFor();
         await expect(page.getByText('Items (0 left)')).toBeVisible();
 
         await page.locator('.list-item', { hasText: item.ingredientName }).getByRole('button', { name: '✕' }).click();
-        await page.waitForTimeout(50);
         await expect(page.getByText(item.ingredientName)).not.toBeVisible();
     });
 
@@ -121,22 +141,24 @@ test.describe('Shopping list', () => {
         await selectGroup(page, group.name);
         await clearShoppingList(page);
 
+        await expect(page.getByText('Items (0 left)')).toBeVisible();
+
         const boughtItem = await addShoppingItem(page.request, group.id, `Butter ${Date.now()}`);
         const keepItem = await addShoppingItem(page.request, group.id, `Eggs ${Date.now()}`);
         await page.reload();
         await selectGroup(page, group.name);
 
+        await expect(page.getByText('Items (2 left)')).toBeVisible();
+
         const boughtRow = page.getByText(boughtItem.ingredientName);
         await boughtRow.waitFor();
         await boughtRow.click();
 
-        await page.getByText('Items (1 left)').waitFor();
         await expect(page.getByText('Items (1 left)')).toBeVisible();
 
         await page.getByRole('button', { name: 'Remove bought' }).click();
         const removeDialog = page.getByRole('heading', { name: 'Remove bought items' }).locator('..').locator('..');
         await removeDialog.getByRole('button', { name: 'Remove bought items' }).click();
-        await page.waitForTimeout(50);
         await expect(page.getByText(boughtItem.ingredientName)).not.toBeVisible();
         await expect(page.getByText(keepItem.ingredientName)).toBeVisible();
 

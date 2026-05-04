@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -156,7 +155,6 @@ public class RecipeController {
 		Recipe recipe = recipeRepository.findById(recipeId).orElseThrow();
 		if (!recipe.getOwner().equals(owner)) throw new AuthorizationDeniedException("You do not have permission to edit this recipe!");
 
-		System.out.println(groupId);
 		Group group = null;
 		if (groupId != null) {
 			group = groupService.getGroupById(groupId);
