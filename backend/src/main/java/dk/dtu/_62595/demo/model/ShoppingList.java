@@ -26,6 +26,7 @@ public class ShoppingList {
     private float amount;
 
     @Column(nullable = true, columnDefinition = "VARCHAR(255)")
+    @Enumerated(EnumType.STRING)
     private Unit unit;
 
     @Column(name = "is_bought", nullable = false)

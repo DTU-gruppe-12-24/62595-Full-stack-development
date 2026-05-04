@@ -128,6 +128,8 @@ public class RecipeIngredient {
 		}
 
 		public static Unit fromString(String string) {
+			if (string == null || string.isBlank()) return NOTHING;
+
 			String check = string.toLowerCase().trim();
 			for (Unit unit : Unit.values()) {
 				if (unit.string.equalsIgnoreCase(check))
