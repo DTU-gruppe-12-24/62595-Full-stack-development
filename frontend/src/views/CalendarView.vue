@@ -19,15 +19,11 @@
     <p class="selected-date">{{ selectedDate }}</p>
     <p v-if="selectedMealSlot" class="selected-slot">{{ selectedMealSlot }}</p>
 
-    <p v-if="errorMessage" class="error-text">
-      {{ errorMessage }}
-    </p>
-
     <p v-else-if="isLoading" class="muted-text">
       Loading meal plans...
     </p>
 
-    <div v-else-if="selectedDateMealPlans.length > 0" class="meal-plan-list">
+    <div v-if="selectedDateMealPlans.length > 0" :key="selectedDate" class="meal-plan-list">
       <h4 class="section-title">Planned recipes</h4>
 
       <div
@@ -74,7 +70,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from "vue"
+import { ref, onMounted, computed, watch } from "vue"
 import AppCalendar from "@/components/AppCalendar.vue"
 import AppButton from "@/components/AppButton.vue"
 import AppDialog from "@/components/AppDialog.vue"
@@ -83,49 +79,48 @@ import {getMealPlansByDate, deleteMealPlan, createMealPlan, getMealPlansByRange}
 import { apiFetch } from "@/utilities/apiFetch"
 import GroupSelector from "@/components/GroupSelector.vue"
 import type { Group } from "@/model/Group"
+import { showError } from "@/utilities/notifications"
 
-const selectedDate = ref<string | null>(null)
+const selectedDate = ref<string | undefined>(undefined)
 const selectedMealSlot = ref("")
 const weekMealPlans = ref<MealPlan[]>([])
 const selectedDateMealPlans = ref<MealPlan[]>([])
 const isLoading = ref(false)
-const errorMessage = ref("")
 const showAdd = ref(false)
 const selectedRecipeId = ref("")
 const recipes = ref<any[]>([])
 const activeGroup = ref<Group | undefined>(undefined)
-const groupId = activeGroup.value?.id
+const groupId = computed(() => activeGroup.value?.id);
 
 function formatDate(date: Date): string {
   return date.toISOString().slice(0, 10)
 }
 
 async function selectCell(payload: { day: Date; slot: string }) {
-  selectedDate.value = formatDate(payload.day)
-  selectedMealSlot.value = payload.slot.toUpperCase()
-  errorMessage.value = ""
+  const date = formatDate(payload.day)
+  const mealSlot = payload.slot.toUpperCase()
   selectedDateMealPlans.value = []
   selectedRecipeId.value = ""
   showAdd.value = true
-
-  const groupId = activeGroup.value?.id
-
-  if (!groupId) {
-    errorMessage.value = "No active group selected."
-    return
-  }
-
   try {
-    isLoading.value = true
-    selectedDateMealPlans.value = await getMealPlansByDate(
-        groupId,
-        selectedDate.value
-    )
-  } catch (error) {
-    console.error(error)
-    errorMessage.value = "Could not load meal plans."
-  } finally {
-    isLoading.value = false
+
+    if (!groupId.value) return showError("No active group selected.")
+
+    try {
+        isLoading.value = true
+        selectedDateMealPlans.value = await getMealPlansByDate(
+            groupId.value,
+            date
+        )
+    } catch (error) {
+        showError("Could not load meal plans.")
+    } finally {
+        isLoading.value = false
+    }
+  }
+  finally {
+    selectedMealSlot.value = mealSlot;
+    selectedDate.value = date;
   }
 }
 
@@ -138,8 +133,7 @@ async function addMealPlan() {
       !selectedRecipeId.value ||
       !selectedMealSlot.value
   ) {
-    errorMessage.value = "Missing data."
-    return
+    return showError("Missing data.")
   }
 
   try {
@@ -158,8 +152,7 @@ async function addMealPlan() {
     showAdd.value = false
     selectedRecipeId.value = ""
   } catch (error) {
-    console.error(error)
-    errorMessage.value = "Could not create meal plan."
+    showError("Could not create meal plan.")
   }
   await loadWeekMealPlans(new Date(selectedDate.value))
 }
@@ -167,12 +160,10 @@ async function addMealPlan() {
 async function removeMealPlan(id: string) {
   try {
     await deleteMealPlan(id)
-    selectedDateMealPlans.value = selectedDateMealPlans.value.filter(
-        m => m.id !== id
-    )
+    selectedDateMealPlans.value = selectedDateMealPlans.value.filter(m => m.id !== id)
+    weekMealPlans.value = weekMealPlans.value.filter(m => m.id !== id)
   } catch (error) {
-    console.error(error)
-    errorMessage.value = "Could not delete meal plan."
+    showError("Could not delete meal plan.")
   }
 }
 
@@ -180,8 +171,7 @@ async function loadRecipes() {
   try {
     recipes.value = await apiFetch("/api/recipes")
   } catch (error) {
-    console.error(error)
-    errorMessage.value = "Could not load recipes."
+    showError("Could not load recipes.")
   }
 }
 
@@ -202,22 +192,22 @@ function getWeekEnd(date: Date): string {
 }
 
 async function loadWeekMealPlans(date: Date = new Date()) {
-  const groupId = activeGroup.value?.id
-
-  if (!groupId) {
-    return
-  }
+  if (!groupId.value) return
 
   const start = getWeekStart(date)
   const end = getWeekEnd(date)
 
-  weekMealPlans.value = await getMealPlansByRange(groupId, start, end)
+  weekMealPlans.value = await getMealPlansByRange(groupId.value, start, end)
 }
 
 onMounted(() => {
   loadRecipes()
   loadWeekMealPlans()
 })
+
+watch(groupId, () => {
+    loadWeekMealPlans()
+});
 </script>
 
 <style scoped>
@@ -241,10 +231,6 @@ onMounted(() => {
 
 .muted-text {
   color: #666;
-}
-
-.error-text {
-  color: red;
 }
 
 .meal-plan-item {
