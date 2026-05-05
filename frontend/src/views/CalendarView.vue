@@ -79,7 +79,13 @@ import AppCalendar from "@/components/AppCalendar.vue"
 import AppButton from "@/components/AppButton.vue"
 import AppDialog from "@/components/AppDialog.vue"
 import type { MealPlan } from "@/model/MealPlan"
-import {getMealPlansByDate, deleteMealPlan, createMealPlan, getMealPlansByRange} from "@/services/MealPlanService"
+import {
+  getMealPlansByDate,
+  deleteMealPlan,
+  createMealPlan,
+  getMealPlansByRange,
+  updateMealPlan
+} from "@/services/MealPlanService"
 import { apiFetch } from "@/utilities/apiFetch"
 import GroupSelector from "@/components/GroupSelector.vue"
 import type { Group } from "@/model/Group"
@@ -218,6 +224,7 @@ onMounted(() => {
   loadRecipes()
   loadWeekMealPlans()
 })
+
 </script>
 
 <style scoped>
