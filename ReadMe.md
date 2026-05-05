@@ -22,3 +22,5 @@ cd frontend && npm install && npm run build && cd ../backend && mvn spring-boot:
 **Frontend:**
 - Build: `cd frontend && npm install && npm run build`
 - Dev run: `cd frontend && npm install && npm run dev`
+- Note: `npm run build` outputs to Spring Boot locally, while `BUILD_TARGET=server npm run build` creates `dist/` for Nginx in production.
+
