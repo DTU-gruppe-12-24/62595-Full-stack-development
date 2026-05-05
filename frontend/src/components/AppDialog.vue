@@ -28,8 +28,11 @@ defineProps({
   width: String
 })
 
-const emit = defineEmits(['update:modelValue'])
-const close = () => emit('update:modelValue', false)
+const emit = defineEmits(["update:modelValue"])
+
+function close() {
+  emit("update:modelValue", false)
+}
 </script>
 
 <style scoped>
@@ -52,11 +55,9 @@ const close = () => emit('update:modelValue', false)
   max-width: 95vw;
   display: flex;
   flex-direction: column;
-
   box-shadow:
       0 20px 25px -5px rgba(0, 0, 0, 0.1),
       0 10px 10px -5px rgba(0, 0, 0, 0.04);
-
   border: 1px solid #f9c74f20;
   overflow: hidden;
 }
@@ -80,9 +81,6 @@ const close = () => emit('update:modelValue', false)
   max-height: 70vh;
 }
 
-.content > :first-child { margin-top: 0; }
-.content > :last-child { margin-bottom: 0; }
-
 .footer {
   padding: 16px 20px;
   background: #f8fafc;
@@ -99,8 +97,9 @@ const close = () => emit('update:modelValue', false)
   height: 32px;
   border-radius: 50%;
   cursor: pointer;
-  transition: background 0.2s;
 }
 
-.close-btn:hover { background: #e2e8f0; }
+.close-btn:hover {
+  background: #e2e8f0;
+}
 </style>

@@ -30,7 +30,7 @@ defineProps<{
       0 4px 12px rgba(0, 0, 0, 0.05),
       0 2px 4px rgba(0, 0, 0, 0.03);
   border: 1px solid #f9c74f20;
-  overflow: hidden; /* Ensures footer background doesn't bleed over radius */
+  overflow: hidden;
   display: flex;
   flex-direction: column;
   transition: all 0.25s ease;
@@ -46,7 +46,7 @@ defineProps<{
 
 .card-body {
   padding: 20px;
-  flex-grow: 1; /* Ensures body fills space if card has a fixed height */
+  flex-grow: 1;
 }
 
 /* Fixes the "weird gap" at the top/bottom */
@@ -58,7 +58,7 @@ defineProps<{
   background: #f8f9fa;
   border-top: 1px solid #eee;
   display: flex;
-  justify-content: flex-end; /* Aligns button to the right by default */
+  justify-content: flex-end;
 }
 .card-body.is-flex {
   display: flex;

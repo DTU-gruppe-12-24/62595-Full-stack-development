@@ -42,5 +42,13 @@ public class MealPlan {
 	public Group getGroup() { return group; }
 	public Recipe getRecipe() { return recipe; }
 	public LocalDate getScheduledDate() { return scheduledDate; }
+
+	public void setScheduledDate(LocalDate scheduledDate) {
+		this.scheduledDate = scheduledDate;
+	}
+
 	public String getMealSlot() { return mealSlot; }
+	public void setMealSlot(String mealSlot) {
+		this.mealSlot = mealSlot;
+	}
 }
