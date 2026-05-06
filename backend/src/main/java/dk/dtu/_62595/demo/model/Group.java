@@ -19,6 +19,10 @@ public class Group {
 	@OneToMany(mappedBy = "group", orphanRemoval = true)
 	private List<GroupMember> members;
 
+	@ManyToOne
+	@JoinColumn(name = "current_shopper_id", columnDefinition = "CHAR(36)")
+	private User currentShopper;
+
     public Group() {}
 
 	public Group(String name) {
@@ -31,4 +35,7 @@ public class Group {
     public String getName() { return name; }
 
     public void setName(String name) { this.name = name; }
+
+	public User getCurrentShopper() { return currentShopper; }
+	public void setCurrentShopper(User currentShopper) { this.currentShopper = currentShopper; }
 }

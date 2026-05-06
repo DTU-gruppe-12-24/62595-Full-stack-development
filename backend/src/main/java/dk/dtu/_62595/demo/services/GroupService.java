@@ -140,4 +140,31 @@ public class GroupService {
 			groupMemberRepository.save(successor);
 		}
 	}
+
+	@Transactional
+	public void updateShopper(UUID groupId, UUID shopperUserId, User currentUser) {
+		Group group = groupRepository.findById(groupId)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Group not found"));
+
+		// Permissions check: Only ADMIN/OWNER can change the designated shopper
+		if (!canUserEditGroup(group, currentUser)) {
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only admins can assign a shopper");
+		}
+
+		if (shopperUserId == null) {
+			group.setCurrentShopper(null);
+		} else {
+			// Verify the new shopper is actually a member of this group
+			User newShopper = userRepository.findById(shopperUserId)
+					.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+			if (!canUserViewGroup(group, newShopper)) {
+				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User must be a member of the group to be the shopper");
+			}
+
+			group.setCurrentShopper(newShopper);
+		}
+
+		groupRepository.save(group);
+	}
 }

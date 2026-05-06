@@ -30,19 +30,25 @@
     <div v-else-if="selectedDateMealPlans.length > 0" class="meal-plan-list">
       <h4 class="section-title">Planned recipes</h4>
 
-      <div
-          v-for="mealPlan in selectedDateMealPlans"
-          :key="mealPlan.id"
-          class="meal-plan-item"
-      >
+      <div v-for="mealPlan in selectedDateMealPlans" :key="mealPlan.id" class="meal-plan-item">
         <div>
           <p class="meal-name">{{ mealPlan.recipeName }}</p>
-          <p class="meal-slot">{{ mealPlan.mealSlot }}</p>
-        </div>
 
-        <AppButton @click="removeMealPlan(mealPlan.id)">
-          Remove
-        </AppButton>
+          <!-- Cooker Selection -->
+          <div class="cooker-select-row">
+            <span class="muted-text">Cook: </span>
+            <select
+                :value="mealPlan.cookerId || ''"
+                @change="assignCooker(mealPlan.id, $event)"
+            >
+              <option value="">Unassigned</option>
+              <option v-for="member in groupMembers" :key="member.user.id" :value="member.user.id">
+                {{ member.user.name }}
+              </option>
+            </select>
+          </div>
+        </div>
+        <AppButton @click="removeMealPlan(mealPlan.id)">Remove</AppButton>
       </div>
     </div>
 
@@ -74,7 +80,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from "vue"
+import {ref, onMounted, watch} from "vue"
 import AppCalendar from "@/components/AppCalendar.vue"
 import AppButton from "@/components/AppButton.vue"
 import AppDialog from "@/components/AppDialog.vue"
@@ -83,6 +89,8 @@ import {getMealPlansByDate, deleteMealPlan, createMealPlan, getMealPlansByRange}
 import { apiFetch } from "@/utilities/apiFetch"
 import GroupSelector from "@/components/GroupSelector.vue"
 import type { Group } from "@/model/Group"
+import {showError, showSuccess} from "@/utilities/notifications.ts";
+import type {GroupMember} from "@/model/GroupMember.ts";
 
 const selectedDate = ref<string | null>(null)
 const selectedMealSlot = ref("")
@@ -212,6 +220,39 @@ async function loadWeekMealPlans(date: Date = new Date()) {
   const end = getWeekEnd(date)
 
   weekMealPlans.value = await getMealPlansByRange(groupId, start, end)
+}
+
+const groupMembers = ref<any[]>([])
+
+watch(activeGroup, (newGroup) => {
+  if (newGroup) {
+    loadWeekMealPlans()
+    loadGroupMembers()
+  }
+})
+
+async function loadGroupMembers() {
+  if (!activeGroup.value) return
+  try {
+    groupMembers.value = await apiFetch<any[]>(`/api/group/${activeGroup.value.id}/members`)
+  } catch (e) {
+    console.error("Failed to load members", e)
+  }
+}
+
+async function assignCooker(mealPlanId: string, event: Event) {
+  const userId = (event.target as HTMLSelectElement).value
+  try {
+    await apiFetch(`/api/meal-plans/${mealPlanId}/cooker?userId=${userId}`, 'PATCH')
+
+    const meal = selectedDateMealPlans.value.find(m => m.id === mealPlanId)
+    if (meal) {
+      (meal as any).cookerId = userId
+    }
+    showSuccess("Cooker assigned")
+  } catch (e) {
+    showError("Failed to assign cooker")
+  }
 }
 
 onMounted(() => {

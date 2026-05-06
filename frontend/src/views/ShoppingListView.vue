@@ -32,7 +32,17 @@ interface ShoppingItem {
 // Active group
 const activeGroup = ref<Group | undefined>(undefined)
 
-watch(activeGroup, () => loadItems())
+watch(activeGroup, async (newGroup) => {
+  if (newGroup) {
+    loadItems()
+    loadGroupMembers()
+    currentShopperId.value = (newGroup as any).currentShopperId || null
+  } else {
+    items.value = []
+    groupMembers.value = []
+    currentShopperId.value = null
+  }
+})
 
 // Items
 const items = ref<ShoppingItem[]>([])
@@ -216,6 +226,29 @@ async function submitCustomIngredient() {
     showError(e instanceof Error ? e.message : 'Failed to add ingredient.')
   }
 }
+
+const groupMembers = ref<any[]>([])
+const currentShopperId = ref<string | null>(null)
+
+async function loadGroupMembers() {
+  if (!activeGroup.value) return
+  try {
+    groupMembers.value = await apiFetch<any[]>(`/api/group/${activeGroup.value.id}/members`)
+  } catch (e) {
+    console.error("Failed to load members", e)
+  }
+}
+
+async function updateGroupShopper() {
+  if (!activeGroup.value) return
+  try {
+    const url = `/api/group/${activeGroup.value.id}/shopper?userId=${currentShopperId.value || ''}`
+    await apiFetch(url, 'PATCH')
+    showSuccess("Shopper updated")
+  } catch (e) {
+    showError("Failed to update shopper")
+  }
+}
 </script>
 
 <template>
@@ -224,7 +257,6 @@ async function submitCustomIngredient() {
 
     <!-- Group selector -->
     <AppSection>
-      <template #title>Group</template>
       <AppCard>
         <GroupSelector v-model="activeGroup" persist />
       </AppCard>
@@ -232,7 +264,19 @@ async function submitCustomIngredient() {
 
     <!-- Everything below is hidden until a group is selected -->
     <template v-if="activeGroup">
-
+      <AppSection v-if="activeGroup">
+        <AppCard class="shopper-card">
+          <div class="shopper-info">
+            <AppText variant="subheading">Designated Shopper:</AppText>
+            <select v-model="currentShopperId" @change="updateGroupShopper">
+              <option value="">No one assigned</option>
+              <option v-for="member in groupMembers" :key="member.user.id" :value="member.user.id">
+                {{ member.user.name }}
+              </option>
+            </select>
+          </div>
+        </AppCard>
+      </AppSection>
       <!-- Actions -->
       <AppSection>
         <div class="actions">
@@ -396,4 +440,7 @@ async function submitCustomIngredient() {
 @media (max-width: 480px) {
   .amount-row { flex-direction: column; gap: 8px; }
 }
+
+.shopper-card { background-color: #f9c74f10; border: 1px solid #f9c74f; margin-bottom: 16px; }
+.shopper-info { display: flex; align-items: center; gap: 12px; }
 </style>
