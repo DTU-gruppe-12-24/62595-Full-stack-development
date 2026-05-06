@@ -11,7 +11,7 @@ export async function deleteMealPlan(id: string): Promise<void> {
     });
 }
 
-export async function createMealPlan(groupId: string, recipeId: string, scheduledDate: string, mealSlot: string): Promise<void> {
+export async function createMealPlan(groupId: string, recipeId: string, scheduledDate: string, mealSlot: string, cookerId?: string): Promise<void> {
     await apiFetch(
         "/api/meal-plans",
         "POST",
@@ -19,7 +19,8 @@ export async function createMealPlan(groupId: string, recipeId: string, schedule
             groupId,
             recipeId,
             scheduledDate,
-            mealSlot
+            mealSlot,
+            cookerId
         }
     )
 }

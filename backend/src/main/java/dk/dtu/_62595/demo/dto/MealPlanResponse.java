@@ -11,8 +11,8 @@ public class MealPlanResponse {
     public String recipeName;
     public LocalDate scheduledDate;
     public String mealSlot;
-    UUID cookerId;
-    String cookerName;
+    public UUID cookerId;
+    public String cookerName;
 
     public MealPlanResponse(UUID id, UUID groupId, UUID recipeId, String recipeName, LocalDate scheduledDate, String mealSlot, UUID cookerId, String cookerName) {
         this.id = id;

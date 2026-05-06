@@ -63,10 +63,14 @@ public class MealPlanService {
         MealPlan mealPlan = new MealPlan(
                 group,
                 recipe,
-                null, //FIXME
                 request.scheduledDate,
                 request.mealSlot
         );
+        if (request.cookerId != null) {
+            User cooker = userRepository.findById(request.cookerId)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cooker user not found"));
+            mealPlan.setCooker(cooker);
+        }
 
         MealPlan saved = mealPlanRepository.save(mealPlan);
         return toResponse(saved);
@@ -122,8 +126,7 @@ public class MealPlanService {
                 mealPlan.getScheduledDate(),
                 mealPlan.getMealSlot(),
                 mealPlan.getCooker() != null ? mealPlan.getCooker().getId() : null,
-                mealPlan.getCooker() != null ? mealPlan.getCooker().getName() : null
-        );
+                mealPlan.getCooker() != null ? mealPlan.getCooker().getName() : null        );
     }
 
     public MealPlanResponse update(UUID id, UpdateMealPlanRequest request) {

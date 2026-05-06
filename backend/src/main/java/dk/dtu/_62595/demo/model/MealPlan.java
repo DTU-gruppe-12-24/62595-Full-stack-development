@@ -32,11 +32,10 @@ public class MealPlan {
 
 	public MealPlan() {}
 
-	public MealPlan(Group group, Recipe recipe, User cooker, LocalDate scheduledDate, String mealSlot) {
+	public MealPlan(Group group, Recipe recipe, LocalDate scheduledDate, String mealSlot) {
 		this.id = UUID.randomUUID();
 		this.group = group;
 		this.recipe = recipe;
-		this.cooker = cooker;
 		this.scheduledDate = scheduledDate;
 		this.mealSlot = mealSlot;
 	}
