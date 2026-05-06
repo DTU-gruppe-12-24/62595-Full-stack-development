@@ -11,13 +11,17 @@ public class MealPlanResponse {
     public String recipeName;
     public LocalDate scheduledDate;
     public String mealSlot;
+    public UUID cookerId;
+    public String cookerName;
 
-    public MealPlanResponse(UUID id, UUID groupId, UUID recipeId, String recipeName, LocalDate scheduledDate, String mealSlot) {
+    public MealPlanResponse(UUID id, UUID groupId, UUID recipeId, String recipeName, LocalDate scheduledDate, String mealSlot, UUID cookerId, String cookerName) {
         this.id = id;
         this.groupId = groupId;
         this.recipeId = recipeId;
         this.recipeName = recipeName;
         this.scheduledDate = scheduledDate;
         this.mealSlot = mealSlot;
+        this.cookerId = cookerId;
+        this.cookerName = cookerName;
     }
 }

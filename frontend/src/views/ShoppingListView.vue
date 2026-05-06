@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import {computed, ref, watch} from 'vue'
 
 import AppContainer from '@/components/AppContainer.vue'
 import AppSection from '@/components/AppSection.vue'
@@ -11,14 +11,14 @@ import AppCheckbox from '@/components/AppCheckbox.vue'
 import AppText from '@/components/AppText.vue'
 import AppDialog from '@/components/AppDialog.vue'
 import AppConfirmDialog from '@/components/AppConfirmDialog.vue'
+import type {Group} from '@/components/GroupSelector.vue'
 import GroupSelector from '@/components/GroupSelector.vue'
+import type {IngredientResult} from '@/components/IngredientSearch.vue'
 import IngredientSearch from '@/components/IngredientSearch.vue'
-import type { Group } from '@/components/GroupSelector.vue'
-import type { IngredientResult } from '@/components/IngredientSearch.vue'
 
-import { apiFetch } from '@/utilities/apiFetch'
-import { showError, showInfo, showSuccess } from '@/utilities/notifications'
-import { Unit } from '@/model/RecipeIngredient'
+import {apiFetch} from '@/utilities/apiFetch'
+import {showError, showInfo, showSuccess} from '@/utilities/notifications'
+import {Unit} from '@/model/RecipeIngredient'
 
 interface ShoppingItem {
   id: string
@@ -32,7 +32,18 @@ interface ShoppingItem {
 // Active group
 const activeGroup = ref<Group | undefined>(undefined)
 
-watch(activeGroup, () => loadItems())
+watch(activeGroup, async (newGroup) => {
+  if (newGroup) {
+    await loadItems()
+    await loadGroupMembers()
+
+    currentShopperId.value = (newGroup as any).currentShopper?.id || undefined;
+  } else {
+    items.value = []
+    groupMembers.value = []
+    currentShopperId.value = undefined
+  }
+})
 
 // Items
 const items = ref<ShoppingItem[]>([])
@@ -216,6 +227,35 @@ async function submitCustomIngredient() {
     showError(e instanceof Error ? e.message : 'Failed to add ingredient.')
   }
 }
+
+const groupMembers = ref<any[]>([])
+const currentShopperId = ref<string | undefined>(undefined)
+
+async function loadGroupMembers() {
+  if (!activeGroup.value) return
+  try {
+    groupMembers.value = await apiFetch<any[]>(`/api/group/${activeGroup.value.id}/members`)
+  } catch (e) {
+    console.error("Failed to load members", e)
+  }
+}
+
+async function updateGroupShopper() {
+  if (!activeGroup.value) return
+  try {
+    const url = `/api/group/${activeGroup.value.id}/shopper?userId=${currentShopperId.value || ''}`
+    await apiFetch(url, 'PATCH')
+    showSuccess("Shopper updated")
+  } catch (e) {
+    showError("Failed to update shopper")
+  }
+}
+const memberOptions = computed(() => {
+  return groupMembers.value.map(m => ({
+    id: m.user.id,
+    name: m.user.name
+  }))
+})
 </script>
 
 <template>
@@ -224,7 +264,6 @@ async function submitCustomIngredient() {
 
     <!-- Group selector -->
     <AppSection>
-      <template #title>Group</template>
       <AppCard>
         <GroupSelector v-model="activeGroup" persist />
       </AppCard>
@@ -232,7 +271,18 @@ async function submitCustomIngredient() {
 
     <!-- Everything below is hidden until a group is selected -->
     <template v-if="activeGroup">
-
+      <AppSection v-if="activeGroup">
+        <AppCard>
+          <div class="shopper-info">
+            <AppDropdown
+                label="Designated Shopper"
+                :values="memberOptions"
+                v-model="currentShopperId"
+                @update:model-value="updateGroupShopper"
+            />
+          </div>
+        </AppCard>
+      </AppSection>
       <!-- Actions -->
       <AppSection>
         <div class="actions">
@@ -397,4 +447,6 @@ async function submitCustomIngredient() {
 @media (max-width: 480px) {
   .amount-row { flex-direction: column; gap: 8px; }
 }
+
+.shopper-info { display: flex; align-items: center; gap: 12px; }
 </style>

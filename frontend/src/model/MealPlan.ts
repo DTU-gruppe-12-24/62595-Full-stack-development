@@ -5,4 +5,6 @@ export type MealPlan = {
 	recipeName: string
 	scheduledDate: string
 	mealSlot: string
+	cookerId?: string
+	cookerName?: string
 }

@@ -20,6 +20,10 @@ public class MealPlan {
 	@JoinColumn(name = "recipe_id", columnDefinition = "CHAR(36)", nullable = false)
 	private Recipe recipe;
 
+	@ManyToOne
+	@JoinColumn(name = "cooker_id", columnDefinition = "CHAR(36)")
+	private User cooker;
+
 	@Column(name = "scheduled_date", nullable = false)
 	private LocalDate scheduledDate;
 
@@ -41,6 +45,8 @@ public class MealPlan {
 	}
 	public Group getGroup() { return group; }
 	public Recipe getRecipe() { return recipe; }
+	public User getCooker() { return cooker; }
+	public void setCooker(User cooker) { this.cooker = cooker; }
 	public LocalDate getScheduledDate() { return scheduledDate; }
 
 	public void setScheduledDate(LocalDate scheduledDate) {
