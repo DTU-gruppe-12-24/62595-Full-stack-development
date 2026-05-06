@@ -6,7 +6,7 @@ export async function getMealPlansByDate(groupId: string, date: string): Promise
 }
 
 export async function deleteMealPlan(id: string): Promise<void> {
-    await apiFetch<void>(`DELETE /api/meal-plans/${id}`)
+    await apiFetch(`/api/meal-plans/${id}`, "DELETE")
 }
 
 export async function createMealPlan(groupId: string, recipeId: string, scheduledDate: string, mealSlot: string): Promise<void> {

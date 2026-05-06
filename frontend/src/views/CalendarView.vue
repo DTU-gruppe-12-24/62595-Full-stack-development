@@ -74,7 +74,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from "vue"
+import { ref, onMounted, watch } from "vue"
 import AppCalendar from "@/components/AppCalendar.vue"
 import AppButton from "@/components/AppButton.vue"
 import AppDialog from "@/components/AppDialog.vue"
@@ -173,9 +173,14 @@ async function addMealPlan() {
 async function removeMealPlan(id: string) {
   try {
     await deleteMealPlan(id)
+
     selectedDateMealPlans.value = selectedDateMealPlans.value.filter(
-        m => m.id !== id
+        mealPlan => mealPlan.id !== id
     )
+
+    if (selectedDate.value) {
+      await loadWeekMealPlans(new Date(selectedDate.value))
+    }
   } catch (error) {
     console.error(error)
     errorMessage.value = "Could not delete meal plan."
@@ -222,6 +227,10 @@ async function loadWeekMealPlans(date: Date = new Date()) {
 
 onMounted(() => {
   loadRecipes()
+  loadWeekMealPlans()
+})
+
+watch(activeGroup, () => {
   loadWeekMealPlans()
 })
 
