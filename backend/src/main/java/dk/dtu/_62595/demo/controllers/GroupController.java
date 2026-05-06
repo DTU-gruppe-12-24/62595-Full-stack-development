@@ -139,8 +139,7 @@ public class GroupController {
 
 	@PatchMapping("/{groupId}/shopper")
 	public ResponseEntity<Void> updateShopper(@PathVariable UUID groupId, @RequestParam(required = false) UUID userId) {
-		User currentUser = authController.getLoggedInUser();
-		groupService.updateShopper(groupId, userId, currentUser);
+		groupService.updateShopper(groupId, userId);
 		return ResponseEntity.ok().build();
 	}
 }
