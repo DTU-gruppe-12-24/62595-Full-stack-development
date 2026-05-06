@@ -8,7 +8,7 @@ import java.time.LocalDate;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/statistics")
+@RequestMapping(value = "/api/statistics", produces="application/json")
 public class StatisticsController {
 
     private final StatisticsService statisticsService;

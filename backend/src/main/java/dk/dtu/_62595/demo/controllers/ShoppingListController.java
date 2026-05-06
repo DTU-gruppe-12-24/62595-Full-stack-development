@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/shopping-list")
+@RequestMapping(value = "/api/shopping-list", produces="application/json")
 public class ShoppingListController {
 
     private final ShoppingListService shoppingListService;
