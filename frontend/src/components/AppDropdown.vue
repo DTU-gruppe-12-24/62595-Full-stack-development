@@ -34,9 +34,11 @@ function onInput(event: Event) {
 
 <template>
   <div class="input-wrapper">
+    <!-- The 'for' attribute looks for a matching 'id' on an input/select -->
     <label v-if="label" :for="id" class="label">{{ label }}</label>
 
     <select
+        :id="id"
         class="input"
         :value="modelValue || ''"
         @change="onInput"
