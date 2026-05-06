@@ -36,6 +36,8 @@ build/
 ### NPM ###
 **/node_modules
 **/resources/static
+# Frontend production build
+frontend/dist/
 
 # Playwright
 node_modules/
