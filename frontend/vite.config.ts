@@ -6,6 +6,8 @@ import vueDevTools from 'vite-plugin-vue-devtools'
 
 import tailwindcss from '@tailwindcss/vite'
 
+const isProd = process.env.BUILD_TARGET === "server";
+
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
@@ -20,7 +22,9 @@ export default defineConfig({
   },
   build: {
 		target: "esnext",
-		outDir: "../backend/src/main/resources/static",
+		outDir: isProd
+            ? "dist"
+            : "../backend/src/main/resources/static",
 		emptyOutDir: true,
 	},
   server: {

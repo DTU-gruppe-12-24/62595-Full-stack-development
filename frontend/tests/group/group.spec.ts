@@ -6,19 +6,25 @@ test.describe('Groups', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
     await page.getByRole('link', { name: "Groups", exact: true }).click();
+    await page.waitForURL("/groups");
   });
 
   async function createGroup(page: Page, name: string) {
     await page.getByRole('button', { name: 'Create' }).click();
     await page.getByRole('textbox', { name: 'Group name...' }).fill(name);
     await page.locator('footer').getByRole('button', { name: 'Create' }).click();
+    await page.getByText(name).waitFor();
     await expect(page.getByText(name)).toBeVisible();
   }
 
   async function deleteGroup(page: Page, name: string) {
     const row = page.getByText(name).locator('..');
+    await row.getByRole('button', { name: 'Delete' }).waitFor();
     await row.getByRole('button', { name: 'Delete' }).click();
+    await page.getByRole('button', { name: 'Delete group' }).waitFor();
     await page.getByRole('button', { name: 'Delete group' }).click();
+    await page.waitForLoadState('networkidle');
+    await page.reload();
     await expect(page.getByText(name)).not.toBeVisible();
   }
 
@@ -39,10 +45,10 @@ test.describe('Groups', () => {
 
     const row = page.getByText(originalName).locator('..');
     await row.getByRole('button', { name: 'Edit' }).click();
-    await page.getByRole('textbox', { name: 'Group name...' }).fill(updatedName);
+    await page.getByPlaceholder("Group name...").fill(updatedName);
     await page.getByRole('button', { name: 'Save' }).click();
+    await page.getByText(updatedName).waitFor();
     await expect(page.getByText(updatedName)).toBeVisible();
-
   });
 
 

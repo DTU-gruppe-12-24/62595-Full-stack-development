@@ -318,10 +318,11 @@ async function updateGroupShopper() {
           placeholder="Search e.g. mayonnaise, milk, sugar…"
         />
         <div class="amount-row">
-          <AppInput v-model="newAmount" label="Amount" type="number" placeholder="e.g. 500" />
+          <AppInput v-model="newAmount" label="Amount" id="AmountInput" type="number" placeholder="e.g. 500" />
           <AppDropdown
           		label="Unit (optional)"
 				:values="Object.values(Unit)"
+				id="UnitInput"
 				v-model="newUnit"
 				placeholder=""
 			/>

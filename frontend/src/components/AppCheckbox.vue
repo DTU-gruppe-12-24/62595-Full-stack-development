@@ -47,31 +47,43 @@ function toggle() {
 
 /* Hide default checkbox */
 input {
-  display: none;
+	opacity: 0;
+	width: 20px;
+	height: 20px;
+	z-index: 2;
 }
+
 .box {
-  width: 20px;
-  height: 20px;
+	position: absolute;
+	width: 20px;
+	height: 20px;
 
-  border-radius: 6px;
+	border-radius: 6px;
 
-  border: 2px solid var(--color-primary);
+	border: 2px solid var(--color-primary);
 
-  display: flex;
-  align-items: center;
-  justify-content: center;
+	display: flex;
+	align-items: center;
+	justify-content: center;
 
-  transition: all 0.2s ease;
+	transition: all 0.2s ease;
+}
+
+.check {
+	position: absolute;
+	padding-top: 1px;
+	padding-left: 1px;
+	font-size: 16px;
 }
 
 input:checked + .box {
-  background: linear-gradient(
-      135deg,
-      var(--color-primary),
-      var(--color-primary-light)
-  );
+	background: linear-gradient(
+		135deg,
+		var(--color-primary),
+		var(--color-primary-light)
+	);
 
-  border-color: transparent;
+	border-color: transparent;
 }
 
 

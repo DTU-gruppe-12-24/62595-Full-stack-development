@@ -5,6 +5,7 @@ const props = defineProps<{
   values: string[]
   placeholder?: string
   label?: string
+  id?: string
   disabled?: boolean
 }>()
 
@@ -20,7 +21,7 @@ function onInput(event: Event) {
 
 <template>
   <div class="input-wrapper">
-    <label v-if="label" class="label">
+    <label v-if="label" :for="id" class="label">
       {{ label }}
     </label>
 
@@ -28,6 +29,7 @@ function onInput(event: Event) {
     	class="input"
 	    :placeholder="placeholder"
 	    :value="modelValue"
+					:id="id"
 	    @input="onInput"
 		:disabled="disabled"
     >
