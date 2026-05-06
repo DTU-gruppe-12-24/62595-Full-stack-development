@@ -66,7 +66,10 @@
         Cancel
       </AppButton>
 
-      <AppButton @click="addMealPlan">
+      <AppButton
+          v-if="selectedRecipeId"
+          @click="addMealPlan"
+      >
         Save
       </AppButton>
     </template>
