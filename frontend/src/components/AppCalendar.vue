@@ -36,6 +36,13 @@ function formatDay(day: Date) {
     day: "numeric"
   })
 }
+function formatDayFull(day: Date) {
+  return day.toLocaleDateString("en", {
+    weekday: "long",
+    month: "short",
+    day: "numeric"
+  })
+}
 
 function formatDate(date: Date): string {
   return date.toISOString().slice(0, 10)
@@ -69,37 +76,63 @@ function getShortName(name?: string): string {
       <WeekSelector v-model="currentMonday" />
     </div>
 
-    <div class="calendar-grid">
-      <div></div>
+    <!-- Desktop: horizontal grid (days as columns) -->
+    <div class="calendar-scroll desktop-calendar">
+      <div class="calendar-grid">
+      	<div></div>
+	    <div
+	      v-for="day in weekDays"
+	      :key="day.toISOString()"
+	      class="day-header"
+	    >
+	      {{ formatDay(day) }}
+	    </div>
 
-      <div
-          v-for="day in weekDays"
-          :key="day.toISOString()"
-          class="day-header"
-      >
-        {{ formatDay(day) }}
+	    <template v-for="slot in mealSlots" :key="slot">
+	      <div class="slot-label">
+	        {{ slot }}
+	      </div>
+
+	      <div
+	          v-for="day in weekDays"
+	          :key="slot + day.toISOString()"
+	          class="cell"
+	          :class="{ 'has-plan': getMealPlan(day, slot) }"
+	          @click="$emit('cell-click', { day, slot })"
+	      >
+	        <span v-if="getMealPlan(day, slot)" class="meal-name">
+	          {{ getShortName((getMealPlan(day, slot) as any)?.recipe?.name ?? (getMealPlan(day, slot) as any)?.recipeName ?? "Recipe") }}
+	        </span>
+			<span v-else class="placeholder">+</span>
+          </div>
+        </template>
       </div>
+    </div>
 
-      <template v-for="slot in mealSlots" :key="slot">
-        <div class="slot-label">
-          {{ slot }}
-        </div>
-
+    <!-- Mobile: vertical layout (days as rows) -->
+    <div class="mobile-calendar">
+      <div
+        v-for="day in weekDays"
+        :key="'mobile-' + day.toISOString()"
+        class="mobile-day"
+      >
+        <div class="mobile-day-header">{{ formatDayFull(day) }}</div>
         <div
-            v-for="day in weekDays"
-            :key="slot + day.toISOString()"
-            class="cell"
-            :class="{ 'has-plan': getMealPlan(day, slot) }"
-            @click="$emit('cell-click', { day, slot })"
+          v-for="slot in mealSlots"
+          :key="'mobile-' + slot + day.toISOString()"
+          class="mobile-cell"
+          :class="{ 'has-plan': getMealPlan(day, slot) }"
+          @click="$emit('cell-click', { day, slot })"
         >
+          <span class="mobile-slot-label">{{ slot }}</span>
           <span v-if="getMealPlan(day, slot)" class="meal-name">
             {{ getShortName((getMealPlan(day, slot) as any)?.recipe?.name ?? (getMealPlan(day, slot) as any)?.recipeName ?? "Recipe") }}
           </span>
-
           <span v-else class="placeholder">+</span>
         </div>
-      </template>
+      </div>
     </div>
+
   </div>
 </template>
 
@@ -116,9 +149,17 @@ function getShortName(name?: string): string {
   margin-bottom: 16px;
 }
 
+/* ── Desktop grid ── */
+.calendar-scroll {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
 .calendar-grid {
   display: grid;
   grid-template-columns: 120px repeat(7, 1fr);
+  min-width: 650px;
 }
 
 .day-header {
@@ -147,7 +188,7 @@ function getShortName(name?: string): string {
   background: var(--color-primary-soft);
 }
 
-.cell.has-plan {
+.has-plan {
   background: var(--color-primary-soft);
   border-color: var(--color-primary);
 }
@@ -160,5 +201,55 @@ function getShortName(name?: string): string {
 .meal-name {
   font-weight: 600;
   font-size: 14px;
+}
+
+/* ── Mobile vertical layout ── */
+.mobile-calendar {
+  display: none;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.mobile-day {
+  border: 1px solid var(--color-border, #ddd);
+  border-radius: var(--radius-md, 10px);
+  overflow: hidden;
+}
+
+.mobile-day-header {
+  background: var(--color-primary);
+  color: white;
+  font-weight: 700;
+  padding: 10px 14px;
+  font-size: 0.95rem;
+}
+
+.mobile-cell {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px;
+  border-top: 1px solid var(--color-border, #eee);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.mobile-cell:hover {
+  background: var(--color-primary-soft);
+}
+
+.mobile-slot-label {
+  font-weight: 500;
+  color: var(--color-text);
+}
+
+@media (max-width: 640px) {
+  .desktop-calendar {
+    display: none;
+  }
+
+  .mobile-calendar {
+    display: flex;
+  }
 }
 </style>
