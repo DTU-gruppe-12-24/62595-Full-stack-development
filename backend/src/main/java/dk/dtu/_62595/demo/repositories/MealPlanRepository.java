@@ -8,7 +8,6 @@ import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 import dk.dtu._62595.demo.dto.NutritionStatistics;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.Repository;
 
 import dk.dtu._62595.demo.model.Group;
 import dk.dtu._62595.demo.model.MealPlan;
@@ -40,13 +39,13 @@ public interface MealPlanRepository extends JpaRepository<MealPlan, UUID> {
 
     @Query("""
     SELECT new dk.dtu._62595.demo.dto.NutritionStatistics(
-        CAST(SUM(i.calories * ri.amount) AS double),
-        CAST(SUM(i.protein * ri.amount) AS double),
-        CAST(SUM(i.carbohydrates * ri.amount) AS double),
-        CAST(SUM(i.fat * ri.amount) AS double),
-        CAST(SUM(i.saturatedFat * ri.amount) AS double),
-        CAST(SUM(i.sugars * ri.amount) AS double),
-        CAST(SUM(i.salt * ri.amount) AS double)
+        CAST(SUM(i.calories * ri.amount / 100) AS double),
+        CAST(SUM(i.protein * ri.amount / 100) AS double),
+        CAST(SUM(i.carbohydrates * ri.amount / 100) AS double),
+        CAST(SUM(i.fat * ri.amount / 100) AS double),
+        CAST(SUM(i.saturatedFat * ri.amount / 100) AS double),
+        CAST(SUM(i.sugars * ri.amount / 100) AS double),
+        CAST(SUM(i.salt * ri.amount / 100) AS double)
     )
     FROM RecipeIngredient ri
     JOIN ri.recipe r
