@@ -1,5 +1,6 @@
 package dk.dtu._62595.demo.services;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -9,12 +10,16 @@ import dk.dtu._62595.demo.dto.AddShoppingListItemRequest;
 import dk.dtu._62595.demo.dto.ShoppingListItemDto;
 import dk.dtu._62595.demo.model.Group;
 import dk.dtu._62595.demo.model.Ingredient;
+import dk.dtu._62595.demo.model.MealPlan;
+import dk.dtu._62595.demo.model.RecipeIngredient;
 import dk.dtu._62595.demo.model.RecipeIngredient.Unit;
 import dk.dtu._62595.demo.model.ShoppingList;
 import dk.dtu._62595.demo.model.User;
 import dk.dtu._62595.demo.repositories.GroupMemberRepository;
 import dk.dtu._62595.demo.repositories.GroupRepository;
 import dk.dtu._62595.demo.repositories.IngredientRepository;
+import dk.dtu._62595.demo.repositories.MealPlanRepository;
+import dk.dtu._62595.demo.repositories.RecipeIngredientRepository;
 import dk.dtu._62595.demo.repositories.ShoppingListRepository;
 
 @Service
@@ -24,15 +29,21 @@ public class ShoppingListService {
     private final IngredientRepository ingredientRepository;
     private final GroupRepository groupRepository;
     private final GroupMemberRepository groupMemberRepository;
+    private final MealPlanRepository mealPlanRepository;
+    private final RecipeIngredientRepository recipeIngredientRepository;
 
     public ShoppingListService(ShoppingListRepository shoppingListRepository,
                                IngredientRepository ingredientRepository,
                                GroupRepository groupRepository,
-                               GroupMemberRepository groupMemberRepository) {
+                               GroupMemberRepository groupMemberRepository,
+                               MealPlanRepository mealPlanRepository,
+                               RecipeIngredientRepository recipeIngredientRepository) {
         this.shoppingListRepository = shoppingListRepository;
         this.ingredientRepository = ingredientRepository;
         this.groupRepository = groupRepository;
         this.groupMemberRepository = groupMemberRepository;
+        this.mealPlanRepository = mealPlanRepository;
+        this.recipeIngredientRepository = recipeIngredientRepository;
     }
 
     // Helper
@@ -87,6 +98,55 @@ public class ShoppingListService {
                 .orElseGet(() -> toDto(shoppingListRepository.save(
                         new ShoppingList(group, ingredient, request.amount(), Unit.fromString(request.unit()), false)
                 )));
+    }
+
+    public List<ShoppingListItemDto> addFromMealPlan(UUID groupId, int startDay, int endDay, User currentUser) {
+        if (startDay < 0 || endDay < startDay || endDay > 13) {
+            throw new IllegalArgumentException("startDay must be 0–13, endDay must be >= startDay and <= 13");
+        }
+
+        Group group = requireGroupMember(groupId, currentUser);
+
+        LocalDate start = LocalDate.now().plusDays(startDay);
+        LocalDate end = LocalDate.now().plusDays(endDay);
+
+        List<MealPlan> mealPlans = mealPlanRepository.findByGroupAndScheduledDateBetween(group, start, end);
+
+        for (MealPlan plan : mealPlans) {
+            List<RecipeIngredient> recipeIngredients =
+                    recipeIngredientRepository.findByRecipe(plan.getRecipe());
+
+            for (RecipeIngredient ri : recipeIngredients) {
+                Ingredient ingredient = ri.getIngredient();
+                Unit unit = ri.getUnit();
+                float amount = ri.getAmount();
+
+                shoppingListRepository
+                        .findByGroupAndIngredient(group, ingredient)
+                        .stream()
+                        .filter(existing -> existing.getUnit() == unit)
+                        .findFirst()
+                        .ifPresentOrElse(
+                                existing -> {
+                                    shoppingListRepository.deleteById(existing.getId());
+                                    shoppingListRepository.save(new ShoppingList(
+                                            group, ingredient,
+                                            existing.getAmount() + amount,
+                                            unit,
+                                            existing.isBought()
+                                    ));
+                                },
+                                () -> shoppingListRepository.save(
+                                        new ShoppingList(group, ingredient, amount, unit, false)
+                                )
+                        );
+            }
+        }
+
+        return shoppingListRepository.findByGroup(group)
+                .stream()
+                .map(this::toDto)
+                .toList();
     }
 
     public ShoppingListItemDto toggleBought(UUID itemId, User currentUser) {
