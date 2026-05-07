@@ -16,7 +16,7 @@ const userName = computed(() => getStoredUser()?.name ?? 'there')
   <AppContainer class="home-page">
     <AppSection class="hero">
       <template v-if="!authenticated">
-        <AppText variant="title" tag="h1">Food Plan makes weekly food planning simple</AppText>
+        <AppText variant="title" tag="h1">OurMenu makes weekly food planning simple</AppText>
         <AppText class="hero-subtitle">
           Plan meals, manage recipes, build shared shopping lists, and keep your food routine organized in one place.
         </AppText>
