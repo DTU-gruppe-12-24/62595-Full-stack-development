@@ -34,7 +34,7 @@ function closeMenu() {
   <nav class="navbar">
     <div class="navbar-container">
       <div class="logo">
-        <RouterLink to="/" class="menu-item" @click="closeMenu">food plan</RouterLink>
+        <RouterLink to="/" class="menu-item" @click="closeMenu">OurMenu</RouterLink>
       </div>
 
       <!-- Desktop menu links -->
@@ -46,7 +46,7 @@ function closeMenu() {
           <RouterLink to="/groups" class="menu-item">Groups</RouterLink>
           <RouterLink to="/statistics" class="menu-item">My statistics</RouterLink>
           <AppButton variant="ghost" class="user-pill" @click="showProfile = true">
-            <span class="icon">👤</span>
+            <span class="icon">👨‍🍳</span>
             <span>Account</span>
           </AppButton>
         </template>
@@ -72,7 +72,7 @@ function closeMenu() {
         <RouterLink to="/groups" class="mobile-menu-item" @click="closeMenu">Groups</RouterLink>
         <RouterLink to="/statistics" class="mobile-menu-item" @click="closeMenu">My statistics</RouterLink>
         <button class="mobile-menu-item mobile-account-btn" @click="() => { showProfile = true; closeMenu() }">
-          <span class="icon">👤</span> Account
+          <span class="icon">👨‍🍳</span> Account
         </button>
       </template>
       <template v-else>
