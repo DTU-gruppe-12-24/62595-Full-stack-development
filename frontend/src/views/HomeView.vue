@@ -78,9 +78,9 @@ const userName = computed(() => getStoredUser()?.name ?? 'there')
 
           <AppCard>
             <AppText variant="subtitle" tag="h2">Track Your Progress</AppText>
-            <AppText>Review your weekly and all-time food planning statistics.</AppText>
+            <AppText>Review your weekly and all-time food planning nutrition.</AppText>
             <template #footer>
-              <AppButton variant="secondary" to="/statistics">Go to Statistics</AppButton>
+              <AppButton variant="secondary" to="/statistics">Go to Nutrition</AppButton>
             </template>
           </AppCard>
         </div>
@@ -91,7 +91,7 @@ const userName = computed(() => getStoredUser()?.name ?? 'there')
 
 <style scoped>
 .home-page {
-  padding: 32px 0 48px;
+  padding-block: 32px 48px;
 }
 
 .hero {
@@ -123,7 +123,7 @@ const userName = computed(() => getStoredUser()?.name ?? 'there')
 
 @media (max-width: 640px) {
   .home-page {
-    padding: 20px 0 32px;
+    padding-block: 20px 32px;
   }
 
   .hero {

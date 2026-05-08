@@ -57,7 +57,7 @@ const mostCooked = computed(() => {
       </div>
     </AppSection>
 
-    <AppText v-if="!stats" class="loading">Select a group to see statistics...</AppText>
+    <AppText v-if="!stats" class="loading">Select a group to see nutrition...</AppText>
 
     <AppSection v-else class="stats-section">
       <div class="stats-grid">
@@ -95,12 +95,12 @@ const mostCooked = computed(() => {
 
 <style scoped>
 .statistics-page {
-  padding: 24px 0;
+  padding-block: 24px;
 }
 
 @media (max-width: 640px) {
   .statistics-page {
-    padding: 16px 0;
+    padding-block: 16px;
   }
 }
 
