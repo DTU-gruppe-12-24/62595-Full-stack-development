@@ -16,6 +16,14 @@ body {
     color: var(--color-text);
 }
 
+html,
+body,
+#app {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
 button {
     font-family: inherit;
 }
