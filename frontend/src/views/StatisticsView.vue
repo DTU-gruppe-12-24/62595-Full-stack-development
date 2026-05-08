@@ -149,7 +149,7 @@ const mostCooked = computed(() => {
   box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
-.stats-section { margin-top: 0; }
+.stats-section { margin-top: 24px; }
 
 .stats-grid {
   display: grid;
