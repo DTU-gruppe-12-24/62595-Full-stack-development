@@ -57,7 +57,7 @@ const mostCooked = computed(() => {
       </div>
     </AppSection>
 
-    <AppText v-if="!stats" class="loading">Select a group to see nutrition...</AppText>
+    <AppText v-if="!stats" class="loading">Select a group to view nutrition information...</AppText>
 
     <AppSection v-else class="stats-section">
       <div class="stats-grid">
