@@ -1,5 +1,5 @@
 <template>
-  <div class="page">
+  <AppContainer>
     <h1>Calendar</h1>
     <div class="group-selector-wrapper">
       <GroupSelector v-model="activeGroup" persist />
@@ -10,7 +10,7 @@
         @cell-click="selectCell"
         @week-updated="refreshWeek"
     />
-  </div>
+  </AppContainer>
 
   <AppDialog
       v-model="showAdd"
@@ -82,6 +82,7 @@ import GroupSelector from "@/components/GroupSelector.vue"
 import type { Group } from "@/model/Group"
 import {showError, showSuccess} from "@/utilities/notifications.ts";
 import AppDropdown from "@/components/AppDropdown.vue";
+import AppContainer from "@/components/AppContainer.vue"
 
 const selectedDate = ref<string | undefined>(undefined)
 const selectedMealSlot = ref("")
@@ -242,10 +243,6 @@ function refreshWeek(monday: Date) {
 </script>
 
 <style scoped>
-.page {
-  padding: 20px;
-}
-
 .selected-date {
   font-weight: 600;
   font-size: 18px;

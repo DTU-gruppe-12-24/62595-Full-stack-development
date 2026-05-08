@@ -112,15 +112,14 @@ async function submit() {
 
 <style scoped>
 .page {
-  max-width: 700px;
   margin: 60px auto;
-  padding: 0 24px;
+  padding: 0;
 }
 
 @media (max-width: 640px) {
   .page {
     margin: 16px auto;
-    padding: 0 16px;
+    padding: 0;
   }
 }
 

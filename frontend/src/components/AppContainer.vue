@@ -6,8 +6,15 @@
 
 <style scoped>
 .container {
-  max-width: 900px;
+  width: 100%;
+  max-width: 1100px;
   margin: auto;
-  padding: 20px;
+  padding: 24px;
+}
+
+@media (max-width: 640px) {
+  .container {
+    padding: 16px;
+  }
 }
 </style>

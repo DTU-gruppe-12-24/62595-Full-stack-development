@@ -37,9 +37,13 @@ const router = createRouter({
     },
 
     {
-      path: '/statistics',
-      name: 'statistics',
+      path: '/nutrition',
+      name: 'nutrition',
       component: () => import('@/views/StatisticsView.vue')
+    },
+    {
+      path: '/statistics',
+      redirect: '/nutrition'
     },
 
     {

@@ -16,6 +16,12 @@ body {
     color: var(--color-text);
 }
 
+html,
+body,
+#app {
+    width: 100%;
+}
+
 button {
     font-family: inherit;
 }
