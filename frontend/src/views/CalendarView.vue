@@ -8,6 +8,7 @@
     <AppCalendar
         :meal-plans="weekMealPlans"
         @cell-click="selectCell"
+        @week-updated="refreshWeek"
     />
   </div>
 
@@ -92,9 +93,10 @@ const selectedRecipeId = ref("")
 const recipes = ref<any[]>([])
 const activeGroup = ref<Group | undefined>(undefined)
 const groupId = computed(() => activeGroup.value?.id);
+const weekMonday = ref<Date>(new Date());
 
 function formatDate(date: Date): string {
-  return date.toISOString().slice(0, 10)
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
 }
 
 async function selectCell(payload: { day: Date; slot: string }) {
@@ -146,7 +148,7 @@ async function addMealPlan() {
       );
     }
 
-    await loadWeekMealPlans(new Date(selectedDate.value));
+    await loadWeekMealPlans();
     showAdd.value = false;
     selectedRecipeId.value = "";
     showSuccess("Changes saved successfully");
@@ -180,7 +182,7 @@ function getWeekStart(date: Date): string {
   const day = d.getDay()
   const diff = d.getDate() - (day === 0 ? 6 : day - 1)
   d.setDate(diff)
-  return d.toISOString().slice(0, 10)
+  return formatDate(d)
 }
 
 function getWeekEnd(date: Date): string {
@@ -188,14 +190,14 @@ function getWeekEnd(date: Date): string {
   const day = d.getDay()
   const diff = d.getDate() - (day === 0 ? 6 : day - 1) + 6
   d.setDate(diff)
-  return d.toISOString().slice(0, 10)
+  return formatDate(d)
 }
 
-async function loadWeekMealPlans(date: Date = new Date()) {
+async function loadWeekMealPlans() {
   if (!groupId.value) return
 
-  const start = getWeekStart(date)
-  const end = getWeekEnd(date)
+  const start = getWeekStart(weekMonday.value)
+  const end = getWeekEnd(weekMonday.value)
   weekMealPlans.value = await getMealPlansByRange(groupId.value, start, end)
 }
 
@@ -232,6 +234,11 @@ onMounted(() => {
 watch(groupId, () => {
     loadWeekMealPlans()
 });
+
+function refreshWeek(monday: Date) {
+    weekMonday.value = monday;
+    loadWeekMealPlans();
+}
 </script>
 
 <style scoped>

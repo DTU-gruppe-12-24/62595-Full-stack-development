@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { ref, computed } from "vue"
+import { ref, computed, watch } from "vue"
 import WeekSelector from "@/components/WeekSelector.vue"
 import type { MealPlan } from "@/model/MealPlan"
 
-defineEmits(["cell-click"])
+const emits = defineEmits(["cell-click", "week-updated"])
 
 const props = defineProps<{
   mealPlans?: MealPlan[]
@@ -45,7 +45,7 @@ function formatDayFull(day: Date) {
 }
 
 function formatDate(date: Date): string {
-  return date.toISOString().slice(0, 10)
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
 }
 
 function normalizeSlot(slot: string): string {
@@ -68,6 +68,10 @@ function getShortName(name?: string): string {
   if (!name) return ""
   return name.length > 10 ? name.slice(0, 10) + "..." : name
 }
+
+watch(currentMonday, () => {
+    emits("week-updated", currentMonday.value);
+})
 </script>
 
 <template>
@@ -82,7 +86,7 @@ function getShortName(name?: string): string {
       	<div></div>
 	    <div
 	      v-for="day in weekDays"
-	      :key="day.toISOString()"
+	      :key="formatDate(day)"
 	      class="day-header"
 	    >
 	      {{ formatDay(day) }}
@@ -95,7 +99,7 @@ function getShortName(name?: string): string {
 
 	      <div
 	          v-for="day in weekDays"
-	          :key="slot + day.toISOString()"
+	          :key="slot + formatDate(day)"
 	          class="cell"
 	          :class="{ 'has-plan': getMealPlan(day, slot) }"
 	          @click="$emit('cell-click', { day, slot })"
@@ -113,13 +117,13 @@ function getShortName(name?: string): string {
     <div class="mobile-calendar">
       <div
         v-for="day in weekDays"
-        :key="'mobile-' + day.toISOString()"
+        :key="'mobile-' + formatDate(day)"
         class="mobile-day"
       >
         <div class="mobile-day-header">{{ formatDayFull(day) }}</div>
         <div
           v-for="slot in mealSlots"
-          :key="'mobile-' + slot + day.toISOString()"
+          :key="'mobile-' + slot + formatDate(day)"
           class="mobile-cell"
           :class="{ 'has-plan': getMealPlan(day, slot) }"
           @click="$emit('cell-click', { day, slot })"

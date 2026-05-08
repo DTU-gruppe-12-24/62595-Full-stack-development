@@ -297,6 +297,10 @@ function capitalise(str: string): string {
 
 let previewAbort: AbortController | null = null
 
+function formatDate(date: Date): string {
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+}
+
 async function fetchMealPreview() {
   if (!activeGroup.value || rangeStart.value === null) return
 
@@ -313,7 +317,7 @@ async function fetchMealPreview() {
     const endOffset = rangeEnd.value ?? rangeStart.value
     endDate.setDate(base.getDate() + endOffset)
 
-    const fmt = (d: Date) => d.toISOString().split('T')[0]
+    const fmt = (d: Date) => formatDate(d)
     const meals = await apiFetch<MealPlanEntry[]>(
         `/api/meal-plans/range?groupId=${activeGroup.value.id}&start=${fmt(startDate)}&end=${fmt(endDate)}`
     )
