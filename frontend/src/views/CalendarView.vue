@@ -118,10 +118,11 @@ async function selectCell(payload: { day: Date; slot: string }) {
 
     try {
         isLoading.value = true
-        selectedDateMealPlans.value = await getMealPlansByDate(
-            groupId.value,
-            date
-        )
+      const plans = await getMealPlansByDate(groupId.value, date)
+
+      selectedDateMealPlans.value = plans.filter(
+          mealPlan => mealPlan.mealSlot === mealSlot
+      )
     } catch (error) {
         showError("Could not load meal plans.")
     } finally {
@@ -154,6 +155,11 @@ async function addMealPlan() {
           selectedMealSlot.value
       );
     }
+    const plans = await getMealPlansByDate(gId, selectedDate.value)
+
+    selectedDateMealPlans.value = plans.filter(
+        mealPlan => mealPlan.mealSlot === selectedMealSlot.value
+    )
 
     await loadWeekMealPlans(new Date(selectedDate.value));
     showAdd.value = false;
@@ -169,10 +175,12 @@ async function addMealPlan() {
 async function removeMealPlan(id: string) {
   try {
     await deleteMealPlan(id)
-    selectedDateMealPlans.value = selectedDateMealPlans.value.filter(m => m.id !== id)
-    weekMealPlans.value = weekMealPlans.value.filter(m => m.id !== id)
 
     selectedDateMealPlans.value = selectedDateMealPlans.value.filter(
+        mealPlan => mealPlan.id !== id
+    )
+
+    weekMealPlans.value = weekMealPlans.value.filter(
         mealPlan => mealPlan.id !== id
     )
 
