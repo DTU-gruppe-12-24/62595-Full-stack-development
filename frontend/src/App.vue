@@ -13,5 +13,6 @@ import AppNavbar from "@/components/AppNavBar.vue"
 <style>
 .main {
   padding-top: 80px; /* must be larger than navbar height */
+  overflow-x: hidden;
 }
 </style>
