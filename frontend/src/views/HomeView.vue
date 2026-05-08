@@ -78,7 +78,7 @@ const userName = computed(() => getStoredUser()?.name ?? 'there')
 
           <AppCard>
             <AppText variant="subtitle" tag="h2">Track Your Progress</AppText>
-            <AppText>Review your weekly and all-time food planning nutrition.</AppText>
+            <AppText>Review your weekly and all-time nutrition insights.</AppText>
             <template #footer>
               <AppButton variant="secondary" to="/statistics">Go to Nutrition</AppButton>
             </template>
