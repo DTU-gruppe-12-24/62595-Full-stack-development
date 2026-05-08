@@ -80,7 +80,7 @@ const userName = computed(() => getStoredUser()?.name ?? 'there')
             <AppText variant="subtitle" tag="h2">Track Your Progress</AppText>
             <AppText>Review your weekly and all-time nutrition insights.</AppText>
             <template #footer>
-              <AppButton variant="secondary" to="/statistics">Go to Nutrition</AppButton>
+              <AppButton variant="secondary" to="/nutrition">Go to Nutrition</AppButton>
             </template>
           </AppCard>
         </div>

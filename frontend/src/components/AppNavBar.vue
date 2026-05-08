@@ -44,7 +44,7 @@ function closeMenu() {
           <RouterLink to="/calendar" class="menu-item">Calendar</RouterLink>
           <RouterLink to="/shopping" class="menu-item">Shopping List</RouterLink>
           <RouterLink to="/groups" class="menu-item">Groups</RouterLink>
-          <RouterLink to="/statistics" class="menu-item">Our Nutrition</RouterLink>
+          <RouterLink to="/nutrition" class="menu-item">Our Nutrition</RouterLink>
           <AppButton variant="ghost" class="user-pill" @click="showProfile = true">
             <span class="icon">👨‍🍳</span>
             <span>Account</span>
@@ -70,7 +70,7 @@ function closeMenu() {
         <RouterLink to="/calendar" class="mobile-menu-item" @click="closeMenu">Calendar</RouterLink>
         <RouterLink to="/shopping" class="mobile-menu-item" @click="closeMenu">Shopping List</RouterLink>
         <RouterLink to="/groups" class="mobile-menu-item" @click="closeMenu">Groups</RouterLink>
-        <RouterLink to="/statistics" class="mobile-menu-item" @click="closeMenu">Our Nutrition</RouterLink>
+        <RouterLink to="/nutrition" class="mobile-menu-item" @click="closeMenu">Our Nutrition</RouterLink>
         <button class="mobile-menu-item mobile-account-btn" @click="() => { showProfile = true; closeMenu() }">
           <span class="icon">👨‍🍳</span> Account
         </button>
