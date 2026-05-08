@@ -38,6 +38,15 @@ public class ShoppingListController {
         return ResponseEntity.ok(shoppingListService.addItem(groupId, request, currentUser));
     }
 
+    @PostMapping("/{groupId}/from-meal-plan")
+    public ResponseEntity<List<ShoppingListItemDto>> addFromMealPlan(
+            @PathVariable UUID groupId,
+            @RequestParam(defaultValue = "0") int startDay,
+            @RequestParam int endDay) {
+        User currentUser = authController.getLoggedInUser();
+        return ResponseEntity.ok(shoppingListService.addFromMealPlan(groupId, startDay, endDay, currentUser));
+    }
+
     @PatchMapping("/item/{itemId}/toggle")
     public ResponseEntity<ShoppingListItemDto> toggleBought(@PathVariable UUID itemId) {
         User currentUser = authController.getLoggedInUser();
