@@ -7,9 +7,12 @@ export async function getMealPlansByDate(groupId: string, date: string): Promise
 
 export async function deleteMealPlan(id: string): Promise<void> {
     await apiFetch(`/api/meal-plans/${id}`, "DELETE")
+    await apiFetch<void>(`/api/meal-plans/${id}`, "DELETE").catch((error) => {
+        throw error
+    });
 }
 
-export async function createMealPlan(groupId: string, recipeId: string, scheduledDate: string, mealSlot: string): Promise<void> {
+export async function createMealPlan(groupId: string, recipeId: string, scheduledDate: string, mealSlot: string, cookerId?: string): Promise<void> {
     await apiFetch(
         "/api/meal-plans",
         "POST",
@@ -17,7 +20,8 @@ export async function createMealPlan(groupId: string, recipeId: string, schedule
             groupId,
             recipeId,
             scheduledDate,
-            mealSlot
+            mealSlot,
+            cookerId
         }
     )
 }

@@ -84,6 +84,7 @@ function persistAndEmit(group: Group | undefined) {
     :values="groupNames"
     :disabled="loading"
     label="Active group"
+    id="ActiveGroupInput"
     @update:model-value="onChange"
   />
 </template>

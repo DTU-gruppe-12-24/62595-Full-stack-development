@@ -4,6 +4,8 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
+import dk.dtu._62595.demo.model.User;
+import dk.dtu._62595.demo.repositories.UserRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -24,15 +26,18 @@ public class MealPlanService {
     private final MealPlanRepository mealPlanRepository;
     private final GroupRepository groupRepository;
     private final RecipeRepository recipeRepository;
+    private final UserRepository userRepository;
 
     public MealPlanService(
             MealPlanRepository mealPlanRepository,
             GroupRepository groupRepository,
-            RecipeRepository recipeRepository
+            RecipeRepository recipeRepository,
+            UserRepository userRepository
     ) {
         this.mealPlanRepository = mealPlanRepository;
         this.groupRepository = groupRepository;
         this.recipeRepository = recipeRepository;
+        this.userRepository = userRepository;
     }
 
     public MealPlanResponse create(CreateMealPlanRequest request) {
@@ -61,6 +66,11 @@ public class MealPlanService {
                 request.scheduledDate,
                 request.mealSlot
         );
+        if (request.cookerId != null) {
+            User cooker = userRepository.findById(request.cookerId)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cooker user not found"));
+            mealPlan.setCooker(cooker);
+        }
 
         MealPlan saved = mealPlanRepository.save(mealPlan);
         return toResponse(saved);
@@ -114,8 +124,9 @@ public class MealPlanService {
                 mealPlan.getRecipe().getId(),
                 mealPlan.getRecipe().getName(),
                 mealPlan.getScheduledDate(),
-                mealPlan.getMealSlot()
-        );
+                mealPlan.getMealSlot(),
+                mealPlan.getCooker() != null ? mealPlan.getCooker().getId() : null,
+                mealPlan.getCooker() != null ? mealPlan.getCooker().getName() : null        );
     }
 
     public MealPlanResponse update(UUID id, UpdateMealPlanRequest request) {
@@ -128,5 +139,20 @@ public class MealPlanService {
         MealPlan saved = mealPlanRepository.save(mealPlan);
 
         return toResponse(saved);
+    }
+
+    public MealPlanResponse updateCooker(UUID mealPlanId, UUID userId) {
+        MealPlan mealPlan = mealPlanRepository.findById(mealPlanId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Meal plan not found"));
+
+        if (userId != null) {
+            User user = userRepository.findById(userId)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+            mealPlan.setCooker(user);
+        } else {
+            mealPlan.setCooker(null);
+        }
+
+        return toResponse(mealPlanRepository.save(mealPlan));
     }
 }

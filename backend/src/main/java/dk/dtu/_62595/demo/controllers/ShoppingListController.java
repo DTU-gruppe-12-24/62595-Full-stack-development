@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/shopping-list")
+@RequestMapping(value = "/api/shopping-list", produces="application/json")
 public class ShoppingListController {
 
     private final ShoppingListService shoppingListService;
@@ -23,7 +23,6 @@ public class ShoppingListController {
         this.authController = authController;
     }
 
-    // ── Shopping list endpoints ───────────────────────────────────────────────
 
     @GetMapping("/{groupId}")
     public ResponseEntity<List<ShoppingListItemDto>> getItems(@PathVariable UUID groupId) {
@@ -65,8 +64,6 @@ public class ShoppingListController {
         shoppingListService.deleteBoughtItems(groupId, currentUser);
         return ResponseEntity.noContent().build();
     }
-
-    // ── Ingredient search (no group membership required) ──────────────────────
 
     @GetMapping("/ingredients/search")
     public ResponseEntity<List<ShoppingListItemDto>> searchIngredients(@RequestParam String q) {

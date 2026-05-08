@@ -59,6 +59,14 @@ public class MealPlanController {
     ) {
         return mealPlanService.update(id, request);
     }
+
+    @PatchMapping("/{id}/cooker")
+    public MealPlanResponse updateCooker(
+            @PathVariable UUID id,
+            @RequestParam(required = false) UUID userId
+    ) {
+        return mealPlanService.updateCooker(id, userId);
+    }
 }
 
 

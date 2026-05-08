@@ -76,7 +76,7 @@ function updateDropdownPosition() {
 }
 
 function onBlur() {
-  setTimeout(() => { showSuggestions.value = false }, 150)
+  setTimeout(() => { showSuggestions.value = false }, 10050)
 }
 </script>
 

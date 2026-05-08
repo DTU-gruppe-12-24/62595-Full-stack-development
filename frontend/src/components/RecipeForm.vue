@@ -71,12 +71,14 @@ function updateGroup(group: Group | undefined) {
       <AppInput
         :model-value="modelValue.name"
         label="Name"
+        id="NameInput"
         placeholder="Recipe name"
         @update:model-value="updateField('name', $event)"
       />
       <AppInput
         :model-value="modelValue.description"
         label="Description"
+        id="DescriptionInput"
         placeholder="Description"
         type="textarea"
         @update:model-value="updateField('description', $event)"
@@ -84,6 +86,7 @@ function updateGroup(group: Group | undefined) {
       <AppInput
         :model-value="modelValue.instructions"
         label="Instructions"
+        id="InstructionsInput"
         placeholder="Step by step instructions"
         type="textarea"
         @update:model-value="updateField('instructions', $event)"
@@ -94,6 +97,7 @@ function updateGroup(group: Group | undefined) {
       	v-if="canChangeGroup"
         :model-value="group"
         label="Group"
+        id="GroupInput"
         placeholder="Group..."
         @update:model-value="updateGroup"
         allowNull
@@ -103,12 +107,14 @@ function updateGroup(group: Group | undefined) {
         <AppInput
           :model-value="modelValue.mealType"
           label="Meal type"
+          id="MealTypeInput"
           placeholder="e.g. Dinner"
           @update:model-value="updateField('mealType', $event)"
         />
         <AppInput
           :model-value="modelValue.servings"
           label="Servings"
+          id="Servings"
           type="number"
           placeholder="e.g. 4"
           @update:model-value="updateField('servings', $event)"
@@ -116,6 +122,7 @@ function updateGroup(group: Group | undefined) {
         <AppInput
           :model-value="modelValue.prepTimeMinutes"
           label="Prep time (min)"
+          id="PrepTimeInput"
           type="number"
           placeholder="e.g. 30"
           @update:model-value="updateField('prepTimeMinutes', $event)"

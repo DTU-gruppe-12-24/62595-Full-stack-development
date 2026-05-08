@@ -39,7 +39,7 @@ import dk.dtu._62595.demo.services.ExternalRecipeService;
 import dk.dtu._62595.demo.services.GroupService;
 
 @RestController
-@RequestMapping("/api/recipes")
+@RequestMapping(value = "/api/recipes", produces="application/json")
 public class RecipeController {
 
     @Autowired
@@ -155,7 +155,6 @@ public class RecipeController {
 		Recipe recipe = recipeRepository.findById(recipeId).orElseThrow();
 		if (!recipe.getOwner().equals(owner)) throw new AuthorizationDeniedException("You do not have permission to edit this recipe!");
 
-		System.out.println(groupId);
 		Group group = null;
 		if (groupId != null) {
 			group = groupService.getGroupById(groupId);

@@ -44,7 +44,6 @@ public class ExternalRecipeService {
 	public List<ExternalRecipeDto> search(String searchTerm) {
 		try {
 			URL url = URI.create(baseUrl + "search.php?s=" + URLEncoder.encode(searchTerm, "UTF-8") ).toURL();
-			System.out.println(url);
 			HttpURLConnection con = (HttpURLConnection) url.openConnection();
 			con.setRequestMethod("GET");
 			con.setRequestProperty("Content-Type", "application/json");
@@ -78,7 +77,6 @@ public class ExternalRecipeService {
 
 						RecipeIngredient.Unit measureUnit = RecipeIngredient.Unit.fromString(strMeasure.replaceAll("(\\d+((\\/\\d+)?|(\\.\\d)?)+)", "").trim());
 						if (measureUnit == RecipeIngredient.Unit.NOTHING) measureUnit = RecipeIngredient.Unit.PIECE;
-						System.out.println(measureUnit);
 						float measureAmount = measure.stream()
                                                         .map(s -> toNumber(s))
                                                         .filter(n -> n != null)

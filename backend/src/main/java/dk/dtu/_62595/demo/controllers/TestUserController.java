@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*;
 
 @Profile("test")
 @RestController
-@RequestMapping("/api/test")
+@RequestMapping(value = "/api/test", produces="application/json")
 public class TestUserController {
 
     private final UserService userService;
