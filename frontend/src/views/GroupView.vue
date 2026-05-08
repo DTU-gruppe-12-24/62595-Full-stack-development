@@ -11,7 +11,7 @@
 				{{ group.group.name }}
 			</AppText>
 			<div v-if="group.role != 'MEMBER'" class="flex flex-row justify-end gap-1 w-fit">
-				<AppButton 
+				<AppButton
 					variant="secondary"
 					aria-label="Edit"
 					@click="() => openEditDialog(group.group, true)"
@@ -71,6 +71,8 @@
 							:values="['ADMIN', 'MEMBER']"
 							v-model="member.role"
 							:disabled="member.role == 'OWNER' || !allowEdit"
+							:disableNull="true"
+							:showUnknownValue="true"
 							v-on:change="() => updateMemberRole(member)"
 						/>
 						<AppButton variant="ghost" @click="() => requestRemoveMember(member)" v-if="allowEdit && member.role != 'OWNER'">

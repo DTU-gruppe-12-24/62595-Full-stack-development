@@ -8,6 +8,8 @@ const props = defineProps<{
   label?: string
   id?: string
   disabled?: boolean
+  disableNull?: boolean
+  showUnknownValue?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -44,7 +46,8 @@ function onInput(event: Event) {
         @change="onInput"
         :disabled="disabled"
     >
-      <option value="">{{ placeholder || 'Select...' }}</option>
+      <option value="" v-if="!disableNull">{{ placeholder || 'Select...' }}</option>
+      <option v-if="showUnknownValue && modelValue && !values.includes(modelValue)" :value="modelValue">{{modelValue}}</option>
       <option v-for="opt in normalizedOptions" :key="opt.val" :value="opt.val">
         {{ opt.lab }}
       </option>
@@ -53,11 +56,39 @@ function onInput(event: Event) {
 </template>
 
 <style scoped>
-.input-wrapper { display: flex; flex-direction: column; gap: 6px; width: 100%; }
-.label { font-size: 14px; font-weight: 500; color: var(--color-secondary); }
+.input-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+}
+
+.label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-secondary);
+}
+
 .input {
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 2px solid var(--color-primary-light);
+  outline: none;
+  font-size: 14px;
+  transition: 0.2s ease;
+  height: 3rem;
+}
+
+.input:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(243, 114, 44, 0.2);
+}
+
+.input:disabled {
+  border-color: var(--color-text-light);
+  background-color: var(--color-gray-300);
+  cursor: not-allowed;
   padding: 10px 14px; border-radius: 8px; border: 2px solid var(--color-primary-light);
   outline: none; font-size: 14px; transition: 0.2s ease; height: 3rem; width: 100%;
 }
-.input:focus { border-color: var(--color-primary); box-shadow: 0 0 0 3px rgba(243, 114, 44, 0.2); }
 </style>
