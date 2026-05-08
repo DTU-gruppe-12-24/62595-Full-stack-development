@@ -25,10 +25,14 @@ function getInitialMonday() {
   return monday
 }
 
+function formatDate(date: Date): string {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+}
+
 const loadData = async () => {
   if (!selectedGroup.value) return
-  const start = filterType.value === 'week' ? currentMonday.value.toISOString().split('T')[0] : undefined
-  const end = filterType.value === 'week' ? new Date(new Date(currentMonday.value).setDate(currentMonday.value.getDate() + 6)).toISOString().split('T')[0] : undefined
+  const start = filterType.value === 'week' ? formatDate(currentMonday.value) : undefined
+  const end = filterType.value === 'week' ? formatDate(new Date(new Date(currentMonday.value).setDate(currentMonday.value.getDate() + 6))) : undefined
   stats.value = await getStatistics(selectedGroup.value.id, start, end)
 }
 
