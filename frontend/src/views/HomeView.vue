@@ -91,9 +91,7 @@ const userName = computed(() => getStoredUser()?.name ?? 'there')
 
 <style scoped>
 .home-page {
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 32px 24px 48px;
+  padding: 32px 0 48px;
 }
 
 .hero {
@@ -125,7 +123,7 @@ const userName = computed(() => getStoredUser()?.name ?? 'there')
 
 @media (max-width: 640px) {
   .home-page {
-    padding: 20px 16px 32px;
+    padding: 20px 0 32px;
   }
 
   .hero {

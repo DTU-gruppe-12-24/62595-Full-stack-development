@@ -1,9 +1,10 @@
 <template>
+<AppContainer>
 <div class="flex flex-col gap-4 justify-center items-center w-full">
 	<AppCard
 		v-for="group in groups"
 		flex hover
-		class="w-full max-w-xl hover:cursor-pointer"
+		class="w-full hover:cursor-pointer"
 		@click="() => openEditDialog(group.group, group.role != 'MEMBER')"
 	>
 		<div class="flex flex-row justify-between items-center w-full">
@@ -115,6 +116,7 @@
 		@confirm="confirmRemoveMember"
 	/>
 </div>
+</AppContainer>
 </template>
 
 <script setup lang="ts">
@@ -129,6 +131,7 @@ import AppDialog from "@/components/AppDialog.vue"
 import AppConfirmDialog from '@/components/AppConfirmDialog.vue'
 import AppInput from "@/components/AppInput.vue"
 import AppDropdown from "@/components/AppDropdown.vue"
+import AppContainer from "@/components/AppContainer.vue"
 
 import { apiFetch, getMyUser } from "@/utilities/apiFetch"
 import type { GroupMember } from '@/model/GroupMember'

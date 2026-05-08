@@ -95,15 +95,12 @@ const mostCooked = computed(() => {
 
 <style scoped>
 .statistics-page {
-  padding: 24px;
-  max-width: 95%;
-  margin: 0 auto;
+  padding: 24px 0;
 }
 
 @media (max-width: 640px) {
   .statistics-page {
-    padding: 16px;
-    max-width: 100%;
+    padding: 16px 0;
   }
 }
 

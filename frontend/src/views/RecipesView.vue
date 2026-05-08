@@ -150,10 +150,10 @@ async function confirmDeleteRecipe() {
 </template>
 
 <style scoped>
-.page { padding: 40px; }
+.page { padding: 40px 0; }
 
 @media (max-width: 640px) {
-  .page { padding: 16px; }
+  .page { padding: 16px 0; }
 
   .page-header {
     flex-direction: column;
